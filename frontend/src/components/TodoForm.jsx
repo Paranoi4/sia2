@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const TodoForm = ({ todos, setTodos }) => {
+ 
   const [newTodo, setNewTodo] = useState({
     body: '',
     quantity: '',
@@ -18,30 +19,38 @@ const TodoForm = ({ todos, setTodos }) => {
 
   const postTodo = async () => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/todo/', newTodo);
-
-      // Update the todos state directly by appending the new todo
-      setTodos((prev) => [...prev, response.data]);
-
-      // Clear the input fields after submission
+      const existingItem = todos.find(todo => todo.body === newTodo.body);
+  
+      if (existingItem) {
+        // Update existing item quantity
+        const updatedQuantity = parseInt(existingItem.quantity) + parseInt(newTodo.quantity);
+  
+        const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${existingItem.id}/`, {
+          quantity: updatedQuantity
+        });
+  
+        setTodos(todos.map(todo => todo.id === existingItem.id ? { ...todo, quantity: updatedQuantity } : todo));
+      } else {
+        // Create new item
+        const response = await axios.post('http://127.0.0.1:8000/api/todo/', newTodo);
+        setTodos([...todos, response.data]);
+      }
+  
       setNewTodo({
         body: '',
         quantity: '',
         type: '',
       });
-
-      // Close the modal (if using a modal to add items)
+  
       document.querySelector('.modal').close();
     } catch (error) {
       console.error(error);
     }
   };
+  
 
   return (
-    <div>
-      <button className="btn ml-4" onClick={() => document.querySelector('.modal').showModal()}>
-        Add Item
-      </button>
+    <div> 
       <dialog className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Fill Up Details</h3>

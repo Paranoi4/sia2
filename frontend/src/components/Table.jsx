@@ -5,10 +5,10 @@ import { MdOutlineDeleteOutline, MdEditNote, MdOutlineCheckBox, MdOutlineCheckBo
 const Table = ({ todos, setTodos, isLoading }) => {
   const [filterText, setFilterText] = useState('');
   const filteredTodos = todos.filter(todo =>
-  todo.body.toLowerCase().includes(filterText.toLowerCase()) ||
-  todo.type.toLowerCase().includes(filterText.toLowerCase()) ||
-  todo.quantity.toString().includes(filterText)
-);
+    todo.body.toLowerCase().includes(filterText.toLowerCase()) ||
+    todo.type.toLowerCase().includes(filterText.toLowerCase()) ||
+    todo.quantity.toString().includes(filterText)
+  );
   const [editText, setEditText] = useState({
     id: '',
     body: '',
@@ -35,9 +35,6 @@ const Table = ({ todos, setTodos, isLoading }) => {
       [name]: value, // Dynamically updates the correct field
     }));
   };
-  
-
-  
 
   // Function to handle the edit action
   const handleEdit = async (id, updatedTodo) => {
@@ -45,8 +42,8 @@ const Table = ({ todos, setTodos, isLoading }) => {
       const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${id}/`, updatedTodo);
       const updatedTodos = todos.map((todo) =>
         todo.id === id
-        ? { ...todo, body: response.data.body, quantity: response.data.quantity, type: response.data.type }
-        : todo
+          ? { ...todo, body: response.data.body, quantity: response.data.quantity, type: response.data.type }
+          : todo
       );
       setTodos(updatedTodos);
     } catch (error) {
@@ -61,7 +58,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
       quantity: editText.quantity,
       type: editText.type,
     });
-  
+
     setEditText({
       id: '',
       body: '',
@@ -69,19 +66,24 @@ const Table = ({ todos, setTodos, isLoading }) => {
       type: '',
     });
   };
-  
 
   return (
     <div className="py-8">
       <div className="flex justify-center items-center mb-4">
-  <input
-    type="text"
-    placeholder="Filter todos..."
-    value={filterText}
-    onChange={(e) => setFilterText(e.target.value)}
-    className="input input-bordered w-full max-w-md"
-  />
-</div>
+        <input
+          type="text"
+          placeholder="Filter todos..."
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+          className="input input-bordered w-full max-w-md"
+        />
+        <button
+          className="btn ml-4"
+          onClick={() => document.querySelector('.modal').showModal()}
+        >
+          Stock In
+        </button>
+      </div>
 
       <table className="w-11/12 max-w-4x1">
         <thead className="border-b-2 border-black">
@@ -121,8 +123,12 @@ const Table = ({ todos, setTodos, isLoading }) => {
                   <span>
                     <label htmlFor="my-modal">
                       <MdEditNote
-                        onClick={() => setEditText({ id: todoItem.id, body: todoItem.body, quantity: todoItem.quantity,
-                          type: todoItem.type,})}
+                        onClick={() => setEditText({
+                          id: todoItem.id,
+                          body: todoItem.body,
+                          quantity: todoItem.quantity,
+                          type: todoItem.type,
+                        })}
                         className="text-xl cursor-pointer"
                       />
                     </label>
@@ -151,29 +157,29 @@ const Table = ({ todos, setTodos, isLoading }) => {
             placeholder="Type here"
             className="input input-bordered w-full "
           />
-           <label className="block font-medium mb-2">Quantity</label>
-    <input
-      type="number"
-      name="quantity"
-      value={editText.quantity}
-      onChange={handleChange}
-      placeholder="Quantity"
-      className="input input-bordered w-full"
-    />
-         <label className="block font-medium mb-2">Ingredients Type</label>
-    <select
-      name="type"
-      className="select select-bordered w-full"
-      onChange={handleChange}
-      value={editText.type || ''}
-    >
-      <option value="" disabled>
-        Select ingredient type
-      </option>
-      <option value="Beverage">Beverage</option>
-      <option value="Fruits">Fruits</option>
-      <option value="Non-Perishable Item">Non-Perishable Item</option>
-    </select>
+          <label className="block font-medium mb-2">Quantity</label>
+          <input
+            type="number"
+            name="quantity"
+            value={editText.quantity}
+            onChange={handleChange}
+            placeholder="Quantity"
+            className="input input-bordered w-full"
+          />
+          <label className="block font-medium mb-2">Ingredients Type</label>
+          <select
+            name="type"
+            className="select select-bordered w-full"
+            onChange={handleChange}
+            value={editText.type || ''}
+          >
+            <option value="" disabled>
+              Select ingredient type
+            </option>
+            <option value="Beverage">Beverage</option>
+            <option value="Fruits">Fruits</option>
+            <option value="Non-Perishable Item">Non-Perishable Item</option>
+          </select>
           <div className="modal-action">
             <label htmlFor="my-modal" onClick={handleClick} className="btn btn-primary">
               Edit
