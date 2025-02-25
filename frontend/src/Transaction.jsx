@@ -41,6 +41,9 @@ function Transaction() {
               <th className="border border-gray-300 px-4 py-2">Action</th>
               <th className="border border-gray-300 px-4 py-2">Product</th>
               <th className="border border-gray-300 px-4 py-2">Quantity</th>
+              <th className="border border-gray-300 px-4 py-2">PreviosQuantity</th>
+              <th className="border border-gray-300 px-4 py-2">Stock-in</th>
+              <th className="border border-gray-300 px-4 py-2">Stock-out</th>
               <th className="border border-gray-300 px-4 py-2">Type</th>
               <th className="border border-gray-300 px-4 py-2">Timestamp</th>
             </tr>
@@ -51,6 +54,9 @@ function Transaction() {
                 <td className="border border-gray-300 px-4 py-2">{transaction.action}</td>
                 <td className="border border-gray-300 px-4 py-2">{transaction.item_name}</td>
                 <td className="border border-gray-300 px-4 py-2">{transaction.quantity}</td>
+                <td className="border border-gray-300 px-4 py-2">{transaction.previous_quantity}</td> 
+                <td className="border border-gray-300 px-4 py-2">{transaction.action === "Stock-In" ? transaction.stock_in_quantity : "-"}</td>
+                <td className="border border-gray-300 px-4 py-2">{transaction.action === "Stock-Out" ? transaction.stock_out_quantity : "-"}</td>
                 <td className="border border-gray-300 px-4 py-2">{transaction.type}</td>
                 <td className="border border-gray-300 px-4 py-2">
                   {new Date(transaction.timestamp).toLocaleString()}

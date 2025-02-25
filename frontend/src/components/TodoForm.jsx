@@ -118,10 +118,12 @@ const TodoForm = ({ todos, setTodos }) => {
                 Cancel
               </button>
             </div>
+            
           </form>
         </div>
       </dialog>
     </div>
+    
   );
 };
 
