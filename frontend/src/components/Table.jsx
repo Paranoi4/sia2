@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { MdOutlineDeleteOutline, MdEditNote, MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from 'react-icons/md';
 
-const Table = ({ todos, setTodos, isLoading, createdDates }) => {
-  const [transferData, setTransferData] = useState({ id: '', quantity: '', date: '' });
+const Table = ({ todos, setTodos, isLoading }) => {
   const [stockOutData, setStockOutData] = useState({ id: '', quantity: '' });
   const [stockInData, setStockInData] = useState({ id: '', quantity: '' });
   const [filterText, setFilterText] = useState('');
@@ -18,55 +17,6 @@ const Table = ({ todos, setTodos, isLoading, createdDates }) => {
     quantity: '',
     type: '',
   });
-
-  const handleTransferChange = (e) => {
-    const { name, value } = e.target;
-    setTransferData(prev => ({ ...prev, [name]: value }));
-};
-
-const handleTransfer = async () => {
-  const { id, quantity, date } = transferData;
-  
-  if (!id || !quantity || !date) {
-      alert("Please enter ID, quantity, and select a date.");
-      return;
-  }
-
-  try {
-      console.log("Sending Transfer Request:", { id, quantity, date });
-
-      const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${id}/transfer_stock/`, {
-          quantity,
-          date  // Ensure date is included
-      });
-
-      console.log("Transfer Response:", response.data);
-
-      // Update Main Inventory
-      const updatedTodos = todos.map(todo =>
-          todo.id.toString() === id ? { ...todo, quantity: response.data.updated_quantity } : todo
-      );
-
-      setTodos(updatedTodos);
-
-      // ✅ NEW: Fetch updated preparation inventory after transfer
-      fetchPreparationData(date);
-
-      setTransferData({ id: '', quantity: '', date: '' });
-      document.getElementById('transfer-modal').close();
-
-      alert("Stock transferred successfully.");
-  } catch (error) {
-      console.error("Transfer Error:", error.response?.data);
-      alert(error.response?.data?.error || "Failed to transfer stock.");
-  }
-};
-
-
-
-
-
-
 
 
 
@@ -212,9 +162,7 @@ const handleTransfer = async () => {
           onClick={() => document.getElementById('stock-out-modal').showModal()}>
           Stock - Out 
         </button>
-        <button className="btn ml-4" onClick={() => document.getElementById('transfer-modal').showModal()}>
-    Transfer
-</button>
+        
 
 
       </div>
@@ -279,52 +227,6 @@ const handleTransfer = async () => {
         </tbody>
       </table>
 
-
-
-      <dialog id="transfer-modal" className="modal">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg">Transfer Item</h3>
-
-                    <label className="block font-medium mb-2">Enter ID</label>
-                    <input
-                        type="text"
-                        name="id"
-                        value={transferData.id}
-                        onChange={handleTransferChange}
-                        placeholder="Item ID"
-                        className="input input-bordered w-full"
-                    />
-
-                    <label className="block font-medium mb-2">Enter Quantity</label>
-                    <input
-                        type="number"
-                        name="quantity"
-                        value={transferData.quantity}
-                        onChange={handleTransferChange}
-                        placeholder="Quantity"
-                        className="input input-bordered w-full"
-                    />
-
-                    {/* Dropdown for Created Dates */}
-                    <label className="block font-medium mb-2">Select Date</label>
-                    <select
-                        name="date"
-                        value={transferData.date}
-                        onChange={handleTransferChange}
-                        className="select select-bordered w-full"
-                    >
-                        <option value="" disabled>Select a date</option>
-                        {createdDates.map((date, index) => (
-                            <option key={index} value={date}>{date}</option>
-                        ))}
-                    </select>
-
-                    <div className="modal-action">
-                        <button className="btn btn-primary" onClick={handleTransfer}>Submit</button>
-                        <button className="btn" onClick={() => document.getElementById('transfer-modal').close()}>Close</button>
-                    </div>
-                </div>
-            </dialog>
 
 
 
