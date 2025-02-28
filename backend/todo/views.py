@@ -2,21 +2,58 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.timezone import now
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from . import serializers
 from . import models
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.contrib.auth.models import User
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """Custom JWT login view"""
+    pass  # Uses default SimpleJWT behavior
+
+
+@api_view(['POST'])
+def register_user(request):
+    """API endpoint to register a new user"""
+    username = request.data.get("username")
+    password = request.data.get("password")
+
+    if not username or not password:
+        return Response({"error": "Username and password required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if User.objects.filter(username=username).exists():
+        return Response({"error": "Username already taken"}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = User.objects.create_user(username=username, password=password)
+    return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+def logout_user(request):
+    """API endpoint to blacklist refresh token (logout)"""
+    try:
+        refresh_token = request.data["refresh"]
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+    except Exception:
+        return Response({"error": "Invalid refresh token"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TodoViewSet(viewsets.ModelViewSet):
     queryset = models.Todo.objects.all()
     serializer_class = serializers.TodoSerializer
-
+    permission_classes = [IsAuthenticated] 
+    
     def create(self, request, *args, **kwargs):
         """Log transaction when a new Todo item is added."""
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            instance = serializer.save()  # Save Todo item
+            instance = serializer.save()
 
             # Safeguard: Check if a similar log already exists
             if not models.TransactionHistory.objects.filter(
