@@ -107,15 +107,17 @@ class TodoViewSet(viewsets.ModelViewSet):
             item_name=todo_item.body,
             previous_quantity=previous_quantity,
             quantity=todo_item.quantity,
+            stock_out_quantity=stock_out_quantity,
             type=todo_item.type,
-            stock_out_quantity=stock_out_quantity
+            volume=todo_item.volume
         )
 
         models.TransactionHistory.objects.create(
             action="Updated",
             item_name=todo_item.body,
             quantity=todo_item.quantity,
-            type=todo_item.type
+            type=todo_item.type,
+            volume=todo_item.volume
         )
 
         return Response({"message": "Stock updated successfully.",
@@ -147,14 +149,16 @@ class TodoViewSet(viewsets.ModelViewSet):
             previous_quantity=previous_quantity,
             quantity=todo_item.quantity,
             type=todo_item.type,
-            stock_in_quantity=stock_in_quantity
+            stock_in_quantity=stock_in_quantity,
+            volume=todo_item.volume
         )
 
         models.TransactionHistory.objects.create(
             action="Updated",
             item_name=todo_item.body,
             quantity=todo_item.quantity,
-            type=todo_item.type
+            type=todo_item.type,
+            volume=todo_item.volume
         )
 
         return Response({"message": "Stock updated successfully.",

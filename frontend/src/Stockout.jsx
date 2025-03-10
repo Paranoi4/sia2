@@ -87,7 +87,11 @@ function StockOut() {
             <tr className="bg-gray-200">
               <th className="border border-gray-300 px-4 py-2">Action</th>
               <th className="border border-gray-300 px-4 py-2">Product</th>
+              <th className="border border-gray-300 px-4 py-2">Quantity</th>
+              <th className="border border-gray-300 px-4 py-2">Previous Quantity</th>
               <th className="border border-gray-300 px-4 py-2">Stock-Out</th>
+              <th className="border border-gray-300 px-4 py-2">Type</th>
+              <th className="border border-gray-300 px-4 py-2">Volume</th>
               <th className="border border-gray-300 px-4 py-2">Timestamp</th>
             </tr>
           </thead>
@@ -96,7 +100,11 @@ function StockOut() {
               <tr key={transaction.id} className="hover:bg-gray-100">
                 <td className="border border-gray-300 px-4 py-2">{transaction.action}</td>
                 <td className="border border-gray-300 px-4 py-2">{transaction.item_name}</td>
+                <td className="border border-gray-300 px-4 py-2">{transaction.quantity}</td>
+                <td className="border border-gray-300 px-4 py-2">{transaction.previous_quantity}</td>
                 <td className="border border-gray-300 px-4 py-2">{transaction.stock_out_quantity}</td>
+                <td className="border border-gray-300 px-4 py-2">{transaction.type}</td>
+                <td className="border border-gray-300 px-4 py-2">{transaction.volume}</td>
                 <td className="border border-gray-300 px-4 py-2">
                   {new Date(transaction.timestamp).toLocaleString()}
                 </td>

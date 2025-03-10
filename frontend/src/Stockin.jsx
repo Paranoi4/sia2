@@ -87,6 +87,8 @@ function StockIn() {
               <th className="border border-gray-300 px-4 py-2">Quantity</th>
               <th className="border border-gray-300 px-4 py-2">Previous Quantity</th>
               <th className="border border-gray-300 px-4 py-2">Stock-In</th>
+              <th className="border border-gray-300 px-4 py-2">Type</th>
+              <th className="border border-gray-300 px-4 py-2">Volume</th>
               <th className="border border-gray-300 px-4 py-2">Timestamp</th>
             </tr>
           </thead>
@@ -98,6 +100,8 @@ function StockIn() {
                 <td className="border border-gray-300 px-4 py-2">{transaction.quantity}</td>
                 <td className="border border-gray-300 px-4 py-2">{transaction.previous_quantity}</td>
                 <td className="border border-gray-300 px-4 py-2">{transaction.stock_in_quantity}</td>
+                <td className="border border-gray-300 px-4 py-2">{transaction.type}</td>
+                <td className="border border-gray-300 px-4 py-2">{transaction.volume}</td>
                 <td className="border border-gray-300 px-4 py-2">
                   {new Date(transaction.timestamp).toLocaleString()}
                 </td>
