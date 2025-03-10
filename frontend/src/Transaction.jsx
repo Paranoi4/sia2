@@ -18,19 +18,27 @@ function Transaction() {
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/transactions/');
-      setTransactions(response.data);
+      const response = await axios.get("http://127.0.0.1:8000/api/transactions/");
+  
+      // Include Stock-Out-Event in the list
+      const filteredTransactions = response.data.filter(transaction =>
+        transaction.action === "Stock-In"  
+      );
+  
+      setTransactions(filteredTransactions);
       setIsLoading(false);
     } catch (error) {
-      console.error('Error fetching transactions:', error);
+      console.error("Error fetching transactions:", error);
     }
   };
+  
+  
 
 
   return (
       <div>
-          <h1 className="text-4xl font-bold mb-4">Stock-in/Stock-out Transactions </h1>
-          <button onClick={() => navigate(-1)}>Back</button>
+          <h1 className="text-4xl font-bold mb-4">Stock-in Transactions </h1>
+ 
     
           {isLoading ? (
         <p>Loading transactions...</p>
@@ -45,6 +53,7 @@ function Transaction() {
               <th className="border border-gray-300 px-4 py-2">Stock-in</th>
               <th className="border border-gray-300 px-4 py-2">Stock-out</th>
               <th className="border border-gray-300 px-4 py-2">Type</th>
+              <th className="border border-gray-300 px-4 py-2">Volume</th>
               <th className="border border-gray-300 px-4 py-2">Timestamp</th>
             </tr>
           </thead>
@@ -57,6 +66,7 @@ function Transaction() {
                 <td className="border border-gray-300 px-4 py-2">{transaction.previous_quantity}</td> 
                 <td className="border border-gray-300 px-4 py-2">{transaction.action === "Stock-In" ? transaction.stock_in_quantity : "-"}</td>
                 <td className="border border-gray-300 px-4 py-2">{transaction.action === "Stock-Out" ? transaction.stock_out_quantity : "-"}</td>
+                <td className="border border-gray-300 px-4 py-2">{transaction.volume || "-"}</td>
                 <td className="border border-gray-300 px-4 py-2">{transaction.type}</td>
                 <td className="border border-gray-300 px-4 py-2">
                   {new Date(transaction.timestamp).toLocaleString()}

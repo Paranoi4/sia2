@@ -31,7 +31,8 @@ class TodoSerializer(serializers.ModelSerializer):
             action="Updated",
             item_name=instance.body,
             quantity=validated_data.get("quantity", instance.quantity),
-            type=validated_data.get("type", instance.type)
+            type=validated_data.get("type", instance.type),
+            volume=validated_data.get("volume", instance.volume)
         )
         return super().update(instance, validated_data)
     

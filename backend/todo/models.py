@@ -20,6 +20,8 @@ class Todo(models.Model):
         null=True,
         blank=True
     )
+    volume = models.CharField(max_length=100, null=True, blank=True)
+    
 
     def __str__(self):
          return self.body
@@ -39,10 +41,11 @@ class TransactionHistory(models.Model):
     item_name = models.CharField(max_length=300)  # The product name
     quantity = models.CharField(max_length=100, null=True, blank=True)
     previous_quantity = models.CharField(max_length=100, null=True, blank=True)
-    type = models.CharField(max_length=100, null=True, blank=True)
+    type = models.CharField(max_length=100, null=True, blank=True)  
     stock_out_quantity = models.IntegerField(null=True, blank=True)
     stock_in_quantity = models.IntegerField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    volume = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return f"{self.item_name} - {self.action} on {self.timestamp}"

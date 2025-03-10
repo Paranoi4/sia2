@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
 import './App.css';
 import Transaction from './Transaction';
 import Edit from './Edit';
 import Table from './components/Table';
 import TodoForm from './components/TodoForm';
+import Stockin from "./Stockin";
+import Stockout from "./Stockout";
+import StockOutEvent from "./StockOutEvent";
+import StockInReturn from "./StockInReturn";
 import axios from 'axios';
 
 function App() {
   const [todos, setTodos] = useState([]);
   const [isLoading, setisLoading] = useState(true);
+  
 
   useEffect(() => {
     fetchData();
@@ -45,7 +50,16 @@ function App() {
                     <Link to="/main-inventory" className="hover:underline">Main Inventory</Link>
                   </li>
                   <li>
-                    <Link to="/transaction" className="hover:underline">Stock-in/Stock-out</Link>
+                    <Link to="/transaction" className="hover:underline">Stock-In</Link>
+                  </li>
+                  <li>
+                    <Link to="/stock-out" className="hover:underline">Stock-Out</Link>
+                  </li>
+                  <li>
+                    <Link to="/stock-in-return" className="hover:underline">Stock In Return</Link>
+                  </li>
+                  <li>
+                    <Link to="/stock-out-event" className="hover:underline">Preparation Inventory</Link>
                   </li>
                 </ul>
                 <ul className="ml-4 mt-2 space-y-2">
@@ -73,6 +87,10 @@ function App() {
             />
             <Route path="/transaction" element={<Transaction />} />
             <Route path="/edit" element={<Edit />} />
+            <Route path="/stock-in" element={<Stockin />} />
+            <Route path="/stock-out" element={<Stockout />} />
+            <Route path="/stock-out-event" element={<StockOutEvent />} />
+            <Route path="/stock-in-return" element={<StockInReturn />} />
           </Routes>
         </main>
       </div>

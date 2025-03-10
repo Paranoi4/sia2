@@ -5,12 +5,16 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from . import serializers
 from . import models
+from .models import Todo, TransactionHistory
 
 
 
 class TodoViewSet(viewsets.ModelViewSet):
     queryset = models.Todo.objects.all()
     serializer_class = serializers.TodoSerializer
+
+
+    
 
     def create(self, request, *args, **kwargs):
         """Log transaction when a new Todo item is added."""
@@ -23,13 +27,17 @@ class TodoViewSet(viewsets.ModelViewSet):
                 action="Added",
                 item_name=instance.body,
                 quantity=instance.quantity,
-                type=instance.type
+                type=instance.type,
+                volume=instance.volume
+                
             ).exists():
                 models.TransactionHistory.objects.create(
                     action="Added",
                     item_name=instance.body,
                     quantity=instance.quantity,
-                    type=instance.type
+                    type=instance.type,
+                    volume=instance.volume
+                    
                 )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -42,20 +50,21 @@ class TodoViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
 
         if serializer.is_valid():
-            updated_instance = serializer.save()
-
+            updated_instance = serializer.save()            
             # Safeguard: Check if a similar log already exists
             if not models.TransactionHistory.objects.filter(
                 action="Updated",
                 item_name=updated_instance.body,
                 quantity=updated_instance.quantity,
-                type=updated_instance.type
+                type=updated_instance.type,
+                volume=updated_instance.volume
             ).exists():
                 models.TransactionHistory.objects.create(
                     action="Updated",
                     item_name=updated_instance.body,
                     quantity=updated_instance.quantity,
-                    type=updated_instance.type
+                    type=updated_instance.type,
+                    volume=updated_instance.volume
                 )
 
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -151,6 +160,87 @@ class TodoViewSet(viewsets.ModelViewSet):
         return Response({"message": "Stock updated successfully.",
                          "previous_quantity": previous_quantity,
                          "updated_quantity": todo_item.quantity}, status=status.HTTP_200_OK)
+    
+
+    @action(detail=True, methods=['patch'])
+    def stockoutevent(self, request, pk=None):
+        """Reduce stock quantity for an event-specific stock-out"""
+        todo_item = get_object_or_404(Todo, pk=pk)
+        stock_out_quantity = int(request.data.get('quantity', 0))
+
+        previous_quantity = todo_item.quantity
+        current_quantity = int(todo_item.quantity)
+
+        if stock_out_quantity > current_quantity:
+            return Response({"error": "Insufficient stock for event."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Reduce stock for the event and save
+        todo_item.quantity = str(current_quantity - stock_out_quantity)
+        todo_item.save()
+
+        # Log stock-out for an event
+        TransactionHistory.objects.create(
+            action="Stock-Out-Event",
+            item_name=todo_item.body,
+            previous_quantity=previous_quantity,
+            quantity=todo_item.quantity,
+            type=todo_item.type,
+            stock_out_quantity=stock_out_quantity
+        )
+
+        # Log update for tracking purposes
+        TransactionHistory.objects.create(
+            action="Updated",
+            item_name=todo_item.body,
+            quantity=todo_item.quantity,
+            type=todo_item.type
+        )
+
+        return Response({
+            "message": "Stock-out for event updated successfully.",
+            "previous_quantity": previous_quantity,
+            "updated_quantity": todo_item.quantity
+        }, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['patch'])
+    def stockinreturn(self, request, pk=None):
+        """Subtract stock quantity for returned products"""
+        todo_item = get_object_or_404(Todo, pk=pk)
+        stock_return_quantity = int(request.data.get('quantity', 0))
+
+        previous_quantity = todo_item.quantity
+        current_quantity = int(todo_item.quantity)
+
+        if stock_return_quantity > current_quantity:
+            return Response({"error": "Insufficient stock to return."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Subtract stock due to return and save
+        todo_item.quantity = str(current_quantity - stock_return_quantity)
+        todo_item.save()
+
+        # Log "Stock-In-Return" transaction
+        TransactionHistory.objects.create(
+            action="Stock-In-Return",
+            item_name=todo_item.body,
+            previous_quantity=previous_quantity,
+            quantity=todo_item.quantity,
+            type=todo_item.type,
+            stock_in_quantity=stock_return_quantity
+        )
+
+        # Log update
+        TransactionHistory.objects.create(
+            action="Updated",
+            item_name=todo_item.body,
+            quantity=todo_item.quantity,
+            type=todo_item.type
+        )
+
+        return Response({
+            "message": "Stock-in return updated successfully.",
+            "previous_quantity": previous_quantity,
+            "updated_quantity": todo_item.quantity
+        }, status=status.HTTP_200_OK)
 
 
 class TransactionHistoryViewSet(viewsets.ReadOnlyModelViewSet):

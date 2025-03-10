@@ -6,21 +6,86 @@ const Table = ({ todos, setTodos, isLoading }) => {
   const [stockOutData, setStockOutData] = useState({ id: '', quantity: '' });
   const [stockInData, setStockInData] = useState({ id: '', quantity: '' });
   const [filterText, setFilterText] = useState('');
+  const [stockOutEventData, setStockOutEventData] = useState({ id: '', quantity: '' });
+  const [stockInReturnData, setStockInReturnData] = useState({ id: '', quantity: '' });
   const filteredTodos = todos.filter(todo =>
     todo.body.toLowerCase().includes(filterText.toLowerCase()) ||
     todo.type.toLowerCase().includes(filterText.toLowerCase()) ||
-    todo.quantity.toString().includes(filterText)
+    todo.quantity.toString().includes(filterText) ||
+    (todo.volume && todo.volume.toString().includes(filterText))
   );
   const [editText, setEditText] = useState({
     id: '',
     body: '',
     quantity: '',
+    volume: '',
     type: '',
+    
   });
 
 
+  const handleStockInReturnChange = (e) => {
+    const { name, value } = e.target;
+    setStockInReturnData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleStockInReturn = async () => {
+    const { id, quantity } = stockInReturnData;
+  
+    if (!id || !quantity) {
+      alert("Please enter both ID and quantity.");
+      return;
+    }
+  
+    try {
+      const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${id}/stockinreturn/`, { quantity });
+  
+      const updatedTodos = todos.map(todo =>
+        todo.id.toString() === id ? { ...todo, quantity: response.data.updated_quantity } : todo
+      );
+  
+      setTodos(updatedTodos);
+      setStockInReturnData({ id: '', quantity: '' });
+      document.getElementById('stock-in-return-modal').close();
+  
+      alert("Stock-in return updated successfully.");
+    } catch (error) {
+      alert(error.response?.data?.error || "Failed to update stock for return.");
+    }
+  };
+  
 
-
+  const handleStockOutEventChange = (e) => {
+    const { name, value } = e.target;
+    setStockOutEventData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleStockOutEvent = async () => {
+    const { id, quantity } = stockOutEventData;
+  
+    if (!id || !quantity) {
+      alert("Please enter both ID and quantity.");
+      return;
+    }
+  
+    try {
+      const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${id}/stockoutevent/`, { quantity });
+  
+      const updatedTodos = todos.map(todo =>
+        todo.id.toString() === id ? { ...todo, quantity: response.data.updated_quantity } : todo
+      );
+  
+      setTodos(updatedTodos);
+      setStockOutEventData({ id: '', quantity: '' });
+      document.getElementById('stock-out-event-modal').close();
+  
+      alert("Stock-out for event updated successfully.");
+    } catch (error) {
+      alert(error.response?.data?.error || "Failed to update stock for event.");
+    }
+  };
+  
+  
 
   const handleStockOutChange = (e) => {
     const { name, value } = e.target;
@@ -74,8 +139,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
       
       setTodos(updatedTodos);
       setStockInData({ id: '', quantity: '' });
-      document.getElementById('stock-in-modal').close();
-      
+      document.getElementById('stock-in-modal').close();     
       alert("Stock added successfully.");
     } catch (error) {
       alert(error.response?.data?.error || "Failed to add stock.");
@@ -108,7 +172,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
       const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${id}/`, updatedTodo);
       const updatedTodos = todos.map((todo) =>
         todo.id === id
-          ? { ...todo, body: response.data.body, quantity: response.data.quantity, type: response.data.type }
+          ? { ...todo, body: response.data.body, quantity: response.data.quantity, volume: response.data.volume, type: response.data.type }
           : todo
       );
       setTodos(updatedTodos);
@@ -122,6 +186,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
     handleEdit(editText.id, {
       body: editText.body,
       quantity: editText.quantity,
+      volume: editText.volume,
       type: editText.type,
     });
 
@@ -129,15 +194,12 @@ const Table = ({ todos, setTodos, isLoading }) => {
       id: '',
       body: '',
       quantity: '',
+      volume: '',
       type: '',
+      
     });
   };
 
-  
-
-
-  
-  
   return (
     <div className="py-8">
       <div className="flex justify-center items-center mb-4">
@@ -162,7 +224,16 @@ const Table = ({ todos, setTodos, isLoading }) => {
           onClick={() => document.getElementById('stock-out-modal').showModal()}>
           Stock - Out 
         </button>
-        
+        <button
+  className="btn ml-4"
+  onClick={() => document.getElementById('stock-out-event-modal').showModal()}>
+  Stock - Out (Event)
+</button>
+<button
+  className="btn ml-4"
+  onClick={() => document.getElementById('stock-in-return-modal').showModal()}>
+  Stock-In Return
+</button>
 
 
       </div>
@@ -175,6 +246,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
             <th className="p-3 text-sm font-semibold tracking-wide text-left">No ID.</th>
             <th className="p-3 text-sm font-semibold tracking-wide text-left">Product</th>
             <th className="p-3 text-sm font-semibold tracking-wide text-left">Quantity</th>
+            <th className="p-3 text-sm font-semibold tracking-wide text-left">Volume</th>
             <th className="p-3 text-sm font-semibold tracking-wide text-left">Ingredients Type</th>
             <th className="p-3 text-sm font-semibold tracking-wide text-left">Date Added</th>
             <th className="p-3 text-sm font-semibold tracking-wide text-left">Actions</th>
@@ -200,6 +272,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
                 <td className="p-3 text-sm text-center">
                   <span className="p-1.5 text-xs font-medium tracking-wider rounded-md bg-green-300">{todoItem.quantity}</span>
                 </td>
+                <td className="p-3 text-sm">{todoItem.volume}</td> 
                 <td className="p-3 text-sm">{todoItem.type}</td>
                 <td className="p-3 text-sm">{todoItem.created}</td>
                 <td className="p-3 text-xs font-medium grid grid-flow-col items-center mt-5">
@@ -228,7 +301,33 @@ const Table = ({ todos, setTodos, isLoading }) => {
       </table>
 
 
-
+      <dialog id="stock-out-event-modal" className="modal">
+  <div className="modal-box">
+    <h3 className="font-bold text-lg">Stock Out for Event</h3>
+    <label className="block font-medium mb-2">Enter ID</label>
+    <input
+      type="text"
+      name="id"
+      value={stockOutEventData.id}
+      onChange={handleStockOutEventChange}
+      placeholder="Item ID"
+      className="input input-bordered w-full"
+    />
+    <label className="block font-medium mb-2">Enter Quantity</label>
+    <input
+      type="number"
+      name="quantity"
+      value={stockOutEventData.quantity}
+      onChange={handleStockOutEventChange}
+      placeholder="Quantity"
+      className="input input-bordered w-full"
+    />
+    <div className="modal-action">
+      <button className="btn btn-primary" onClick={handleStockOutEvent}>Submit</button>
+      <button className="btn" onClick={() => document.getElementById('stock-out-event-modal').close()}>Close</button>
+    </div>
+  </div>
+</dialog>
 
        {/* Stock-in */}
       <dialog id="stock-in-modal" className="modal">
@@ -259,6 +358,33 @@ const Table = ({ todos, setTodos, isLoading }) => {
         </div>
       </dialog>
 
+      <dialog id="stock-in-return-modal" className="modal">
+  <div className="modal-box">
+    <h3 className="font-bold text-lg">Stock-In Return</h3>
+    <label className="block font-medium mb-2">Enter ID</label>
+    <input
+      type="text"
+      name="id"
+      value={stockInReturnData.id}
+      onChange={handleStockInReturnChange}
+      placeholder="Item ID"
+      className="input input-bordered w-full"
+    />
+    <label className="block font-medium mb-2">Enter Quantity</label>
+    <input
+      type="number"
+      name="quantity"
+      value={stockInReturnData.quantity}
+      onChange={handleStockInReturnChange}
+      placeholder="Quantity"
+      className="input input-bordered w-full"
+    />
+    <div className="modal-action">
+      <button className="btn btn-primary" onClick={handleStockInReturn}>Submit</button>
+      <button className="btn" onClick={() => document.getElementById('stock-in-return-modal').close()}>Close</button>
+    </div>
+  </div>
+</dialog>
        {/* stock out */}
       <dialog id="stock-out-modal" className="modal">
     <div className="modal-box">
@@ -311,6 +437,16 @@ const Table = ({ todos, setTodos, isLoading }) => {
             placeholder="Quantity"
             className="input input-bordered w-full"
           />
+          <label className="block font-medium mb-2">Volume</label>
+          <input
+              type="text"
+              name="volume"
+              value={editText.volume}
+              onChange={handleChange}
+              placeholder="Volume"
+              className="input input-bordered w-full"
+          />
+
           <label className="block font-medium mb-2">Ingredients Type</label>
           <select
             name="type"
