@@ -46,11 +46,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #External Apps
     'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
       #Internal Apps
     'todo',
     
   ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 
 

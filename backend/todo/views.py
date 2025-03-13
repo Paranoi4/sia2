@@ -2,11 +2,13 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.timezone import now
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from . import serializers
 from . import models
 from .models import Todo, TransactionHistory
-
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import authenticate
 
 
 class TodoViewSet(viewsets.ModelViewSet):
@@ -171,7 +173,6 @@ class TodoViewSet(viewsets.ModelViewSet):
         """Reduce stock quantity for an event-specific stock-out"""
         todo_item = get_object_or_404(Todo, pk=pk)
         stock_out_quantity = int(request.data.get('quantity', 0))
-
         previous_quantity = todo_item.quantity
         current_quantity = int(todo_item.quantity)
 
@@ -245,6 +246,33 @@ class TodoViewSet(viewsets.ModelViewSet):
             "previous_quantity": previous_quantity,
             "updated_quantity": todo_item.quantity
         }, status=status.HTTP_200_OK)
+    
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """JWT Login API for existing superusers"""
+    def post(self, request, *args, **kwargs):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        user = authenticate(username=username, password=password)
+
+        if user is None:
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        response = super().post(request, *args, **kwargs)
+
+        return Response({
+            "access": response.data["access"],
+            "refresh": response.data["refresh"],
+            "username": username,
+            "is_superuser": user.is_superuser
+        })
+
+# Protected Route Example
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def protected_view(request):
+    return Response({"message": f"Hello, {request.user.username}! You are authenticated."})
 
 
 class TransactionHistoryViewSet(viewsets.ReadOnlyModelViewSet):
