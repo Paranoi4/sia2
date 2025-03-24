@@ -1,7 +1,14 @@
+import { useNavigate } from "react-router-dom";
 import React from "react";
 import MountainPng from "../assets/moon-surface-hd.png";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
+  const handleBookNow = () => {
+    navigate("/first/");
+  };
+
   return (
     <div className=" bg-black/20 h-full"> 
       <div className="h-full flex justify-center items-center p-4">
@@ -14,9 +21,10 @@ const Hero = () => {
             Your premier mobile bar experience, serving handcrafted cocktails, premium beverages, and unforgettable moments at every event!
             </p>
             <button
+              onClick={handleBookNow}
               data-aos="fade-up"
               data-aos-delay="500"
-              className="bg-blue-400 text-white hover:bg-blue-500 px-4 py-1 rounded-md duration-200"
+              className="book-now-button z-20 relative bg-blue-400 text-white hover:bg-blue-500 px-4 py-1 rounded-md duration-200"
             >
               Book now
             </button>

@@ -1,0 +1,119 @@
+/* Center the Order Page */
+.order-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100vw;
+    background-color: #000; /* Dark background */
+  }
+  
+  /* Card Style */
+  .order-card {
+    width: 800px;
+    background-color: #222;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.7);
+  }
+  
+  /* Title */
+  .order-title {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #ffc107;
+    margin-bottom: 20px;
+  }
+  
+  /* Order Content Layout */
+  .order-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+  }
+  
+  /* Left Side: Menu Section */
+  .menu-section {
+    flex: 1;
+    color: #fff;
+  }
+  
+  /* Category Titles */
+  .menu-title {
+    font-weight: bold;
+    color: #ffc107;
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  /* Right Side: Package Section */
+  .package-section {
+    flex: 1;
+    background-color: #111;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  /* Labels */
+  .order-label {
+    display: block;
+    color: #ffc107;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  /* Dropdown Select */
+  .order-select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 1rem;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #ffc107;
+    margin-bottom: 20px;
+  }
+  
+  /* Price Display */
+  .order-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+  
+  /* Confirm Button */
+  .order-button {
+    width: 100%;
+    padding: 12px;
+    background-color: black;
+    color: white;
+    border: 2px solid #fff;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+  }
+  
+  .order-button:hover {
+    background-color: #ffc107;
+    color: black;
+  }
+  /* Customer Unavailable Dates - Red */
+.unavailable-date {
+    background-color: red !important;
+    color: white !important;
+    border-radius: 50%;
+  }
+  
+  /* Admin Unavailable Dates - Grey */
+.admin-unavailable-date {
+    background-color: grey !important;
+    color: white !important;
+    border-radius: 50%;
+  }
+  

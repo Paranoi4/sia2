@@ -1,0 +1,115 @@
+/* Center the form & use the full screen */
+.booking-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100vw;
+    background-color: #222; /* Dark background */
+    padding: 20px;
+}
+
+/* Booking Form Styling */
+.booking-form-wrapper {
+    width: 100%;
+    max-width: 1100px; /* Adjust max width */
+    background-color: #696a10;
+    border-radius: 10px;
+    padding: 40px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Title */
+.booking-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ffc107;
+    font-weight: bold;
+    font-size: 2rem;
+}
+
+/* Form Layout */
+.booking-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+/* Columns */
+.booking-group {
+    flex: 1;
+}
+
+/* Labels */
+.booking-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Inputs */
+.booking-input,
+.booking-select,
+.booking-date-picker {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #000000;
+    border-radius: 5px;
+    background-color: #6b0202;
+    font-size: 1rem;
+}
+
+/* Display PAX & Price */
+.booking-summary {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #fff3cd;
+    border-radius: 8px;
+}
+
+.booking-summary-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Ensure Full Screen Usage */
+.booking-container,
+.booking-form-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Confirm Button */
+.booking-submit-button {
+    margin-top: 30px;
+    width: 100%;
+    padding: 15px;
+    background-color: black;
+    color: rgb(255, 255, 255);
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.booking-submit-button:hover {
+    background-color: #ffc107;
+    color: black;
+}
+
+/* ✅ Customer Booked Date (Red) */
+.red-date {
+    background-color: red !important;
+    color: white !important;
+    border-radius: 50%;
+}
+
+/* ✅ Admin Marked Unavailable Date (Grey) */
+.grey-date {
+    background-color: grey !important;
+    color: white !important;
+    border-radius: 50%;
+}

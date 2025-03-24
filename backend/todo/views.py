@@ -1,14 +1,21 @@
 from django.shortcuts import render, get_object_or_404
 from django.utils.timezone import now
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes
 from . import serializers
 from . import models
-from .models import Todo, TransactionHistory
+from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
+from rest_framework.views import APIView
+from .serializers import BookingSerializer, UnavailableDateSerializer, PaymentSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from datetime import timedelta
+
+
+
 
 
 class TodoViewSet(viewsets.ModelViewSet):
@@ -278,3 +285,76 @@ def protected_view(request):
 class TransactionHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.TransactionHistory.objects.all().order_by('-timestamp')
     serializer_class = serializers.TransactionHistorySerializer
+
+
+# ✅ View to Handle Customer Bookings (Red Dates)
+class BookingView(generics.ListCreateAPIView):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+
+
+# ✅ View to Fetch Unavailable Dates (Red = Customers, Grey = Admin)
+class UnavailableDatesView(APIView):  # 🛑 MAKE SURE THIS EXISTS!
+    def get(self, request, format=None):
+        customer_unavailable_dates = Booking.objects.values_list("event_date", flat=True).distinct()
+        admin_unavailable_dates = UnavailableDate.objects.values_list("date", flat=True).distinct()
+
+        return Response({
+            "customer_unavailable_dates": list(customer_unavailable_dates),  # Red dates
+            "admin_unavailable_dates": list(admin_unavailable_dates)  # Grey dates
+        })
+
+# ✅ View for Admin to Manually Set Unavailable Dates (Grey Dates)
+class AdminUnavailableDateView(APIView):
+    def post(self, request, format=None):
+        serializer = UnavailableDateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({"error": "Invalid data", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+# ✅ Payment Processing API View (Fixes Booking Reference Issue)
+class PaymentView(APIView):
+    parser_classes = (MultiPartParser, FormParser)  # ✅ Allow file uploads (receipt)
+
+    def post(self, request, format=None):
+        print("📥 Incoming payment data:", request.data)  # ✅ Debugging Log
+
+        # ✅ Retrieve booking ID from request
+        booking_id = request.data.get("booking_id")
+
+        if not booking_id:
+            print("🚨 Missing booking_id!")
+            return Response({"error": "Booking ID is required for payment."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ✅ Check if booking exists
+        try:
+            booking = Booking.objects.get(id=booking_id, confirmed=False)  # Only unconfirmed bookings
+        except Booking.DoesNotExist:
+            print("🚨 Invalid Booking ID:", booking_id)
+            return Response({"error": "Invalid Booking ID. Booking not found or already confirmed."}, status=status.HTTP_404_NOT_FOUND)
+
+        # ✅ Process Payment
+        serializer = PaymentSerializer(data=request.data)
+        if serializer.is_valid():
+            payment = serializer.save()
+
+            # ✅ Mark booking as permanently confirmed
+            booking.confirmed = True
+            booking.save()
+
+            return Response({"message": "Payment submitted successfully!"}, status=status.HTTP_201_CREATED)
+
+        print("🚨 Payment error details:", serializer.errors)  # ✅ Debugging Log
+        return Response({"error": "Invalid data", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+class CleanupExpiredBookings(APIView):
+    def delete(self, request):
+        expiration_time = now() - timedelta(minutes=20)
+        expired_bookings = Booking.objects.filter(confirmed=False, created_at__lt=expiration_time)
+
+        if expired_bookings.exists():
+            count = expired_bookings.count()
+            expired_bookings.delete()
+            return Response({"message": f"{count} expired bookings removed."}, status=status.HTTP_200_OK)
+        
+        return Response({"message": "No expired bookings found."}, status=status.HTTP_200_OK)

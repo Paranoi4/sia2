@@ -11,6 +11,8 @@ import StockInReturn from "./StockInReturn";
 import Table from "./components/Table";
 import TodoForm from "./components/TodoForm";
 import LandingPage from "./LandingPage";
+import BookPage from "./BookPage";
+
 
 function App() {
     const [todos, setTodos] = useState([]);
@@ -40,10 +42,16 @@ function App() {
         setIsAuthenticated(false);
         window.location.href = "/login";  // Redirect to login
     };
-
+    const PrivateRoute = ({ children }) => {
+        const token = localStorage.getItem("access");
+        return token ? children : <Navigate to="/login" />;
+    };
+    
     return (
         <Router>
             <Routes>
+                 {/* ✅ Public Booking Pages */}
+                 <Route path="/first/*" element={<BookPage />} />
                 {/* Landing Page should be a separate full-screen route */}
                 <Route path="/landing-page" element={<LandingPage />} />
 
@@ -78,21 +86,25 @@ function App() {
                             <main className="w-3/4 p-8">
                                 <Routes>
                                     <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
+                                    <Route path="/" element={<Navigate to="/login" />} />
                                     <Route path="/main-inventory" element={
-                                        <>
-                                            <nav className="pt-8">
-                                                <h1 className="text-5xl text-center pb-8">Bevanda Inventory</h1>
-                                            </nav>
-                                            <TodoForm setTodos={setTodos} todos={todos} />
-                                            <Table todos={todos} setTodos={setTodos} isLoading={isLoading} />
-                                        </>
-                                    }/>
-                                    <Route path="/transaction" element={<Transaction />} />
-                                    <Route path="/edit" element={<Edit />} />
-                                    <Route path="/stock-in" element={<Stockin />} />
-                                    <Route path="/stock-out" element={<Stockout />} />
-                                    <Route path="/stock-out-event" element={<StockOutEvent />} />
-                                    <Route path="/stock-in-return" element={<StockInReturn />} />
+    <PrivateRoute>
+        <>
+            <nav className="pt-8">
+                <h1 className="text-5xl text-center pb-8">Bevanda Inventory</h1>
+            </nav>
+            <TodoForm setTodos={setTodos} todos={todos} />
+            <Table todos={todos} setTodos={setTodos} isLoading={isLoading} />
+        </>
+    </PrivateRoute>
+} />
+                                    <Route path="/transaction" element={<PrivateRoute><Transaction /></PrivateRoute>} />
+<Route path="/edit" element={<PrivateRoute><Edit /></PrivateRoute>} />
+<Route path="/stock-in" element={<PrivateRoute><Stockin /></PrivateRoute>} />
+<Route path="/stock-out" element={<PrivateRoute><Stockout /></PrivateRoute>} />
+<Route path="/stock-out-event" element={<PrivateRoute><StockOutEvent /></PrivateRoute>} />
+<Route path="/stock-in-return" element={<PrivateRoute><StockInReturn /></PrivateRoute>} />
+
                                 </Routes>
                             </main>
                         </div>
