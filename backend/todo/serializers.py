@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from . import models
-from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment
+from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment, Package, DrinkCategory
 
 class TodoSerializer(serializers.ModelSerializer):
     
@@ -83,3 +83,20 @@ class PaymentSerializer(serializers.ModelSerializer):
         if not value.name.lower().endswith(('.jpg', '.jpeg', '.png', '.pdf')):
             raise serializers.ValidationError("Only JPG, PNG, and PDF files are allowed.")
         return value
+
+class PaymentSerializer(serializers.ModelSerializer):
+    booking = BookingSerializer(read_only=True)
+
+    class Meta:
+        model = Payment
+        fields = ["id", "booking", "payment_method", "status", "receipt", "created_at"]
+
+class PackageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Package
+        fields = '__all__'
+
+class DrinkCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DrinkCategory
+        fields = "__all__"

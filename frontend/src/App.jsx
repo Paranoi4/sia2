@@ -12,6 +12,8 @@ import Table from "./components/Table";
 import TodoForm from "./components/TodoForm";
 import LandingPage from "./LandingPage";
 import BookPage from "./BookPage";
+import ManagePackages from "./components/Admin/ManagePackages";
+
 
 
 function App() {
@@ -46,15 +48,14 @@ function App() {
         const token = localStorage.getItem("access");
         return token ? children : <Navigate to="/login" />;
     };
-    
     return (
         <Router>
             <Routes>
-                 {/* ✅ Public Booking Pages */}
-                 <Route path="/first/*" element={<BookPage />} />
+            <Route path="/" element={<Navigate to="/login" />} />
                 {/* Landing Page should be a separate full-screen route */}
+                <Route path="/first/*" element={<BookPage />} />
                 <Route path="/landing-page" element={<LandingPage />} />
-
+                <Route path="/login" element={isAuthenticated ? <Navigate to="/main-inventory" /> : <Login />} />
                 {/* Authenticated Routes with Sidebar and Layout */}
                 <Route 
                     path="/*"
@@ -74,6 +75,10 @@ function App() {
                                         <li className="font-semibold"><a href="/stock-in-return">Stock In Return</a></li>
                                         <li className="font-semibold"><a href="/stock-out-event">Preparation Inventory</a></li>
                                         <li className="font-semibold"><a href="/edit">Product History</a></li>
+                                        <li className="font-semibold"><a href="/admin/payments">Payment Management</a></li>
+                                        <li className="font-semibold"><a href="/manage-packages">Manage Package</a></li>
+
+
                                         <li className="font-semibold">
                                             <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded-lg">
                                                 Logout
@@ -85,25 +90,29 @@ function App() {
 
                             <main className="w-3/4 p-8">
                                 <Routes>
-                                    <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
-                                    <Route path="/" element={<Navigate to="/login" />} />
+                                   
+                               
+
                                     <Route path="/main-inventory" element={
-    <PrivateRoute>
-        <>
-            <nav className="pt-8">
-                <h1 className="text-5xl text-center pb-8">Bevanda Inventory</h1>
-            </nav>
-            <TodoForm setTodos={setTodos} todos={todos} />
-            <Table todos={todos} setTodos={setTodos} isLoading={isLoading} />
-        </>
-    </PrivateRoute>
-} />
+                                        <PrivateRoute>
+                                        <>
+                                            <nav className="pt-8">
+                                                <h1 className="text-5xl text-center pb-8">Bevanda Inventory</h1>
+                                            </nav>
+                                            <TodoForm setTodos={setTodos} todos={todos} />
+                                            <Table todos={todos} setTodos={setTodos} isLoading={isLoading} />
+                                        </>
+                                        </PrivateRoute>
+                                    }/>
                                     <Route path="/transaction" element={<PrivateRoute><Transaction /></PrivateRoute>} />
-<Route path="/edit" element={<PrivateRoute><Edit /></PrivateRoute>} />
-<Route path="/stock-in" element={<PrivateRoute><Stockin /></PrivateRoute>} />
-<Route path="/stock-out" element={<PrivateRoute><Stockout /></PrivateRoute>} />
-<Route path="/stock-out-event" element={<PrivateRoute><StockOutEvent /></PrivateRoute>} />
-<Route path="/stock-in-return" element={<PrivateRoute><StockInReturn /></PrivateRoute>} />
+                                    <Route path="/edit" element={<PrivateRoute><Edit /></PrivateRoute>} />
+                                    <Route path="/stock-in" element={<PrivateRoute><Stockin /></PrivateRoute>} />
+                                    <Route path="/stock-out" element={<PrivateRoute><Stockout /></PrivateRoute>} />
+                                    <Route path="/stock-out-event" element={<PrivateRoute><StockOutEvent /></PrivateRoute>} />
+                                    <Route path="/stock-in-return" element={<PrivateRoute><StockInReturn /></PrivateRoute>} />
+                                    <Route path="/admin/*" element={<PrivateRoute><BookPage /></PrivateRoute>} />
+                                    <Route path="/manage-packages" element={<PrivateRoute><ManagePackages /></PrivateRoute>} />
+
 
                                 </Routes>
                             </main>

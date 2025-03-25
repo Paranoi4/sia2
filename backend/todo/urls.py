@@ -1,12 +1,15 @@
 
 from django.urls import path, include
 from rest_framework import routers
-from .views import TodoViewSet, TransactionHistoryViewSet, CustomTokenObtainPairView, protected_view, BookingView, UnavailableDatesView, AdminUnavailableDateView, PaymentView, CleanupExpiredBookings
+from .views import TodoViewSet, TransactionHistoryViewSet, CustomTokenObtainPairView, protected_view, BookingView, UnavailableDatesView,AdminUnavailableDateView, PaymentCreateView, CleanupExpiredBookings, AdminApprovePaymentView, PaymentStatusView, DeleteUnpaidBookingView,PaymentListView,PaymentDetailView, PackageViewSet, DrinkCategoryViewSet
 from rest_framework_simplejwt.views import TokenRefreshView
 
 router = routers.DefaultRouter()
 router.register('todo', TodoViewSet, basename='todo')
 router.register('transactions', TransactionHistoryViewSet, basename='transactions')
+router.register('packages', PackageViewSet, basename='packages')  # 👈 Add this
+router.register('drink-categories', DrinkCategoryViewSet, basename='drinkcategory')
+
 
 
 urlpatterns = [
@@ -17,7 +20,13 @@ urlpatterns = [
     path("bookings/", BookingView.as_view(), name="bookings"),
     path("unavailable-dates/", UnavailableDatesView.as_view(), name="unavailable_dates"),
     path("admin/unavailable-dates/", AdminUnavailableDateView.as_view(), name="admin_unavailable_dates"),
-    path("payments/", PaymentView.as_view(), name="payments"),  # ✅ Add Payment API
-    path("cleanup-expired-bookings/", CleanupExpiredBookings.as_view(), name="cleanup_expired_bookings"),  # ✅ Auto-Cleanup API
+    path("payments/", PaymentCreateView.as_view(), name="payments"), # Only for POST
+    path("payments/", PaymentListView.as_view(), name="payment-list"),        # For GET list
+    path("payments/<int:payment_id>/", PaymentDetailView.as_view(), name="payment-detail"),
+    path("cleanup-expired-bookings/", CleanupExpiredBookings.as_view(), name="cleanup_expired_bookings"),
+    path("admin/approve-payment/<int:payment_id>/", AdminApprovePaymentView.as_view(), name="approve_payment"),
+    path("payment-status/<int:booking_id>/", PaymentStatusView.as_view(), name="payment_status"),
+    path("delete-unpaid-booking/<int:booking_id>/", DeleteUnpaidBookingView.as_view(), name="delete-unpaid-booking"),
+    
 ]
 

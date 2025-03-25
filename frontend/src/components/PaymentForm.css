@@ -1,64 +1,94 @@
+/* Ensure the entire payment form is centered */
 .payment-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    background: black;
-    color: white;
-    padding: 20px;
+    align-items: center;
+    height: 100vh;
+    background: url('/path-to-your-background.jpg') center/cover no-repeat;
   }
   
-  .payment-title {
-    font-size: 2rem;
-    font-weight: bold;
-    color: gold;
-  }
-  
-  .payment-content {
-    display: flex;
-    justify-content: space-between;
-    width: 80%;
-    max-width: 900px;
-    background: #222;
+  /* Main payment box layout */
+  .payment-box {
+    background: rgba(255, 255, 255, 0.9);
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(255, 215, 0, 0.4);
-  }
-  
-  .payment-options,
-  .order-details {
-    flex: 1;
-    padding: 10px;
-  }
-  
-  .payment-method {
-    display: block;
-    font-size: 1rem;
-    margin: 10px 0;
-  }
-  
-  .receipt-upload {
-    margin-top: 20px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    width: 900px;
+    display: flex;
+    flex-direction: column;
     text-align: center;
   }
   
-  .receipt-upload input {
-    margin-top: 10px;
+  /* Layout for Payment Options & Order Details (Side by Side) */
+  .payment-details {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
   }
   
-  .confirm-button {
-    margin-top: 20px;
-    padding: 10px 15px;
-    font-size: 1.2rem;
+  /* Payment Options (Left Side) */
+  .payment-options {
+    background: #b39600;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
+    width: 50%;
+    text-align: left;
+  }
+  
+  /* Order Details (Right Side) */
+  .order-details {
+    background: #b39600;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
+    width: 50%;
+    text-align: left;
+  }
+  
+  /* Styling for both sections */
+  .payment-options h3,
+  .order-details h3 {
+    font-size: 18px;
     font-weight: bold;
-    background: gold;
-    border: none;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  .payment-method {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 15px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .payment-method img {
+    width: 30px;
+    height: auto;
+  }
+  
+  /* Upload section */
+  .upload-container {
+    background: #b39600;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  /* Confirm button */
+  .confirm-button {
+    background: #222;
+    color: white;
+    font-size: 18px;
+    padding: 10px;
     border-radius: 5px;
+    width: 100%;
     cursor: pointer;
+    margin-top: 15px;
   }
   
   .confirm-button:hover {
-    background: #ffdd57;
+    background: #111;
   }
-  

@@ -53,7 +53,6 @@ class TransactionHistory(models.Model):
         return f"{self.item_name} - {self.action} on {self.timestamp}"
     
 
-# ✅ Customer Bookings (Red Dates)
 class Booking(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -86,10 +85,33 @@ class UnavailableDate(models.Model):
 
 # ✅ Payment Transactions Model
 class Payment(models.Model):
-    booking = models.OneToOneField(Booking, on_delete=models.CASCADE)  # Link to a booking
-    payment_method = models.CharField(max_length=50)  # GCASH, BPI, METROBANK
-    receipt = models.ImageField(upload_to="receipts/")  # Store receipt images
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('denied', 'Denied'),
+    ]
+
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
+    payment_method = models.CharField(max_length=50)
+    receipt = models.ImageField(upload_to="receipts/")
     created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')  # ✅ New Field
 
     def __str__(self):
-        return f"Payment for {self.booking.first_name} {self.booking.last_name} - {self.payment_method}"
+        return f"Payment for {self.booking.first_name} {self.booking.last_name} - {self.status}"
+    
+
+class Package(models.Model):
+    pax = models.CharField(max_length=50)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    available = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.pax} - ₱{self.price}"
+    
+class DrinkCategory(models.Model):
+    name = models.CharField(max_length=100)  # e.g. "Cocktail"
+    items = models.TextField()               # e.g. "Margarita, Mojito, etc."
+
+    def __str__(self):
+        return self.name

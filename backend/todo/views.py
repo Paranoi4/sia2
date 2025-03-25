@@ -10,9 +10,13 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
-from .serializers import BookingSerializer, UnavailableDateSerializer, PaymentSerializer
+from .serializers import BookingSerializer, UnavailableDateSerializer, PaymentSerializer, PackageSerializer, DrinkCategorySerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from datetime import timedelta
+from rest_framework.generics import ListCreateAPIView
+from django.core.mail import send_mail  #added 4:30 pm 
+from django.conf import settings #added 4:30 pm 
+from .models import Package, DrinkCategory
 
 
 
@@ -292,6 +296,11 @@ class BookingView(generics.ListCreateAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
+    def create(self, request, *args, **kwargs):
+        print("Received event_date in Django:", request.data.get("event_date"))  # Debugging Log
+        return super().create(request, *args, **kwargs)
+
+
 
 # ✅ View to Fetch Unavailable Dates (Red = Customers, Grey = Admin)
 class UnavailableDatesView(APIView):  # 🛑 MAKE SURE THIS EXISTS!
@@ -316,6 +325,11 @@ class AdminUnavailableDateView(APIView):
 # ✅ Payment Processing API View (Fixes Booking Reference Issue)
 class PaymentView(APIView):
     parser_classes = (MultiPartParser, FormParser)  # ✅ Allow file uploads (receipt)
+    
+    def get(self, request):
+        payments = Payment.objects.all()
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
         print("📥 Incoming payment data:", request.data)  # ✅ Debugging Log
@@ -358,3 +372,128 @@ class CleanupExpiredBookings(APIView):
             return Response({"message": f"{count} expired bookings removed."}, status=status.HTTP_200_OK)
         
         return Response({"message": "No expired bookings found."}, status=status.HTTP_200_OK)
+
+class AdminApprovePaymentView(APIView):
+    def post(self, request, payment_id):
+        payment = get_object_or_404(Payment, id=payment_id)
+        action = request.data.get("action")
+
+        if action == "approve":
+            payment.status = "approved"
+            payment.booking.confirmed = True  # ✅ Ensure booking is confirmed
+            payment.booking.save()
+            payment.save(update_fields=["status"])  # ✅ Force save status update
+
+            # ✅ Send Email Confirmation
+            subject = "🎉 Your Payment Has Been Approved!"
+            message = (
+                f"Dear {payment.booking.first_name},\n\n"
+                f"Your payment for the event on {payment.booking.event_date} has been approved!\n\n"
+                "Thank you for booking with us!\n\n"
+                "Best regards,\nYour Business Team"
+            )
+
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [payment.booking.email],
+                    fail_silently=False,
+                )
+                print("✅ Email sent successfully!")
+            except Exception as e:
+                print("🚨 Email sending failed:", e)
+
+            return Response({"message": "Payment approved successfully."}, status=status.HTTP_200_OK)
+
+        elif action == "deny":
+            payment.status = "denied"
+            payment.save(update_fields=["status"])  # ✅ Force save status update
+            return Response({"message": "Payment denied."}, status=status.HTTP_200_OK)
+
+        return Response({"error": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+def approve_payment(request, payment_id):
+    try:
+        payment = Payment.objects.get(id=payment_id)
+        payment.booking.confirmed = True  # ✅ Mark the booking as confirmed
+        payment.booking.save()
+
+        # ✅ Send email confirmation to the customer
+        send_mail(
+            subject="Payment Approved - Your Booking is Confirmed!",
+            message=f"Hello {payment.booking.first_name},\n\nYour payment has been approved! Thank you for booking with us.\n\nEvent Date: {payment.booking.event_date}\n\nBest Regards,\nYour Business Name",
+            from_email="yourbusiness@email.com",  # ✅ Replace with your business email
+            recipient_list=[payment.booking.email],
+            fail_silently=False,
+        )
+
+        return Response({"message": "Payment approved successfully!"}, status=status.HTTP_200_OK)
+
+    except Payment.DoesNotExist:
+        return Response({"error": "Payment not found"}, status=status.HTTP_404_NOT_FOUND)
+class PaymentStatusView(APIView):
+    def get(self, request, booking_id):
+        payment = get_object_or_404(Payment, booking__id=booking_id)
+        return Response({"status": payment.status}) 
+            
+class DeleteUnpaidBookingView(APIView):
+    def delete(self, request, booking_id):
+        try:
+            booking = get_object_or_404(Booking, id=booking_id, confirmed=False)  # Only delete if NOT confirmed
+            booking.delete()
+            return Response({"message": "Booking deleted successfully."}, status=200)
+        except Booking.DoesNotExist:
+            return Response({"error": "Booking not found or already confirmed."}, status=404)
+
+# ✅ Fetch all Payments (For Viewing in Admin Panel)
+class PaymentListView(APIView):
+    def get(self, request):
+        payments = Payment.objects.select_related("booking").all().order_by("-created_at")
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data)
+
+class PaymentDetailView(APIView):
+    def get(self, request, payment_id):
+        payment = get_object_or_404(Payment, id=payment_id)
+        serializer = PaymentSerializer(payment)
+        return Response(serializer.data)
+    
+
+class PaymentCreateView(ListCreateAPIView):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+    parser_classes = (MultiPartParser, FormParser)  # ✅ Allow file uploads
+
+    def create(self, request, *args, **kwargs):
+        print("📥 Incoming Payment Data:", request.data)  # ✅ Debugging Log
+
+        booking_id = request.data.get("booking_id")  # ✅ Match frontend field
+
+        if not booking_id:
+            print("🚨 ERROR: Missing booking ID in request:", request.data)  # ✅ Debugging Log
+            return Response({"error": "Booking ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            booking = Booking.objects.get(id=booking_id)
+        except Booking.DoesNotExist:
+            return Response({"error": "Invalid Booking ID."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            payment = serializer.save(booking=booking)
+            return Response({"message": "Payment submitted successfully!"}, status=status.HTTP_201_CREATED)
+
+        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class PackageViewSet(viewsets.ModelViewSet):
+    queryset = Package.objects.all()
+    serializer_class = PackageSerializer
+
+class DrinkCategoryViewSet(viewsets.ModelViewSet):
+    queryset = DrinkCategory.objects.all()
+    serializer_class = DrinkCategorySerializer

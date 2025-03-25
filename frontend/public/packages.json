@@ -1,0 +1,7 @@
+[
+    { "pax": "50 pax", "price": 15000, "available": true },
+    { "pax": "100 pax", "price": 22000, "available": true },
+    { "pax": "120 pax", "price": 29500, "available": true },
+    { "pax": "210 pax", "price": 37000, "available": false }
+  ]
+  

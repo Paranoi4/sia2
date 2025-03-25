@@ -5,18 +5,44 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./BookingForm.css"; // ✅ Ensure this CSS file exists
 
+console.log("✅ BookingForm Component Loaded");
+
 const BookingForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const selectedPackage = location.state?.selectedPackage || null;
 
+  console.log("📌 Selected Package Data:", selectedPackage); // Debugging log
+
+
   // ✅ Redirect if no package was selected (user refreshed without ordering)
   useEffect(() => {
     if (!selectedPackage) {
-      alert("You must select a package first!");
-      navigate("/"); // Redirect back to Step 1 (Order Page)
+        alert("You must select a package first!");
+        navigate("/");
     }
-  }, [selectedPackage, navigate]);
+
+    const handleBeforeUnload = (event) => {
+        console.log("🔄 Tab Closed or Refreshed - Attempting to delete booking...");
+
+        const storedBookingId = sessionStorage.getItem("bookingId"); // Get stored ID
+
+        if (storedBookingId) {
+            axios.delete(`http://127.0.0.1:8000/api/delete-unpaid-booking/${storedBookingId}/`)
+                .then(() => console.log("✅ Unpaid booking deleted successfully."))
+                .catch((err) => console.error("🚨 Error deleting booking:", err));
+        }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+}, [selectedPackage, navigate]);  // ✅ Removed bookingId dependency
+
+
+
 
   // ✅ If no package, stop rendering (prevents errors)
   if (!selectedPackage) return null;
@@ -67,8 +93,17 @@ const BookingForm = () => {
 
   // ✅ Update selected event date
   const handleDateChange = (date) => {
-    setFormData({ ...formData, event_date: date, available_time: "" });
-  };
+    if (date) {
+        // Ensure the selected date is set to midnight to avoid timezone shifts
+        const adjustedDate = new Date(date);
+        adjustedDate.setHours(0, 0, 0, 0); // Reset time to prevent timezone issues
+
+        setFormData({
+            ...formData,
+            event_date: adjustedDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
+        });
+    }
+};
 
   // ✅ Validate before submitting
   const validateForm = () => {
@@ -88,37 +123,50 @@ const BookingForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const [bookingId, setBookingId] = useState(null); // Store Booking ID 3/16/2025
   // ✅ Handle Booking Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return; // Stop submission if validation fails
 
-    const formattedDate = formData.event_date ? formData.event_date.toISOString().split("T")[0] : null;
+    console.log("Selected Event Date (React):", formData.event_date);
+
+    let eventDate = formData.event_date ? new Date(formData.event_date) : null;
+    if (eventDate) {
+        eventDate.setHours(12, 0, 0, 0);
+    }
+
+    const formattedDate = eventDate ? eventDate.toISOString().split("T")[0] : null;
+
+    console.log("Formatted Date Sent to Django:", formattedDate);
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/bookings/", {
-        ...formData,
-        event_date: formattedDate, // ✅ Ensure correct date format
-      });
+        const response = await axios.post("http://127.0.0.1:8000/api/bookings/", {
+            ...formData,
+            event_date: formattedDate,
+        });
 
-      alert("Booking confirmed! Proceed to Payment.");
+        console.log("✅ Booking Created:", response.data);
 
-      // ✅ Start 20-minute countdown for payment
-      setTimeout(() => {
-        axios.delete("http://127.0.0.1:8000/api/cleanup-expired-bookings/")
-          .then(() => console.log("Expired bookings cleaned up"))
-          .catch((err) => console.error("Error cleaning up:", err));
-      }, 20 * 60 * 1000); // 20 minutes
+        setBookingId(response.data.id);
+        sessionStorage.setItem("bookingId", response.data.id); // ✅ Store ID in sessionStorage
 
-      // ✅ Redirect to Payment Page
-      navigate("/first/payment", { state: { bookingData: response.data } });
+        alert("Booking confirmed! Proceed to Payment.");
 
+        setTimeout(() => {
+            axios.delete(`http://127.0.0.1:8000/api/delete-unpaid-booking/${response.data.id}/`)
+                .then(() => console.log("Expired booking deleted"))
+                .catch((err) => console.error("Error cleaning up:", err));
+        }, 20 * 60 * 1000);
+
+        navigate("/first/payment", { state: { bookingData: response.data } });
 
     } catch (error) {
-      console.error("Error submitting booking:", error);
-      alert("Error: " + JSON.stringify(error.response?.data || "An error occurred"));
+        console.error("Error submitting booking:", error);
+        alert("Error: " + JSON.stringify(error.response?.data || "An error occurred"));
     }
-  };
+};
+
   const handleTimeChange = (e) => {
     setFormData({ ...formData, available_time: e.target.value });
 };

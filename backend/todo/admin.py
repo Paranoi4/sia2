@@ -1,9 +1,9 @@
 from django.contrib import admin
 #from . import models
 #from .models import Booking, UnavailableDate, Payment
-from .models import Booking, UnavailableDate, Payment, Todo
+from .models import Booking, UnavailableDate, Payment, Todo, DrinkCategory
 
-# Register your models here.
+# ✅ Admin panel for Booking management (Red Dates)
 class BookingAdmin(admin.ModelAdmin):
     list_display = ("first_name", "last_name", "event_date", "available_time", "pax")
     list_filter = ("event_date", "available_time")
@@ -23,4 +23,5 @@ admin.site.register(Todo)
 admin.site.register(Booking, BookingAdmin)
 admin.site.register(UnavailableDate, UnavailableDateAdmin)
 admin.site.register(Payment, PaymentAdmin)
+admin.site.register(DrinkCategory)
 
