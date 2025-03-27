@@ -1,46 +1,96 @@
+/* 🔲 ManagePayments Container */
 .manage-payments-container {
-    width: 80%;
-    margin: auto;
-    background: #889104;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 1100px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #a4a2a2;
+    color: #000;
+    border-radius: 10px;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
   }
   
-  h2 {
+  .payments-table {
+    table-layout: fixed;
+  }
+  
+  
+  /* 🔤 Header */
+  .manage-payments-container h2 {
     text-align: center;
     margin-bottom: 20px;
   }
   
+  /* 📋 Payments Table Fix */
   .payments-table {
     width: 100%;
+    table-layout: fixed; /* Force equal column widths */
     border-collapse: collapse;
     margin-top: 10px;
+    font-size: 15px;
   }
   
-  .payments-table th, .payments-table td {
-    border: 1px solid #000000;
+  .payments-table th,
+  .payments-table td {
+    border: 1px solid #000;
     padding: 10px;
-    text-align: left;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
-  .payments-table th {
-    background-color: #9d0000;
+  /* 🧱 Force exact width per column */
+  .payments-table th:nth-child(1),
+  .payments-table td:nth-child(1) {
+    width: 18%; /* Customer */
   }
   
+  .payments-table th:nth-child(2),
+  .payments-table td:nth-child(2) {
+    width: 18%; /* Payment Method */
+  }
+  
+  .payments-table th:nth-child(3),
+  .payments-table td:nth-child(3) {
+    width: 15%; /* Status */
+  }
+  
+  .payments-table th:nth-child(4),
+  .payments-table td:nth-child(4) {
+    width: 15%; /* Event Date */
+  }
+  
+  .payments-table th:nth-child(5),
+  .payments-table td:nth-child(5) {
+    width: 20%; /* Created At */
+  }
+  
+  .payments-table th:nth-child(6),
+  .payments-table td:nth-child(6) {
+    width: 14%; /* Actions */
+  }
+  
+  /* 👁 View Button */
   .view-btn {
     background-color: #007bff;
-    color: rgb(255, 255, 255);
+    color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 6px 12px;
+    font-weight: bold;
+    font-size: 14px;
     cursor: pointer;
     border-radius: 5px;
+    transition: background 0.3s ease;
   }
   
   .view-btn:hover {
     background-color: #0056b3;
   }
   
+  /* ✅ Status Tags */
   .status-approved {
     color: green;
     font-weight: bold;
@@ -51,37 +101,150 @@
     font-weight: bold;
   }
   
+  .status-denied {
+    color: red;
+    font-weight: bold;
+  }
+  
+  /* 📦 Payment Detail Box */
   .payment-details {
-    margin-top: 20px;
-    padding: 20px;
-    border-radius: 5px;
-    background-color: #b40404;
-    border: 1px solid #000000;
+    margin-top: 25px;
+    padding: 25px;
+    border-radius: 10px;
+    background-color: #1f1f1f;
+    border: 1px solid #333;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 16px;
   }
   
   .payment-details h3 {
-    margin-bottom: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
   
+  /* 🧾 Detail Info Grid */
+  .payment-info-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .payment-info-grid p {
+    flex: 1 1 300px;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #444;
+    padding-bottom: 8px;
+  }
+  
+  .payment-info-grid strong {
+    width: 130px;
+    color: #ccc;
+  }
+  
+  /* 🔗 Receipt Link */
+  .receipt-link a {
+    color: #4db8ff;
+    font-weight: bold;
+    text-decoration: none;
+  }
+  
+  .receipt-link a:hover {
+    text-decoration: underline;
+  }
+  
+  /* ❌ Close Button */
   .close-btn {
-    background-color: #dc3545;
-    color: rgb(241, 241, 241);
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #c0392b;
     border: none;
-    padding: 5px 10px;
+    padding: 8px 16px;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
     cursor: pointer;
-    border-radius: 5px;
   }
   
   .close-btn:hover {
-    background-color: #c82333;
+    background-color: #e74c3c;
   }
   
-  a {
+  /* ✅ Action Buttons */
+  .approve-btn {
+    background-color: rgba(0, 255, 0, 0.726);
+    color: rgb(12, 32, 85);
+    border: none;
+    padding: 6px 12px;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .approve-btn:hover {
+    background-color: darkgreen;
+  }
+  
+  .deny-btn {
+    background-color: rgb(164, 21, 107);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .deny-btn:hover {
+    background-color: rgb(15, 54, 163);
+  }
+  
+  /* 🔗 Link Global Style */
+  .manage-payments-container a {
     color: #007bff;
     text-decoration: none;
   }
   
-  a:hover {
+  .manage-payments-container a:hover {
     text-decoration: underline;
+  }
+  
+  /* ⏩ Pagination Controls */
+  .pagination-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .pagination-controls button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .pagination-controls button:hover {
+    background-color: #0056b3;
+  }
+  
+  .pagination-controls button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
   }
   
