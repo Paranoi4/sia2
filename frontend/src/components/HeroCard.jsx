@@ -1,63 +1,68 @@
-import React from "react";
-import wave from "../assets/waveGif.gif";
-import { FaReact } from "react-icons/fa";
-import { FaShuttleSpace, FaSpaceAwesome } from "react-icons/fa6";
+import React, { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import showcase1 from "../assets/showcase1.jpg";
+import showcase2 from "../assets/showcase2.jpg";
+import showcase3 from "../assets/showcase3.jpg";
+import wave from "../assets/waveGif.gif"; // Make sure the waveGif.gif is in your assets folder
 
-const ServiceData = [
-  {
-    title: "HST",
-    content: "300-1500km",
-    description:
-      "Used for astronomical observations, capturing stunning images of the universe.",
-    icon: <FaReact className="text-7xl" />,
-    aosDelay: "300",
-  },
-  {
-    title: "ISS",
-    content: "500-1500km",
-    description:
-      ", it's a habitable artificial satellite orbiting Earth and serves as a space environment research laboratory",
-    icon: <FaShuttleSpace className="text-7xl" />,
-    aosDelay: "500",
-  },
-  {
-    title: "GPS",
-    content: "300-1500km",
-    description:
-      "Part of the Global Positioning System (GPS) used for navigation.",
-    icon: <FaSpaceAwesome className="text-7xl" />,
-    aosDelay: "700",
-  },
-];
 const HeroCard = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 1200,
+      easing: "ease-in-out",
+      once: true,
+    });
+  }, []);
+
   return (
     <>
-      <section className="bg-primary">
-        <div className="container">
-          <div className="min-h-[400px]">
-            <div>
-              <div className=" grid grid-cols-1 sm:grid-cols-3 gap-6 relative z-10 ">
-                {ServiceData.map((data, index) => {
-                  return (
-                    <div
-                      data-aos="fade-up"
-                      data-aos-delay={data.aosDelay}
-                      className="min-h-[180px] flex flex-col justify-center items-center rounded-xl gap-2 bg-sky-900/60 backdrop-blur-sm  text-white text-center text-2xl py-8 px-3 w-full lg:w-[300px] mx-auto"
-                    >
-                      {data.icon}
-                      <h1>{data.title}</h1>
-                      <p>{data.content}</p>
-                      <p className="text-sm">{data.description}</p>
-                    </div>
-                  );
-                })}
-              </div>
-              <img
-                src={wave}
-                alt=""
-                className="h-[200px] w-full  object-cover mix-blend-screen -translate-y-24 relative z-[0]"
-              />
+      <section className="relative bg-black text-white py-16 overflow-hidden">
+        
+        {/* Wave Background */}
+        <div className="absolute inset-x-0 bottom-0 z-[0]">
+          <img
+            src={wave}
+            alt=""
+            className="h-[400px] w-full object-cover mix-blend-screen -translate-y-40"
+          />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-[1]">
+          <h2 
+            data-aos="fade-down" 
+            className="text-4xl font-bold mb-8 text-center"
+          >
+            Choose Bevanda Mobile Bar for Your Event
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            
+            {/* Showcase Image 1 */}
+            <div 
+              data-aos="zoom-in" 
+              className="h-[400px] overflow-hidden rounded-lg shadow-lg transition-transform transform hover:scale-105"
+            >
+              <img src={showcase1} alt="Showcase 1" className="w-full h-full object-cover" />
             </div>
+
+            {/* Showcase Image 2 */}
+            <div 
+              data-aos="zoom-in" 
+              data-aos-delay="200"
+              className="h-[400px] overflow-hidden rounded-lg shadow-lg transition-transform transform hover:scale-105"
+            >
+              <img src={showcase2} alt="Showcase 2" className="w-full h-full object-cover" />
+            </div>
+
+            {/* Showcase Image 3 */}
+            <div 
+              data-aos="zoom-in" 
+              data-aos-delay="400"
+              className="h-[400px] overflow-hidden rounded-lg shadow-lg transition-transform transform hover:scale-105"
+            >
+              <img src={showcase3} alt="Showcase 3" className="w-full h-full object-cover" />
+            </div>
+            
           </div>
         </div>
       </section>

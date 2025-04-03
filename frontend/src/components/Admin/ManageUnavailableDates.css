@@ -1,0 +1,191 @@
+.unavailable-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ccc;
+    color: #000;
+    border-radius: 10px;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .unavailable-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .unavailable-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+  
+  .unavailable-form input {
+    padding: 8px;
+    border: 1px solid #444;
+    border-radius: 5px;
+  }
+  
+  .unavailable-form button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .unavailable-form button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Scrollable Table Wrapper */
+  .table-body-scroll {
+    max-height: 230px;
+    overflow-y: auto;
+    display: block;
+  }
+  
+  /* Unified Table with Head and Body */
+  .unavailable-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  
+  /* Header + Cell Base Styles */
+  .unavailable-table th,
+  .unavailable-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Header Styling */
+  .unavailable-table th {
+    background-color: #9d0000;
+    color: white;
+  }
+  
+  /* Fixed Column Widths for Alignment */
+  .unavailable-table th:nth-child(1),
+  .unavailable-table td:nth-child(1) {
+    width: 10%;  /* Select */
+    text-align: center;
+  }
+  
+  .unavailable-table th:nth-child(2),
+  .unavailable-table td:nth-child(2) {
+    width: 30%;  /* Date */
+  }
+  
+  .unavailable-table th:nth-child(3),
+  .unavailable-table td:nth-child(3) {
+    width: 40%;  /* Reason */
+  }
+  
+  .unavailable-table th:nth-child(4),
+  .unavailable-table td:nth-child(4) {
+    width: 20%;  /* Actions */
+    text-align: center;
+  }
+  
+  /* Action Buttons */
+  .unavailable-table td button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .unavailable-table td .delete-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .unavailable-table td .delete-btn:hover {
+    background-color: #b02a37;
+  }
+  
+  .page-wrapper {
+    min-height: 100vh;
+    width: 100vw;
+    background-color: #9c0c0c;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    box-sizing: border-box;
+  }
+  
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .edit-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .confirm-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .confirm-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #5a6268;
+  }
+  
+  /* Bulk Delete Button Wrapper */
+  .bulk-delete-wrapper {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .bulk-delete-btn {
+    background-color: #ff6347;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .bulk-delete-btn:hover {
+    background-color: #e63946;
+  }
+  
+  .table-action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }

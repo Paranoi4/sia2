@@ -14,6 +14,8 @@ import LandingPage from "./LandingPage";
 import BookPage from "./BookPage";
 import ManagePackages from "./components/Admin/ManagePackages";
 import logo from "./assets/logo.jpg";
+import ManageUnavailableDates from "./components/Admin/ManageUnavailableDates";
+
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -135,6 +137,12 @@ function App() {
                       </a>
                     </li>
                     <li>
+                      <a href="/unavailable" className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-md">
+                        📅 Manage Unavaialable Dates
+                      </a>
+                    </li>
+                               
+                    <li>
                       <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-3 bg-red-600 hover:bg-red-700 p-2 rounded-md mt-6"
@@ -200,6 +208,7 @@ function App() {
                   <Route path="/stock-in-return" element={<PrivateRoute><StockInReturn /></PrivateRoute>} />
                   <Route path="/admin/*" element={<PrivateRoute><BookPage /></PrivateRoute>} />
                   <Route path="/manage-packages" element={<PrivateRoute><ManagePackages /></PrivateRoute>} />
+                  <Route path="/unavailable" element={<PrivateRoute><ManageUnavailableDates /></PrivateRoute>} />
                 </Routes>
               </main>
             </div>

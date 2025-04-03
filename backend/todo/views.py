@@ -124,7 +124,7 @@ class TodoViewSet(viewsets.ModelViewSet):
             type=todo_item.type,
             volume=todo_item.volume
         )
-
+        
         models.TransactionHistory.objects.create(
             action="Updated",
             item_name=todo_item.body,
@@ -165,7 +165,7 @@ class TodoViewSet(viewsets.ModelViewSet):
             stock_in_quantity=stock_in_quantity,
             volume=todo_item.volume
         )
-
+        '''
         models.TransactionHistory.objects.create(
             action="Updated",
             item_name=todo_item.body,
@@ -173,12 +173,12 @@ class TodoViewSet(viewsets.ModelViewSet):
             type=todo_item.type,
             volume=todo_item.volume
         )
-
+        '''
         return Response({"message": "Stock updated successfully.",
                          "previous_quantity": previous_quantity,
                          "updated_quantity": todo_item.quantity}, status=status.HTTP_200_OK)
     
-
+    
     @action(detail=True, methods=['patch'])
     def stockoutevent(self, request, pk=None):
         """Reduce stock quantity for an event-specific stock-out"""
@@ -203,7 +203,7 @@ class TodoViewSet(viewsets.ModelViewSet):
             type=todo_item.type,
             stock_out_quantity=stock_out_quantity
         )
-
+        '''
         # Log update for tracking purposes
         TransactionHistory.objects.create(
             action="Updated",
@@ -211,7 +211,7 @@ class TodoViewSet(viewsets.ModelViewSet):
             quantity=todo_item.quantity,
             type=todo_item.type
         )
-
+        '''
         return Response({
             "message": "Stock-out for event updated successfully.",
             "previous_quantity": previous_quantity,
@@ -231,7 +231,7 @@ class TodoViewSet(viewsets.ModelViewSet):
             return Response({"error": "Insufficient stock to return."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Subtract stock due to return and save
-        todo_item.quantity = str(current_quantity - stock_return_quantity)
+        todo_item.quantity = str(current_quantity + stock_return_quantity)
         todo_item.save()
 
         # Log "Stock-In-Return" transaction
@@ -243,7 +243,7 @@ class TodoViewSet(viewsets.ModelViewSet):
             type=todo_item.type,
             stock_in_quantity=stock_return_quantity
         )
-
+        '''
         # Log update
         TransactionHistory.objects.create(
             action="Updated",
@@ -251,7 +251,7 @@ class TodoViewSet(viewsets.ModelViewSet):
             quantity=todo_item.quantity,
             type=todo_item.type
         )
-
+        '''
         return Response({
             "message": "Stock-in return updated successfully.",
             "previous_quantity": previous_quantity,
@@ -291,76 +291,96 @@ class TransactionHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.TransactionHistorySerializer
 
 
-# ✅ View to Handle Customer Bookings (Red Dates)
 class BookingView(generics.ListCreateAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
     def create(self, request, *args, **kwargs):
-        print("Received event_date in Django:", request.data.get("event_date"))  # Debugging Log
-        return super().create(request, *args, **kwargs)
+        serializer = self.get_serializer(data=request.data)
+        
+        if serializer.is_valid():
+            # Save booking as unconfirmed (pending)
+            booking = serializer.save(confirmed=False)  # Mark as pending
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
 # ✅ View to Fetch Unavailable Dates (Red = Customers, Grey = Admin)
-class UnavailableDatesView(APIView):  # 🛑 MAKE SURE THIS EXISTS!
+class UnavailableDatesView(APIView):
     def get(self, request, format=None):
-        customer_unavailable_dates = Booking.objects.values_list("event_date", flat=True).distinct()
-        admin_unavailable_dates = UnavailableDate.objects.values_list("date", flat=True).distinct()
-
+        # Fetch all confirmed bookings (fully booked)
+        confirmed_bookings = Booking.objects.filter(confirmed=True).values_list("event_date", flat=True).distinct()
+        
+        # Fetch all pending bookings (booked but not confirmed yet AND not denied)
+        pending_bookings = Booking.objects.filter(confirmed=False, payment__status="pending").values_list("event_date", flat=True).distinct()
+        
+        # Fetch all admin-marked unavailable dates
+        admin_unavailable = UnavailableDate.objects.values_list("date", flat=True).distinct()
+        
         return Response({
-            "customer_unavailable_dates": list(customer_unavailable_dates),  # Red dates
-            "admin_unavailable_dates": list(admin_unavailable_dates)  # Grey dates
+            "confirmed_dates": list(confirmed_bookings),
+            "pending_dates": list(pending_bookings),  # No denied dates should appear here
+            "admin_unavailable_dates": list(admin_unavailable)
         })
+
 
 # ✅ View for Admin to Manually Set Unavailable Dates (Grey Dates)
 class AdminUnavailableDateView(APIView):
-    def post(self, request, format=None):
+    def get(self, request):
+        dates = UnavailableDate.objects.all()
+        serializer = UnavailableDateSerializer(dates, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
         serializer = UnavailableDateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response({"error": "Invalid data", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+class UnavailableDateDeleteView(APIView):
+    def delete(self, request, date_id):
+        date = get_object_or_404(UnavailableDate, id=date_id)
+        date.delete()
+        return Response({"message": "Unavailable date deleted."}, status=status.HTTP_200_OK)
+
+class UnavailableDateUpdateView(APIView):
+    def put(self, request, date_id):
+        date = get_object_or_404(UnavailableDate, id=date_id)
+        serializer = UnavailableDateSerializer(date, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 # ✅ Payment Processing API View (Fixes Booking Reference Issue)
-class PaymentView(APIView):
-    parser_classes = (MultiPartParser, FormParser)  # ✅ Allow file uploads (receipt)
-    
-    def get(self, request):
-        payments = Payment.objects.all()
-        serializer = PaymentSerializer(payments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class PaymentView(ListCreateAPIView):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+    parser_classes = (MultiPartParser, FormParser)
 
-    def post(self, request, format=None):
-        print("📥 Incoming payment data:", request.data)  # ✅ Debugging Log
-
-        # ✅ Retrieve booking ID from request
-        booking_id = request.data.get("booking_id")
+    def create(self, request, *args, **kwargs):
+        print("📥 Incoming Payment Data:", request.data)
+        booking_id = request.data.get("booking")
 
         if not booking_id:
-            print("🚨 Missing booking_id!")
-            return Response({"error": "Booking ID is required for payment."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Booking ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ✅ Check if booking exists
         try:
-            booking = Booking.objects.get(id=booking_id, confirmed=False)  # Only unconfirmed bookings
+            booking = Booking.objects.get(id=booking_id)
         except Booking.DoesNotExist:
-            print("🚨 Invalid Booking ID:", booking_id)
-            return Response({"error": "Invalid Booking ID. Booking not found or already confirmed."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Invalid Booking ID."}, status=status.HTTP_404_NOT_FOUND)
 
-        # ✅ Process Payment
-        serializer = PaymentSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            payment = serializer.save()
-
-            # ✅ Mark booking as permanently confirmed
-            booking.confirmed = True
-            booking.save()
-
+            serializer.save(booking=booking)
             return Response({"message": "Payment submitted successfully!"}, status=status.HTTP_201_CREATED)
-
-        print("🚨 Payment error details:", serializer.errors)  # ✅ Debugging Log
-        return Response({"error": "Invalid data", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
 class CleanupExpiredBookings(APIView):
     def delete(self, request):
         expiration_time = now() - timedelta(minutes=20)
@@ -372,6 +392,8 @@ class CleanupExpiredBookings(APIView):
             return Response({"message": f"{count} expired bookings removed."}, status=status.HTTP_200_OK)
         
         return Response({"message": "No expired bookings found."}, status=status.HTTP_200_OK)
+    
+
 
 class AdminApprovePaymentView(APIView):
     def post(self, request, payment_id):
@@ -380,61 +402,31 @@ class AdminApprovePaymentView(APIView):
 
         if action == "approve":
             payment.status = "approved"
-            payment.booking.confirmed = True  # ✅ Ensure booking is confirmed
+            payment.booking.confirmed = True
             payment.booking.save()
-            payment.save(update_fields=["status"])  # ✅ Force save status update
-
-            # ✅ Send Email Confirmation
-            subject = "🎉 Your Payment Has Been Approved!"
-            message = (
-                f"Dear {payment.booking.first_name},\n\n"
-                f"Your payment for the event on {payment.booking.event_date} has been approved!\n\n"
-                "Thank you for booking with us!\n\n"
-                "Best regards,\nYour Business Team"
-            )
-
-            try:
-                send_mail(
-                    subject,
-                    message,
-                    settings.EMAIL_HOST_USER,
-                    [payment.booking.email],
-                    fail_silently=False,
-                )
-                print("✅ Email sent successfully!")
-            except Exception as e:
-                print("🚨 Email sending failed:", e)
-
+            payment.save(update_fields=["status"])
             return Response({"message": "Payment approved successfully."}, status=status.HTTP_200_OK)
 
         elif action == "deny":
+            booking = payment.booking
+
+            # ✅ Mark the payment as denied (Keep the payment data but free the date)
             payment.status = "denied"
-            payment.save(update_fields=["status"])  # ✅ Force save status update
-            return Response({"message": "Payment denied."}, status=status.HTTP_200_OK)
+            payment.save(update_fields=["status"])
+
+            # ✅ Do NOT set booking.confirmed to False. Keep the booking data intact.
+            # ✅ Just free the date by not including it in `greenDates`.
+
+            return Response({
+                "message": "Payment denied. Booking retained but date freed.",
+                "freed_date": booking.event_date.isoformat()
+            }, status=status.HTTP_200_OK)
 
         return Response({"error": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["POST"])
-def approve_payment(request, payment_id):
-    try:
-        payment = Payment.objects.get(id=payment_id)
-        payment.booking.confirmed = True  # ✅ Mark the booking as confirmed
-        payment.booking.save()
 
-        # ✅ Send email confirmation to the customer
-        send_mail(
-            subject="Payment Approved - Your Booking is Confirmed!",
-            message=f"Hello {payment.booking.first_name},\n\nYour payment has been approved! Thank you for booking with us.\n\nEvent Date: {payment.booking.event_date}\n\nBest Regards,\nYour Business Name",
-            from_email="yourbusiness@email.com",  # ✅ Replace with your business email
-            recipient_list=[payment.booking.email],
-            fail_silently=False,
-        )
 
-        return Response({"message": "Payment approved successfully!"}, status=status.HTTP_200_OK)
-
-    except Payment.DoesNotExist:
-        return Response({"error": "Payment not found"}, status=status.HTTP_404_NOT_FOUND)
 class PaymentStatusView(APIView):
     def get(self, request, booking_id):
         payment = get_object_or_404(Payment, booking__id=booking_id)
@@ -497,3 +489,23 @@ class PackageViewSet(viewsets.ModelViewSet):
 class DrinkCategoryViewSet(viewsets.ModelViewSet):
     queryset = DrinkCategory.objects.all()
     serializer_class = DrinkCategorySerializer
+
+@api_view(["POST"])
+def approve_payment(request, payment_id):
+    try:
+        payment = Payment.objects.get(id=payment_id)
+        payment.booking.confirmed = True
+        payment.booking.save()
+        return Response({"message": "Payment approved successfully!"}, status=status.HTTP_200_OK)
+    except Payment.DoesNotExist:
+        return Response({"error": "Payment not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+
+class PaymentDeleteView(APIView):
+    def delete(self, request, payment_id):
+        try:
+            payment = get_object_or_404(Payment, id=payment_id)
+            payment.delete()
+            return Response({"message": "Payment deleted successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

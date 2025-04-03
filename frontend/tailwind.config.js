@@ -7,6 +7,8 @@ export default {
   ],
   theme: {
     extend: {
+      width:{
+        '30': '7.5rem',
       colors: {
         primary: "#000000", // Set primary color to black
       },
@@ -15,6 +17,7 @@ export default {
         sans: ['Poppins', 'sans-serif'],
       },
     },
+   },
   },
   plugins: [require("daisyui")],
 }

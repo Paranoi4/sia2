@@ -6,8 +6,10 @@ import liquors from "./assets/liquors.mp4";
 import Rapidscat from "./components/Rapidscat";
 import Satelite from "./components/Satelite";
 import Footer5 from "./components/Footer5";
+import AboutSection from "./components/AboutSection";
 import AOS from "aos";
 import "aos/dist/aos.css";
+//import { Satellite } from "@mui/icons-material";
 
 const LandingPage = () => {
   useEffect(() => {
@@ -33,6 +35,7 @@ const LandingPage = () => {
       <HeroCard />
       <Rapidscat />
       <Satelite />
+      <AboutSection />
       {/* <Footer /> */}
       <Footer5 />
     </div>

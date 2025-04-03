@@ -21,7 +21,7 @@ const TodoForm = ({ todos, setTodos }) => {
   const postTodo = async () => {
     try {
         const existingItem = todos.find(todo => todo.body === newTodo.body);
-
+        
         if (existingItem) {
             const updatedQuantity = parseInt(existingItem.quantity) + parseInt(newTodo.quantity);
             const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${existingItem.id}/`, {

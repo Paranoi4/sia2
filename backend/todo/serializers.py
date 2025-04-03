@@ -100,3 +100,9 @@ class DrinkCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = DrinkCategory
         fields = "__all__"
+
+# ✅ Serializer for Admin Unavailable Dates
+class UnavailableDateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UnavailableDate
+        fields = ['id', 'date', 'reason']

@@ -6,16 +6,12 @@ function StockOut() {
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");  // Added search query for global filter
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchTransactions();
   }, []);
-
-  useEffect(() => {
-    filterByDate();
-  }, [selectedDate]);
 
   const fetchTransactions = async () => {
     try {
@@ -27,92 +23,79 @@ function StockOut() {
       );
 
       setTransactions(stockOutTransactions);
-      setFilteredTransactions(stockOutTransactions); // Set initial filtered data
+      setFilteredTransactions(stockOutTransactions);  // Set initial filtered data
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching transactions:", error);
     }
   };
 
-  // Function to filter transactions by the selected date
-  const filterByDate = () => {
-    if (!selectedDate) {
-      setFilteredTransactions(transactions); // Reset if no date is selected
-      return;
-    }
+  // Global search filter function
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
 
-    const filtered = transactions.filter((transaction) => {
-      const transactionDate = new Date(transaction.timestamp).toISOString().split("T")[0];
-      return transactionDate === selectedDate; // Compare only the date part
-    });
+    const filtered = transactions.filter(transaction =>
+      Object.values(transaction).some(value =>
+        String(value).toLowerCase().includes(query)
+      )
+    );
 
     setFilteredTransactions(filtered);
   };
 
   return (
-    <div>
-      <h1 className="text-4xl font-bold mb-4">Stock Out</h1>
-      
-      {/* Date Filter Input */}
-      <div className="mb-4 flex gap-4">
-        <div>
-          <label className="block text-gray-700">Select Date:</label>
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">
+        <h1 className="text-4xl font-bold mb-6 text-gray-800">Stock-Out Transactions</h1>
+
+        {/* Global Search Input */}
+        <div className="mb-4">
           <input
-            type="date"
-            className="border px-2 py-1"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+            type="text"
+            className="border border-gray-300 rounded px-4 py-2 w-full"
+            placeholder="Search by any field..."
+            value={searchQuery}
+            onChange={handleSearch}
           />
         </div>
-        <button
-          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700"
-          onClick={() => {
-            setSelectedDate("");
-            setFilteredTransactions(transactions);
-          }}
-        >
-          Reset
-        </button>
+        {isLoading ? (
+          <p>Loading transactions...</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300">
+              <thead>
+                <tr className="bg-gray-900 text-white">
+                  <th className="border border-gray-300 px-4 py-3 text-left">Action</th>
+                  <th className="border border-gray-300 px-4 py-3 text-left">Product</th>
+                  <th className="border border-gray-300 px-4 py-3 text-left">Quantity</th>
+                  <th className="border border-gray-300 px-4 py-3 text-left">Previous Quantity</th>
+                  <th className="border border-gray-300 px-4 py-3 text-left">Stock-Out</th>
+                  <th className="border border-gray-300 px-4 py-3 text-left">Type</th>
+                  <th className="border border-gray-300 px-4 py-3 text-left">Volume</th>
+                  <th className="border border-gray-300 px-4 py-3 text-left">Timestamp</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTransactions.map((transaction) => (
+                  <tr key={transaction.id} className="hover:bg-gray-100 transition">
+                    <td className="border border-gray-300 px-4 py-2 font-bold">{transaction.action}</td>
+                    <td className="border border-gray-300 px-4 py-2">{transaction.item_name}</td>
+                    <td className="border border-gray-300 px-4 py-2">{transaction.quantity}</td>
+                    <td className="border border-gray-300 px-4 py-2">{transaction.previous_quantity}</td>
+                    <td className="border border-gray-300 px-4 py-2">{transaction.stock_out_quantity}</td>
+                    <td className="border border-gray-300 px-4 py-2">{transaction.type}</td>
+                    <td className="border border-gray-300 px-4 py-2">{transaction.volume}</td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {new Date(transaction.timestamp).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-
-      <button onClick={() => navigate(-1)} className="mb-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
-        Back
-      </button>
-
-      {isLoading ? (
-        <p>Loading transactions...</p>
-      ) : (
-        <table className="table-auto w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2">Action</th>
-              <th className="border border-gray-300 px-4 py-2">Product</th>
-              <th className="border border-gray-300 px-4 py-2">Quantity</th>
-              <th className="border border-gray-300 px-4 py-2">Previous Quantity</th>
-              <th className="border border-gray-300 px-4 py-2">Stock-Out</th>
-              <th className="border border-gray-300 px-4 py-2">Type</th>
-              <th className="border border-gray-300 px-4 py-2">Volume</th>
-              <th className="border border-gray-300 px-4 py-2">Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTransactions.map((transaction) => (
-              <tr key={transaction.id} className="hover:bg-gray-100">
-                <td className="border border-gray-300 px-4 py-2">{transaction.action}</td>
-                <td className="border border-gray-300 px-4 py-2">{transaction.item_name}</td>
-                <td className="border border-gray-300 px-4 py-2">{transaction.quantity}</td>
-                <td className="border border-gray-300 px-4 py-2">{transaction.previous_quantity}</td>
-                <td className="border border-gray-300 px-4 py-2">{transaction.stock_out_quantity}</td>
-                <td className="border border-gray-300 px-4 py-2">{transaction.type}</td>
-                <td className="border border-gray-300 px-4 py-2">{transaction.volume}</td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {new Date(transaction.timestamp).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
     </div>
   );
 }

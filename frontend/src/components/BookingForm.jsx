@@ -1,51 +1,14 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "./BookingForm.css"; // ✅ Ensure this CSS file exists
-
-console.log("✅ BookingForm Component Loaded");
+import "./BookingForm.css";
 
 const BookingForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const selectedPackage = location.state?.selectedPackage || null;
-
-  console.log("📌 Selected Package Data:", selectedPackage); // Debugging log
-
-
-  // ✅ Redirect if no package was selected (user refreshed without ordering)
-  useEffect(() => {
-    if (!selectedPackage) {
-        alert("You must select a package first!");
-        navigate("/");
-    }
-
-    const handleBeforeUnload = (event) => {
-        console.log("🔄 Tab Closed or Refreshed - Attempting to delete booking...");
-
-        const storedBookingId = sessionStorage.getItem("bookingId"); // Get stored ID
-
-        if (storedBookingId) {
-            axios.delete(`http://127.0.0.1:8000/api/delete-unpaid-booking/${storedBookingId}/`)
-                .then(() => console.log("✅ Unpaid booking deleted successfully."))
-                .catch((err) => console.error("🚨 Error deleting booking:", err));
-        }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-        window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-}, [selectedPackage, navigate]);  // ✅ Removed bookingId dependency
-
-
-
-
-  // ✅ If no package, stop rendering (prevents errors)
-  if (!selectedPackage) return null;
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -58,119 +21,135 @@ const BookingForm = () => {
     event_date: null,
     available_time: "",
     contact_number_venue: "",
-    pax: selectedPackage ? parseInt(selectedPackage.pax, 10) : 0,  // ✅ Convert to integer
-    price: selectedPackage ? parseFloat(selectedPackage.price) : 0,  // ✅ Convert to float
+    pax: selectedPackage ? parseInt(selectedPackage.pax, 10) : 0,
+    price: selectedPackage ? parseFloat(selectedPackage.price) : 0,
   });
 
   const [errors, setErrors] = useState({});
-  const [redDates, setRedDates] = useState([]); // Customer booked (Red)
-  const [greyDates, setGreyDates] = useState([]); // Admin blocked (Grey)
+  const [redDates, setRedDates] = useState([]);
+  const [greyDates, setGreyDates] = useState([]);
+  const [, setBookingId] = useState(null);
+  const [greenDates, setGreenDates] = useState(() => {
+    const storedGreenDates = JSON.parse(sessionStorage.getItem("greenDates")) || [];
+    return storedGreenDates;
+});
+
+
+useEffect(() => {
+    const storedGreenDates = JSON.parse(sessionStorage.getItem("greenDates")) || [];
+    setGreenDates(storedGreenDates); // Refresh the calendar with latest green dates
+}, []);
 
   useEffect(() => {
-    const fetchUnavailableDates = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/unavailable-dates/");
-        if (response.data) {
-          console.log("Customer unavailable dates (Red):", response.data.customer_unavailable_dates);
-          console.log("Admin unavailable dates (Grey):", response.data.admin_unavailable_dates);
+    if (!selectedPackage) {
+      alert("You must select a package first!");
+      navigate("/");
+    }
+  
 
-          // ✅ Convert backend date strings into Date objects
-          setRedDates(response.data.customer_unavailable_dates.map(date => new Date(date + "T00:00:00"))); // ✅ Ensures correct day
-          setGreyDates(response.data.admin_unavailable_dates.map(date => new Date(date + "T00:00:00"))); // ✅ Fixes next-day shift issue
-        }
-      } catch (error) {
-        console.error("Error fetching unavailable dates:", error);
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+
+      const storedBookingId = sessionStorage.getItem("bookingId");
+      if (storedBookingId) {
+        axios.delete(`http://127.0.0.1:8000/api/delete-unpaid-booking/${storedBookingId}/`)
+          .then(() => console.log("✅ Unpaid booking deleted successfully."))
+          .catch((err) => console.error("🚨 Error deleting booking:", err));
       }
     };
 
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [selectedPackage, navigate]);
+
+  useEffect(() => {
+    const fetchUnavailableDates = async () => {
+        try {
+            const { data } = await axios.get("http://127.0.0.1:8000/api/unavailable-dates/");
+            
+            setRedDates(data.confirmed_dates.map(date => new Date(date + "T00:00:00")));
+            setGreyDates(data.admin_unavailable_dates.map(date => new Date(date + "T00:00:00")));
+            
+            // ✅ Load pending dates properly (without denied dates)
+            const pendingDates = data.pending_dates.map(date => new Date(date + "T00:00:00"));
+            setGreenDates(pendingDates);
+
+            sessionStorage.setItem("greenDates", JSON.stringify(pendingDates));
+        } catch (error) {
+            console.error("Error fetching unavailable dates:", error);
+        }
+    };
     fetchUnavailableDates();
 }, []);
-  // ✅ Update form data on input change
+
+
+
+  if (!selectedPackage) return null;
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Update selected event date
   const handleDateChange = (date) => {
     if (date) {
-        // Ensure the selected date is set to midnight to avoid timezone shifts
-        const adjustedDate = new Date(date);
-        adjustedDate.setHours(0, 0, 0, 0); // Reset time to prevent timezone issues
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const formatted = `${year}-${month}-${day}`;
+        
+        setFormData(prev => ({ ...prev, event_date: formatted }));
 
-        setFormData({
-            ...formData,
-            event_date: adjustedDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
-        });
+        // ✅ Do NOT mark the date as green here. Just save the selected date in the formData.
     }
 };
 
-  // ✅ Validate before submitting
+
+
+  const handleTimeChange = (e) => {
+    setFormData(prev => ({ ...prev, available_time: e.target.value }));
+  };
+
   const validateForm = () => {
-    let newErrors = {};
-
-    if (!formData.event_date) {
-      newErrors.event_date = "Please select a date.";
-    }
-    if (!formData.available_time) {
-      newErrors.available_time = "Please select an available time.";
-    }
-    if (!formData.contact_number_venue.trim()) {
-      newErrors.contact_number_venue = "Contact number (venue) is required.";
-    }
-
+    const newErrors = {};
+    if (!formData.event_date) newErrors.event_date = "Please select a date.";
+    if (!formData.available_time) newErrors.available_time = "Please select an available time.";
+    if (!formData.contact_number_venue.trim()) newErrors.contact_number_venue = "Contact number (venue) is required.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const [bookingId, setBookingId] = useState(null); // Store Booking ID 3/16/2025
-  // ✅ Handle Booking Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return; // Stop submission if validation fails
-
-    console.log("Selected Event Date (React):", formData.event_date);
-
-    let eventDate = formData.event_date ? new Date(formData.event_date) : null;
-    if (eventDate) {
-        eventDate.setHours(12, 0, 0, 0);
-    }
-
-    const formattedDate = eventDate ? eventDate.toISOString().split("T")[0] : null;
-
-    console.log("Formatted Date Sent to Django:", formattedDate);
+    if (!validateForm()) return;
 
     try {
         const response = await axios.post("http://127.0.0.1:8000/api/bookings/", {
             ...formData,
-            event_date: formattedDate,
+            confirmed: false  // Save as pending
         });
 
-        console.log("✅ Booking Created:", response.data);
+        if (response.status === 201) {
+            setBookingId(response.data.id);
+            sessionStorage.setItem("bookingId", response.data.id);
+            alert("Booking confirmed! Proceed to Payment.");
 
-        setBookingId(response.data.id);
-        sessionStorage.setItem("bookingId", response.data.id); // ✅ Store ID in sessionStorage
+            // ✅ Only mark the date as green AFTER the booking is confirmed successfully.
+            const selectedDate = new Date(formData.event_date + "T00:00:00");
+            setGreenDates(prev => [...prev.filter(d => d.toISOString().split("T")[0] !== selectedDate.toISOString().split("T")[0]), selectedDate]);
 
-        alert("Booking confirmed! Proceed to Payment.");
-
-        setTimeout(() => {
-            axios.delete(`http://127.0.0.1:8000/api/delete-unpaid-booking/${response.data.id}/`)
-                .then(() => console.log("Expired booking deleted"))
-                .catch((err) => console.error("Error cleaning up:", err));
-        }, 20 * 60 * 1000);
-
-        navigate("/first/payment", { state: { bookingData: response.data } });
-
+            navigate("/first/payment", { state: { bookingData: response.data } });
+        }
     } catch (error) {
         console.error("Error submitting booking:", error);
         alert("Error: " + JSON.stringify(error.response?.data || "An error occurred"));
     }
 };
 
-  const handleTimeChange = (e) => {
-    setFormData({ ...formData, available_time: e.target.value });
-};
 
+
+  
   return (
     <div className="booking-container">
       <div className="booking-form-wrapper">
@@ -180,21 +159,18 @@ const BookingForm = () => {
           <div className="booking-section">
             <div className="booking-group">
               <h3 className="booking-section-title">Customer Details</h3>
+
               <label className="booking-label">First Name*</label>
               <input type="text" name="first_name" value={formData.first_name} onChange={handleChange} required className="booking-input" />
-              {errors.first_name && <p className="error-text">{errors.first_name}</p>}
 
               <label className="booking-label">Last Name*</label>
               <input type="text" name="last_name" value={formData.last_name} onChange={handleChange} required className="booking-input" />
-              {errors.last_name && <p className="error-text">{errors.last_name}</p>}
 
               <label className="booking-label">Phone Number*</label>
               <input type="text" name="phone_number" value={formData.phone_number} onChange={handleChange} required className="booking-input" />
-              {errors.phone_number && <p className="error-text">{errors.phone_number}</p>}
 
               <label className="booking-label">Email Address*</label>
               <input type="email" name="email" value={formData.email} onChange={handleChange} required className="booking-input" />
-              {errors.email && <p className="error-text">{errors.email}</p>}
 
               <label className="booking-label">Address*</label>
               <input type="text" name="address" value={formData.address} onChange={handleChange} required className="booking-input" />
@@ -204,10 +180,10 @@ const BookingForm = () => {
               <h3 className="booking-section-title">Event Details</h3>
 
               <label className="booking-label">Event Type*</label>
-              <input type="text" name="event_type" value={formData.event_type} onChange={handleChange} required className="booking-input"/>
+              <input type="text" name="event_type" value={formData.event_type} onChange={handleChange} required className="booking-input" />
 
               <label className="booking-label">Venue Address*</label>
-              <input type="text" name="venue_address" value={formData.venue_address} onChange={handleChange} required className="booking-input"/>
+              <input type="text" name="venue_address" value={formData.venue_address} onChange={handleChange} required className="booking-input" />
 
               <label className="booking-label">PAX</label>
               <p className="booking-summary-text">{formData.pax}</p>
@@ -217,52 +193,43 @@ const BookingForm = () => {
 
               <label className="booking-label">Event Date*</label>
               <DatePicker
-                selected={formData.event_date}
-                onChange={(date) => setFormData({ ...formData, event_date: date, available_time: "" })}
+                selected={formData.event_date ? new Date(formData.event_date) : null}
+                onChange={handleDateChange}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="Select a date"
-                className="booking-date-picker"
-                excludeDates={[...redDates, ...greyDates]} // Prevents selection of booked & unavailable dates
+                excludeDates={[...redDates, ...greyDates]}
                 filterDate={(date) => {
-                  const dateString = date.toISOString().split("T")[0]; // ✅ Convert date format
-
-                  return !(
-                    redDates.some(d => d.toISOString().split("T")[0] === dateString) ||
-                    greyDates.some(d => d.toISOString().split("T")[0] === dateString)
-                  ); // ✅ Fixes off-by-one day error
+                    const dateString = date.toISOString().split("T")[0];
+                    return !(
+                        redDates.some(d => d.toISOString().split("T")[0] === dateString) ||
+                        greyDates.some(d => d.toISOString().split("T")[0] === dateString) ||
+                        greenDates.some(d => d.toISOString().split("T")[0] === dateString)
+                    );
                 }}
                 dayClassName={(date) => {
-                  const dateString = date.toISOString().split("T")[0];
-
-                  if (redDates.some(d => d.toISOString().split("T")[0] === dateString)) {
-                    return "red-date"; // ✅ Customer booked (Red)
-                  }
-
-                  if (greyDates.some(d => d.toISOString().split("T")[0] === dateString)) {
-                    return "grey-date"; // ✅ Admin unavailable (Grey)
-                  }
-
-                  return null;
+                    const dateString = date.toISOString().split("T")[0];
+                    if (redDates.some(d => d.toISOString().split("T")[0] === dateString)) return "red-date";
+                    if (greyDates.some(d => d.toISOString().split("T")[0] === dateString)) return "grey-date";
+                    if (greenDates.some(d => d.toISOString().split("T")[0] === dateString)) return "green-date";
+                    return null;
                 }}
-              />
+            />
 
+
+
+              {errors.event_date && <p className="error-text">{errors.event_date}</p>}
 
               <label className="booking-label">Contact Number (Venue)*</label>
-                <input type="text" name="contact_number_venue" value={formData.contact_number_venue} onChange={handleChange} required className="booking-input" />
-                {errors.contact_number_venue && <p className="error-text">{errors.contact_number_venue}</p>}
+              <input type="text" name="contact_number_venue" value={formData.contact_number_venue} onChange={handleChange} required className="booking-input" />
+              {errors.contact_number_venue && <p className="error-text">{errors.contact_number_venue}</p>}
 
-                <label className="booking-label">Available Time*</label>
-              <select 
-                  name="available_time" 
-                  value={formData.available_time} 
-                  onChange={handleTimeChange}  // ✅ Fix here by using the newly added function
-                  required 
-                  className="booking-select"
-              >
-                  <option value="">Select Time</option>
-                  <option value="11:00 AM">11:00 AM</option>
-                  <option value="4:00 PM">4:00 PM</option>
+              <label className="booking-label">Available Time*</label>
+              <select name="available_time" value={formData.available_time} onChange={handleTimeChange} required className="booking-select">
+                <option value="">Select Time</option>
+                <option value="11:00 AM">11:00 AM</option>
+                <option value="4:00 PM">4:00 PM</option>
               </select>
+              {errors.available_time && <p className="error-text">{errors.available_time}</p>}
             </div>
           </div>
 
