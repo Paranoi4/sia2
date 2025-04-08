@@ -15,6 +15,7 @@ import BookPage from "./BookPage";
 import ManagePackages from "./components/Admin/ManagePackages";
 import logo from "./assets/logo.jpg";
 import ManageUnavailableDates from "./components/Admin/ManageUnavailableDates";
+import { FaBox, FaCubes, FaCocktail, FaAppleAlt, FaArchive } from 'react-icons/fa';
 
 
 function App() {
@@ -116,31 +117,57 @@ function App() {
                       </div>
                     </li>
 
-                    <li>
-                      <a href="/stock-in-return" className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-md">
-                        🔁 Stock-In Return
-                      </a>
-                    </li>
-                    <li>
-                      <a href="/stock-out-event" className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-md">
-                        🎉 Preparation Inventory
-                      </a>
-                    </li>
-                    <li>
-                      <a href="/admin/payments" className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-md">
-                        💳 Payment Management
-                      </a>
-                    </li>
-                    <li>
-                      <a href="/manage-packages" className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-md">
-                        🎁 Manage Packages
-                      </a>
-                    </li>
-                    <li>
-                      <a href="/unavailable" className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-md">
-                        📅 Manage Unavaialable Dates
-                      </a>
-                    </li>
+                    {/* Preparation Inventory Dropdown */}
+    <li className="group">
+      <div className="flex flex-col">
+        <span className="flex items-center justify-between gap-3 hover:bg-gray-700 p-2 rounded-md cursor-pointer">
+          <span className="flex items-center gap-3">🎉 Preparation Inventory</span>
+          <svg className="w-4 h-4 transform group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+        <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300 group-hover:block hidden">
+          <li>
+            <a href="/stock-out-event" className="flex items-center gap-2 hover:text-white">
+              🎯 Stock-Out Event
+            </a>
+          </li>
+          <li>
+            <a href="/stock-in-return" className="flex items-center gap-2 hover:text-white">
+              🔁 Stock-In Return
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+                   {/* Booking Management Dropdown */}
+    <li className="group">
+      <div className="flex flex-col">
+        <span className="flex items-center justify-between gap-3 hover:bg-gray-700 p-2 rounded-md cursor-pointer">
+          <span className="flex items-center gap-3">📅 Booking Management</span>
+          <svg className="w-4 h-4 transform group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+        <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300 group-hover:block hidden">
+          <li>
+            <a href="/admin/payments" className="flex items-center gap-2 hover:text-white">
+              💳 Payment Management
+            </a>
+          </li>
+          <li>
+            <a href="/manage-packages" className="flex items-center gap-2 hover:text-white">
+              🎁 Manage Packages
+            </a>
+          </li>
+          <li>
+            <a href="/unavailable" className="flex items-center gap-2 hover:text-white">
+              📅 Manage Unavailable Dates
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
                                
                     <li>
                       <button
@@ -164,36 +191,43 @@ function App() {
                           <nav className="pt-8">
                             <h1 className="text-5xl text-center pb-8">Bevanda Inventory</h1>
                           </nav>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-  <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition">
-    <h3 className="text-gray-500 text-sm">Total Items</h3>
-    <p className="text-2xl font-semibold text-indigo-600">{todos.length}</p>
-  </div>
-  <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition">
-    <h3 className="text-gray-500 text-sm">Total Quantity</h3>
-    <p className="text-2xl font-semibold text-indigo-600">
-      {todos.reduce((acc, item) => acc + parseInt(item.quantity), 0)}
-    </p>
-  </div>
-  <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition">
-    <h3 className="text-gray-500 text-sm">Beverages</h3>
-    <p className="text-2xl font-semibold text-indigo-600">
-      {todos.filter(item => item.type === "Beverage").length}
-    </p>
-  </div>
-  <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition">
-    <h3 className="text-gray-500 text-sm">Fruits</h3>
-    <p className="text-2xl font-semibold text-indigo-600">
-      {todos.filter(item => item.type === "Fruits").length}
-    </p>
-  </div>
-  <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition">
-    <h3 className="text-gray-500 text-sm">Non-Perishable Items</h3>
-    <p className="text-2xl font-semibold text-indigo-600">
-      {todos.filter(item => item.type === "Non-Perishable Item").length}
-    </p>
-  </div>
-</div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4">
+        <FaBox className="text-blue-500 text-3xl" />
+        <div>
+          <h3 className="text-gray-500 text-sm">Total Items</h3>
+          <p className="text-2xl font-semibold text-blue-700">{todos.length}</p>
+        </div>
+      </div>
+      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4">
+        <FaCubes className="text-green-500 text-3xl" />
+        <div>
+          <h3 className="text-gray-500 text-sm">Total Quantity</h3>
+          <p className="text-2xl font-semibold text-green-700">{todos.reduce((acc, item) => acc + parseInt(item.quantity), 0)}</p>
+        </div>
+      </div>
+      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4">
+        <FaCocktail className="text-purple-500 text-3xl" />
+        <div>
+          <h3 className="text-gray-500 text-sm">Beverages</h3>
+          <p className="text-2xl font-semibold text-purple-700">{todos.filter(item => item.type === "Beverage").length}</p>
+        </div>
+      </div>
+      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4">
+        <FaAppleAlt className="text-red-500 text-3xl" />
+        <div>
+          <h3 className="text-gray-500 text-sm">Fruits</h3>
+          <p className="text-2xl font-semibold text-red-700">{todos.filter(item => item.type === "Fruits").length}</p>
+        </div>
+      </div>
+      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4">
+        <FaArchive className="text-yellow-500 text-3xl" />
+        <div>
+          <h3 className="text-gray-500 text-sm">Non-Perishable Items</h3>
+          <p className="text-2xl font-semibold text-yellow-700">{todos.filter(item => item.type === "Non-Perishable Item").length}</p>
+        </div>
+      </div>
+    </div>
                           <TodoForm setTodos={setTodos} todos={todos} />
                           <Table todos={todos} setTodos={setTodos} isLoading={isLoading} />
                         </>

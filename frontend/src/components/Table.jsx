@@ -71,80 +71,92 @@ const Table = ({ todos, setTodos, isLoading }) => {
   return (
     <div className="py-8 px-4 font-sans text-gray-800">
       {/* Search and Actions */}
-      <div className="flex flex-wrap gap-3 justify-center mb-6">
-        <input
-          type="text"
-          placeholder="Search inventory..."
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-          className="input input-bordered w-full max-w-md"
-        />
-       <button
-  className="btn btn-success ml-4"
-  onClick={() => document.querySelector('.modal').showModal()}
->
-  Add Item
-</button>
-        <button className="btn btn-primary" onClick={() => document.getElementById('stock-in-modal').showModal()}>
-          Stock In
-        </button>
-        <button className="btn btn-secondary" onClick={() => document.getElementById('stock-out-modal').showModal()}>
-          Stock Out
-        </button>
-        <button className="btn btn-info" onClick={() => document.getElementById('stock-out-event-modal').showModal()}>
-          Stock Out (Event)
-        </button>
-        <button className="btn btn-accent" onClick={() => document.getElementById('stock-in-return-modal').showModal()}>
-          Stock-In Return
-        </button>
-      </div>
+      {/* Search and Actions */}
+<div className="flex flex-wrap gap-3 justify-center items-center mb-6 mt-2">
+  <input
+    type="text"
+    placeholder="Search inventory..."
+    value={filterText}
+    onChange={(e) => setFilterText(e.target.value)}
+    className="input input-bordered w-full max-w-md mt-5 ml-1"
+  />
+  <button
+    className="bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all duration-200"
+    onClick={() => document.querySelector('.modal').showModal()}
+  >
+    Add Item
+  </button>
+  <button
+    className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all duration-200"
+    onClick={() => document.getElementById('stock-in-modal').showModal()}
+  >
+    Stock In
+  </button>
+  <button
+    className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-purple-700 transition-all duration-200"
+    onClick={() => document.getElementById('stock-out-modal').showModal()}
+  >
+    Stock Out
+  </button>
+  <button
+    className="bg-cyan-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-cyan-700 transition-all duration-200"
+    onClick={() => document.getElementById('stock-out-event-modal').showModal()}
+  >
+    Stock Out (Event)
+  </button>
+  <button
+    className="bg-teal-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-teal-700 transition-all duration-200"
+    onClick={() => document.getElementById('stock-in-return-modal').showModal()}
+  >
+    Stock-In Return
+  </button>
+</div>
+
 
       {/* Table */}
-      <div className="bg-white p-4 rounded-lg shadow-md overflow-x-auto">
-        <table className="w-full table-auto text-sm text-left">
-          <thead className="bg-gray-800 text-white uppercase text-xs">
-            <tr>
-              <th className="px-4 py-2">No ID.</th>
-              <th className="px-4 py-2">Product</th>
-              <th className="px-4 py-2">Quantity</th>
-              <th className="px-4 py-2">Volume</th>
-              <th className="px-4 py-2">Type</th>
-              <th className="px-4 py-2">Date Added</th>
-              <th className="px-4 py-2">Actions</th>
-            </tr>
-          </thead>
+      <div className="overflow-x-auto">
+          <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300">
+            <thead>
+              <tr className="bg-gray-900 text-white">
+                <th className="border border-gray-300 px-4 py-3">No ID.</th>
+                <th className="border border-gray-300 px-4 py-3">Product</th>
+                <th className="border border-gray-300 px-4 py-3">Quantity</th>
+                <th className="border border-gray-300 px-4 py-3">Volume</th>
+                <th className="border border-gray-300 px-4 py-3">Type</th>
+                <th className="border border-gray-300 px-4 py-3">Date Added</th>
+                <th className="border border-gray-300 px-4 py-3">Actions</th>
+              </tr>
+            </thead>
           <tbody className="divide-y">
             {isLoading ? (
               <tr><td colSpan="7" className="text-center py-4">Loading...</td></tr>
             ) : (
               filteredTodos.map((todo) => (
-                <tr key={todo.id} className="hover:bg-gray-100">
-                  <td className="px-4 py-2">{todo.id}</td>
-                  <td className="px-4 py-2">{todo.body}</td>
-                  <td className="px-4 py-2">
-                    <span className="bg-green-200 text-green-800 px-2 py-1 rounded text-xs font-medium">
-                      {todo.quantity}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2">{todo.volume}</td>
-                  <td className="px-4 py-2">{todo.type}</td>
-                  <td className="px-4 py-2">{todo.created}</td>
-                  <td className="px-4 py-2 space-x-2">
-                  <button
-  onClick={() => {
-    setEditText(todo);
-    document.getElementById("edit-modal").showModal();
-  }}
-  className="text-blue-600 hover:text-blue-800"
->
-  <MdEditNote className="text-xl" />
-</button>
-
-                    <button onClick={() => handleDelete(todo.id)} className="text-red-600 hover:text-red-800">
-                      <MdOutlineDeleteOutline className="text-xl" />
+                <tr key={todo.id} className="hover:bg-gray-100 transition">
+                <td className="border border-gray-300 px-4 py-2 text-center">{todo.id}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center">{todo.body}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center">{todo.quantity}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center">{todo.volume}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center">{todo.type}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center">{todo.created}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center w-1/6">
+                  <div className="flex justify-center items-center space-x-2 relative -translate-y-3">
+                    <button
+                      onClick={() => { setEditText(todo); document.getElementById("edit-modal").showModal(); }}
+                      className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
+                    >
+                      <MdEditNote className="text-xl text-indigo-600 hover:text-indigo-800" />
                     </button>
-                  </td>
-                </tr>
+                    <button
+                      onClick={() => handleDelete(todo.id)}
+                      className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
+                    >
+                      <MdOutlineDeleteOutline className="text-xl text-red-600 hover:text-red-800" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              
               ))
             )}
           </tbody>

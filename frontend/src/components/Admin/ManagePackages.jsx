@@ -85,48 +85,62 @@ const ManagePackages = () => {
     }
   };
 
+  const handleDeleteCategory = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this category?");
+    if (!confirmDelete) return;
+  
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/drink-categories/${id}/`);
+      setDrinkCategories(drinkCategories.filter(category => category.id !== id));
+      alert("Category deleted successfully.");
+    } catch (error) {
+      console.error("Failed to delete category", error);
+    }
+  };
+  
+
   return (
     <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">Manage Packages</h2>
+      <h2 className="text-4xl font-bold mb-6 text-gray-800">Manage Packages</h2>
 
-      <table className="w-full border mb-6">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="p-2">PAX</th>
-            <th className="p-2">Price</th>
-            <th className="p-2">Available</th>
-          </tr>
-        </thead>
+      <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300 mb-6">
+  <thead>
+    <tr className="bg-gray-900 text-white">
+      <th className="border border-gray-300 px-4 py-3 text-left">PAX</th>
+      <th className="border border-gray-300 px-4 py-3 text-left">Price</th>
+      <th className="border border-gray-300 px-4 py-3 text-left">Available</th>
+    </tr>
+  </thead>
         <tbody>
           {packages.map((pkg, index) => (
-            <tr key={pkg.id} className="border-t">
-              <td className="p-2">
-                <input
-                  type="text"
-                  value={pkg.pax}
-                  onChange={(e) => handlePackageChange(index, "pax", e.target.value)}
-                  className="border rounded p-1 w-full"
-                />
-              </td>
-              <td className="p-2">
-                <input
-                  type="number"
-                  value={pkg.price}
-                  onChange={(e) => handlePackageChange(index, "price", e.target.value)}
-                  className="border rounded p-1 w-full"
-                />
-              </td>
-              <td className="p-2 text-center">
-                <input
-                  type="checkbox"
-                  checked={pkg.available}
-                  onChange={() => toggleAvailability(index)}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            <tr key={pkg.id} className="hover:bg-gray-100 transition">
+            <td className="border border-gray-300 px-4 py-2">
+              <input
+                type="text"
+                value={pkg.pax}
+                onChange={(e) => handlePackageChange(index, "pax", e.target.value)}
+                className="border border-gray-300 rounded px-4 py-2 w-full"
+              />
+            </td>
+            <td className="border border-gray-300 px-4 py-2">
+              <input
+                type="number"
+                value={pkg.price}
+                onChange={(e) => handlePackageChange(index, "price", e.target.value)}
+                className="border border-gray-300 rounded px-4 py-2 w-full"
+              />
+            </td>
+            <td className="border border-gray-300 px-4 py-2 text-center">
+              <input
+                type="checkbox"
+                checked={pkg.available}
+                onChange={() => toggleAvailability(index)}
+              />
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
 
       <button
         onClick={handleSavePackages}
@@ -161,44 +175,53 @@ const ManagePackages = () => {
         </label>
         <button
           onClick={handleAddPackage}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 -mt-1"
         >
           Add Package
         </button>
       </div>
 
-      <h2 className="text-2xl font-bold mb-4">Manage Drink Categories</h2>
+      <h2 className="text-4xl font-bold mb-6 text-gray-800">Manage Beverages</h2>
 
-      <table className="w-full border mb-6">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="p-2">Category</th>
-            <th className="p-2">Items (comma separated)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {drinkCategories.map((category, index) => (
-            <tr key={category.id} className="border-t">
-              <td className="p-2">
-                <input
-                  type="text"
-                  value={category.name}
-                  onChange={(e) => handleCategoryChange(index, "name", e.target.value)}
-                  className="border rounded p-1 w-full"
-                />
-              </td>
-              <td className="p-2">
-                <textarea
-                  value={category.items}
-                  onChange={(e) => handleCategoryChange(index, "items", e.target.value)}
-                  className="border rounded p-1 w-full"
-                  rows={2}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300 mb-6">
+  <thead>
+    <tr className="bg-gray-900 text-white">
+      <th className="border border-gray-300 px-4 py-3 text-left">Category</th>
+      <th className="border border-gray-300 px-4 py-3 text-left">Items (comma separated)</th>
+      <th className="border border-gray-300 px-4 py-3 text-left">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {drinkCategories.map((category, index) => (
+      <tr key={category.id} className="hover:bg-gray-100 transition">
+        <td className="border border-gray-300 px-4 py-2">
+          <input
+            type="text"
+            value={category.name}
+            onChange={(e) => handleCategoryChange(index, "name", e.target.value)}
+            className="border border-gray-300 rounded px-4 py-2 w-full"
+          />
+        </td>
+        <td className="border border-gray-300 px-4 py-2">
+          <textarea
+            value={category.items}
+            onChange={(e) => handleCategoryChange(index, "items", e.target.value)}
+            className="border border-gray-300 rounded px-4 py-2 w-full"
+            rows={2}
+          />
+        </td>
+        <td className="border border-gray-300 px-4 py-2 text-center">
+        <button
+          onClick={() => handleDeleteCategory(category.id)}
+          className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 -mt-1"
+        >
+          Delete
+        </button>
+      </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
 
       <button
         onClick={handleSaveDrinkCategories}
@@ -207,7 +230,7 @@ const ManagePackages = () => {
         Save Drink Categories
       </button>
 
-      <h3 className="text-xl font-semibold mb-2 mt-8">Add New Drink Category</h3>
+      <h3 className="text-xl font-semibold mb-2 mt-10">Add New Drink Category</h3>
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
         <input
           type="text"
@@ -225,7 +248,7 @@ const ManagePackages = () => {
         />
         <button
           onClick={handleAddCategory}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 -mt-1"
         >
           Add Drink Category
         </button>

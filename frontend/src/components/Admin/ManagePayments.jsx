@@ -5,6 +5,7 @@ import "./ManagePayments.css";
 const ITEMS_PER_PAGE = 6;
 
 const ManagePayments = () => {
+  const [customMessage, setCustomMessage] = useState("");
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState(null);
@@ -55,46 +56,37 @@ const fetchPaymentDetails = async (paymentId) => {
 
 
 const handleApproval = async (paymentId, action) => {
-  const confirmMessage =
-      action === "approve"
-          ? "✅ Are you sure you want to APPROVE this payment?"
-          : "⚠️ Are you sure you want to DENY this payment?";
+    const confirmMessage =
+        action === "approve"
+            ? "✅ Are you sure you want to APPROVE this payment?"
+            : "⚠️ Are you sure you want to DENY this payment?";
 
-  const confirmed = window.confirm(confirmMessage);
-  if (!confirmed) return;
+    const confirmed = window.confirm(confirmMessage);
+    if (!confirmed) return;
 
-  try {
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/approve-payment/${paymentId}/`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action }),
-      });
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/api/admin/approve-payment/${paymentId}/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action, custom_message: customMessage }),  // ✅ Added custom message
+        });
 
-      const data = await res.json();
-      if (res.ok) {
-          alert(data.message || "Action completed successfully!");
-          setSelectedPayment(null);
-          fetchAllPayments();
-
-          if (action === "deny" && data.freed_date) {  
-              const deniedDate = data.freed_date;
-
-              setGreenDates(prev => {
-                  const updatedDates = prev.filter(date => date !== deniedDate);  // ✅ Remove denied date
-                  sessionStorage.setItem("greenDates", JSON.stringify(updatedDates));  // ✅ Save to session storage
-                  return updatedDates;
-              });
-
-              console.log(`📅 Date ${data.freed_date} has been removed from the calendar.`);
-          }
-      } else {
-          alert(data.error || "Something went wrong.");
-      }
-  } catch (err) {
-      console.error("Approval error:", err);
-      alert("Failed to connect to server.");
-  }
+        const data = await res.json();
+        if (res.ok) {
+            alert(data.message || "Action completed successfully!");
+            setSelectedPayment(null);
+            setCustomMessage("");  // ✅ Clear the message after approval
+            fetchAllPayments();
+        } else {
+            alert(data.error || "Something went wrong.");
+        }
+    } catch (err) {
+        console.error("Approval error:", err);
+        alert("Failed to connect to server.");
+    }
 };
+
+
 
 const handleDelete = async (paymentId) => {
   const confirmed = window.confirm("❌ Are you sure you want to DELETE this payment record? This action cannot be undone.");
@@ -137,7 +129,8 @@ const getStatusClass = (status) => {
 
   return (
     <div className="manage-payments-container">
-      <h2>📄 View & Manage Payments</h2>
+     <h2 className="text-4xl font-bold mb-6 text-gray-800"> View & Manage Payments
+     </h2>
 
       {loading ? (
         <p>Loading payments...</p>
@@ -190,6 +183,45 @@ const getStatusClass = (status) => {
         </>
       )}
 
+
+      {/* ✅ New Booking Details Card */}
+     {/* ✅ New Booking Details Card */}
+{selectedPayment && (
+  <div className="booking-details">
+    <h3>📋 Booking Details</h3>
+    <div className="booking-info-grid">
+      <div className="booking-info-row">
+        <strong>Event Type:</strong>
+        <p>{selectedPayment.booking.event_type}</p>
+      </div>
+      <div className="booking-info-row">
+        <strong>Venue Address:</strong>
+        <p>{selectedPayment.booking.venue_address}</p>
+      </div>
+      <div className="booking-info-row">
+        <strong>PAX:</strong>
+        <p>{selectedPayment.booking.pax}</p>
+      </div>
+      <div className="booking-info-row">
+        <strong>Price:</strong>
+        <p>₱{selectedPayment.booking.price}</p>
+      </div>
+      <div className="booking-info-row">
+        <strong>Contact Number (Venue):</strong>
+        <p>{selectedPayment.booking.contact_number_venue}</p>
+      </div>
+      <div className="booking-info-row">
+        <strong>Available Time:</strong>
+        <p>{selectedPayment.booking.available_time}</p>
+      </div>
+      <div className="booking-info-row">
+        <strong>Address:</strong>
+        <p>{selectedPayment.booking.address}</p>
+      </div>
+    </div>
+  </div>
+)}
+
       {/* Payment Details */}
       {selectedPayment && (
         <div className="payment-details">
@@ -220,9 +252,16 @@ const getStatusClass = (status) => {
               </p>
             )}
           </div>
-
           {selectedPayment.status === "pending" && (
             <div>
+                <textarea
+            value={customMessage}
+            onChange={(e) => setCustomMessage(e.target.value)}
+            placeholder="Enter your custom message here..."
+            rows="5"
+            cols="50"
+            style={{ width: "100%", marginBottom: "10px" }}
+        ></textarea>
               <button className="approve-btn" onClick={() => handleApproval(selectedPayment.id, "approve")}>
                 Approve
               </button>
@@ -231,10 +270,14 @@ const getStatusClass = (status) => {
               </button>
             </div>
           )}
-
           <button className="close-btn" onClick={() => setSelectedPayment(null)}>Close</button>
-        </div>
+          </div>
       )}
+     
+
+     
+          
+    
     </div>
   );
 };

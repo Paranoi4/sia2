@@ -12,8 +12,12 @@
   }
   
   .unavailable-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
   
   .unavailable-form {
@@ -29,18 +33,20 @@
     border-radius: 5px;
   }
   
-  .unavailable-form button {
+.unavailable-form button {
     padding: 10px;
     background-color: #007bff;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-  }
-  
-  .unavailable-form button:hover {
+    width: 70px;
+}
+
+.unavailable-form button:hover {
     background-color: #0056b3;
-  }
+}
+
   
   /* Scrollable Table Wrapper */
   .table-body-scroll {
@@ -69,7 +75,7 @@
   
   /* Header Styling */
   .unavailable-table th {
-    background-color: #9d0000;
+    background-color: #1f2937;
     color: white;
   }
   
@@ -189,3 +195,56 @@
     flex-wrap: wrap;
     justify-content: center;
   }
+  /* 📦 Booking Detail Box */
+.booking-details {
+    margin-top: 25px;
+    padding: 25px;
+    border-radius: 10px;
+    background-color: #1f2937;
+    border: 1px solid #333;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 16px;
+}
+
+/* 📋 Booking Details Header */
+.booking-details h3 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: white;
+    text-align: left;
+}
+
+/* 📋 Booking Info Grid */
+.booking-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* 📋 Booking Info Row */
+.booking-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #2d3748;
+    border: 1px solid #444;
+    border-radius: 5px;
+    color: #ccc;
+}
+
+/* 📋 Booking Info Labels */
+.booking-info-row strong {
+    color: white;
+    margin-right: 10px;
+}
+
+/* 📋 Booking Info Values */
+.booking-info-row p {
+    color: rgb(172, 164, 164);
+    margin: 0;
+}

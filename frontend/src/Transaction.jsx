@@ -80,14 +80,14 @@ function Transaction() {
   <tbody>
                   {filteredTransactions.map((transaction) => (
                     <tr key={transaction.id} className="hover:bg-gray-100 transition">
-                      <td className="border border-gray-300 px-4 py-2 font-bold">{transaction.action}</td>
-                      <td className="border border-gray-300 px-4 py-2">{transaction.item_name}</td>
-                      <td className="border border-gray-300 px-4 py-2">{transaction.quantity}</td>
-                      <td className="border border-gray-300 px-4 py-2">{transaction.previous_quantity}</td> 
-                      <td className="border border-gray-300 px-4 py-2">{transaction.stock_in_quantity || "-"}</td>
-                      <td className="border border-gray-300 px-4 py-2">{transaction.type}</td>
-                      <td className="border border-gray-300 px-4 py-2">{transaction.volume}</td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-gray-300 px-4 py-2 text-center font-bold">{transaction.action}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">{transaction.item_name}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">{transaction.quantity}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">{transaction.previous_quantity}</td> 
+                      <td className="border border-gray-300 px-4 py-2 text-center">{transaction.stock_in_quantity || "-"}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">{transaction.type}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">{transaction.volume}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">
                         {new Date(transaction.timestamp).toLocaleString()}
                       </td>
                     </tr>

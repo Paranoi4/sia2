@@ -509,3 +509,34 @@ class PaymentDeleteView(APIView):
             return Response({"message": "Payment deleted successfully."}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+class AdminApprovePaymentView(APIView):
+    def post(self, request, payment_id):
+        payment = get_object_or_404(Payment, id=payment_id)
+        action = request.data.get("action")
+        custom_message = request.data.get("custom_message", "")  # ✅ Capture the custom message
+
+        if action == "approve":
+            payment.status = "approved"
+            payment.booking.confirmed = True
+            payment.booking.save()
+            payment.save(update_fields=["status"])
+            
+            # Send email to customer
+            send_mail(
+                subject="Booking Approved ✅",
+                message=f"Your booking has been approved! {custom_message}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[payment.booking.email],
+                fail_silently=False,
+            )
+
+            return Response({"message": "Payment approved and email sent."}, status=status.HTTP_200_OK)
+
+        elif action == "deny":
+            payment.status = "denied"
+            payment.save(update_fields=["status"])
+            return Response({"message": "Payment denied."}, status=status.HTTP_200_OK)
+
+        return Response({"error": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
+

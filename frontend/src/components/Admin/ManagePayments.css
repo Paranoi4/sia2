@@ -1,95 +1,94 @@
-/* 🔲 ManagePayments Container */
+/* 🔲 Table Container Styling */
 .manage-payments-container {
     width: 100%;
     max-width: 1100px;
     margin: 50px auto;
     padding: 30px;
-    background-color: #a4a2a2;
-    color: #000;
+    background-color: white;
     border-radius: 10px;
     font-family: Arial, sans-serif;
     box-sizing: border-box;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  }
-  
-  .payments-table {
-    table-layout: fixed;
-  }
-  
-  
-  /* 🔤 Header */
-  .manage-payments-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  /* 📋 Payments Table Fix */
-  .payments-table {
+}
+
+/* 📋 Payments Table Styling */
+.payments-table {
     width: 100%;
-    table-layout: fixed; /* Force equal column widths */
     border-collapse: collapse;
+    border: 1px solid #ccc; /* Match border style from StockOut */
     margin-top: 10px;
-    font-size: 15px;
-  }
-  
-  .payments-table th,
-  .payments-table td {
-    border: 1px solid #000;
+    background-color: white;
+}
+
+/* 🔤 Table Headers */
+.payments-table th {
+    background-color: #1f2937; /* Dark header background */
+    color: white;
     padding: 10px;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  /* 🧱 Force exact width per column */
-  .payments-table th:nth-child(1),
-  .payments-table td:nth-child(1) {
-    width: 18%; /* Customer */
-  }
-  
-  .payments-table th:nth-child(2),
-  .payments-table td:nth-child(2) {
-    width: 18%; /* Payment Method */
-  }
-  
-  .payments-table th:nth-child(3),
-  .payments-table td:nth-child(3) {
-    width: 15%; /* Status */
-  }
-  
-  .payments-table th:nth-child(4),
-  .payments-table td:nth-child(4) {
-    width: 15%; /* Event Date */
-  }
-  
-  .payments-table th:nth-child(5),
-  .payments-table td:nth-child(5) {
-    width: 20%; /* Created At */
-  }
-  
-  .payments-table th:nth-child(6),
-  .payments-table td:nth-child(6) {
-    width: 14%; /* Actions */
-  }
-  
-  /* 👁 View Button */
-  .view-btn {
+    text-align: left;
+    border: 1px solid #ccc; /* Border matches StockOut table */
+}
+
+/* 🔢 Table Cells */
+.payments-table td {
+    padding: 10px;
+    border: 1px solid #ccc; /* Border matches StockOut table */
+}
+
+/* 📝 Hover Effect */
+.payments-table tbody tr:hover {
+    background-color: #f3f4f6; /* Light gray hover effect */
+    transition: background-color 0.2s;
+}
+
+/* 🔁 Alternating Row Colors */
+.payments-table tbody tr:nth-child(even) {
+    background-color: #f9fafb; /* Light background for alternate rows */
+}
+
+/* 👁 View Button */
+.view-btn,
+.delete-btn {
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* ✅ View Button Styling */
+.view-btn {
     background-color: #007bff;
     color: white;
-    border: none;
-    padding: 6px 12px;
-    font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background 0.3s ease;
-  }
-  
-  .view-btn:hover {
+    border: 1px solid #007bff;
+    padding: 4px 8px; /* Reduced padding */
+    border-radius: 3px; /* Smaller border radius */
+    font-size: 12px; /* Smaller font size */
+    margin-top: -3px; /* Moves the button slightly upwards */
+    margin-left: 4px;
+}
+
+.view-btn:hover {
     background-color: #0056b3;
-  }
-  
+}
+
+/* ❌ Delete Button Styling */
+.delete-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: 1px solid #e74c3c;
+    padding: 3px 6px;    /* Reduced padding */
+    border-radius: 3px; /* Smaller border radius */
+    font-size: 12px; /* Smaller font size */
+    margin-left: 20px; 
+    margin-top: -100px; 
+}
+
+.delete-btn:hover {
+    background-color: #c0392b;
+}
+
+
   /* ✅ Status Tags */
   .status-approved {
     color: green;
@@ -111,7 +110,7 @@
     margin-top: 25px;
     padding: 25px;
     border-radius: 10px;
-    background-color: #1f1f1f;
+    background-color: #1f2937;
     border: 1px solid #333;
     color: #ffffff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -145,6 +144,7 @@
     justify-content: space-between;
     border-bottom: 1px solid #444;
     padding-bottom: 8px;
+    color: rgb(172, 164, 164);
   }
   
   .payment-info-grid strong {
@@ -223,10 +223,15 @@
   .pagination-controls {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
+    align-items: center;
+    gap: 20px;
+    margin-top: 40px;
   }
-  
+  /* Adding padding to manually align the buttons with the text */
+  .pagination-controls span {
+        padding-top: 16px; /* Adjust this value to align text vertically */
+    }
+
   .pagination-controls button {
     background-color: #007bff;
     color: white;
@@ -244,7 +249,87 @@
   }
   
   .pagination-controls button:disabled {
-    background-color: #cccccc;
+    background-color: #1f2937;
     cursor: not-allowed;
   }
   
+
+  /* 📦 Booking Detail Box */
+.booking-details {
+    margin-top: 25px;
+    padding: 25px;
+    border-radius: 10px;
+    background-color: #1f2937;
+    border: 1px solid #ccc;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 16px;
+}
+
+/* 📋 Booking Details Text Styling */
+.booking-details p {
+    color: rgb(172, 164, 164); /* Ensures all paragraphs are white */
+}
+
+/* 📋 Booking Details Strong Tags */
+.booking-details strong {
+    color: white; /* Ensures all bold labels are white */
+}
+
+.booking-details h3 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #ffffff;
+}
+
+.booking-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.booking-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.booking-row p {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    border-bottom: 1px solid #444;
+}
+
+/* 📋 Booking Info Row Styling */
+.booking-info-row {
+    display: flex;
+    flex-direction: column; /* Changed from row to column for left alignment */
+    align-items: flex-start; /* Align all text to the left */
+    border-bottom: 1px solid #444;
+    padding-bottom: 4px;
+    color: rgb(172, 164, 164);
+    gap: 2px; /* Small gap between label and text */
+}
+
+/* 📋 Booking Info Row Text */
+.booking-info-row p {
+    margin: 0;
+    padding: 0;
+    color: rgb(172, 164, 164);
+    text-align: left; /* Ensure text is aligned left */
+}
+
+/* 📋 Bold Labels */
+.booking-info-row strong {
+    color: white;
+    text-align: left; /* Ensure labels are aligned left */
+}
+
+
+

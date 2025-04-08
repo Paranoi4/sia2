@@ -77,9 +77,9 @@ function Edit() {
               </thead>
               <tbody>
                 {filteredTransactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-gray-100 transition text-sm">
-                    <td className="border border-gray-300 px-4 py-2">
-                      <span className={`px-2 py-1 rounded text-white text-xs font-semibold ${
+                  <tr key={transaction.id} className="hover:bg-gray-100 transition text-sm ">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
+                      <span className={`px-2 py-1 rounded text-white text-xs font-semibold  ${
                         transaction.action === "Added"
                           ? "bg-green-500"
                           : transaction.action === "Deleted"
@@ -89,10 +89,10 @@ function Edit() {
                         {transaction.action}
                       </span>
                     </td>
-                    <td className="border border-gray-300 px-4 py-2">{transaction.item_name}</td>
-                    <td className="border border-gray-300 px-4 py-2">{transaction.type}</td>
-                    <td className="border border-gray-300 px-4 py-2">{transaction.volume}</td>
-                    <td className="border border-gray-300 px-4 py-2">
+                    <td className="border border-gray-300 px-4 py-2 text-center">{transaction.item_name}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-center" >{transaction.type}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-center">{transaction.volume}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-center">
                       {new Date(transaction.timestamp).toLocaleString()}
                     </td>
                   </tr>

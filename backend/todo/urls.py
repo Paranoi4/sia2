@@ -30,4 +30,5 @@ urlpatterns = [
     path("payment-status/<int:booking_id>/", PaymentStatusView.as_view(), name="payment_status"),
     path("delete-unpaid-booking/<int:booking_id>/", DeleteUnpaidBookingView.as_view(), name="delete-unpaid-booking"),
     
+    
 ]
