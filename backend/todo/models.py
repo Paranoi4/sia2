@@ -48,6 +48,9 @@ class TransactionHistory(models.Model):
     stock_in_quantity = models.IntegerField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     volume = models.CharField(max_length=100, null=True, blank=True)
+    transaction_date = models.DateField(null=True, blank=True)  # 🆕 Add this line
+
+    
 
     def __str__(self):
         return f"{self.item_name} - {self.action} on {self.timestamp}"
@@ -115,3 +118,12 @@ class DrinkCategory(models.Model):
 
     def __str__(self):
         return self.name
+
+class ProductAllocation(models.Model):
+    package_pax = models.IntegerField()  # Number of pax (e.g. 10, 20, 30)
+    product_name = models.CharField(max_length=100)  # Must match Todo.product name
+    quantity_per_pax = models.IntegerField()  # How many of this product per pax
+
+    def __str__(self):
+        return f"{self.package_pax} pax - {self.product_name} ({self.quantity_per_pax} per pax)"
+

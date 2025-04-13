@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes
 from . import serializers
 from . import models
-from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment
+from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment, ProductAllocation
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
@@ -201,7 +201,8 @@ class TodoViewSet(viewsets.ModelViewSet):
             previous_quantity=previous_quantity,
             quantity=todo_item.quantity,
             type=todo_item.type,
-            stock_out_quantity=stock_out_quantity
+            stock_out_quantity=stock_out_quantity,
+            volume=todo_item.volume
         )
         '''
         # Log update for tracking purposes
@@ -241,7 +242,8 @@ class TodoViewSet(viewsets.ModelViewSet):
             previous_quantity=previous_quantity,
             quantity=todo_item.quantity,
             type=todo_item.type,
-            stock_in_quantity=stock_return_quantity
+            stock_in_quantity=stock_return_quantity,
+            volume=todo_item.volume
         )
         '''
         # Log update
@@ -399,30 +401,81 @@ class AdminApprovePaymentView(APIView):
     def post(self, request, payment_id):
         payment = get_object_or_404(Payment, id=payment_id)
         action = request.data.get("action")
+        custom_message = request.data.get("custom_message", "")  # Optional message
 
         if action == "approve":
             payment.status = "approved"
             payment.booking.confirmed = True
             payment.booking.save()
             payment.save(update_fields=["status"])
-            return Response({"message": "Payment approved successfully."}, status=status.HTTP_200_OK)
 
-        elif action == "deny":
-            booking = payment.booking
+            package_pax = payment.booking.pax
+            product_allocations = ProductAllocation.objects.filter(package_pax=package_pax)
 
-            # ✅ Mark the payment as denied (Keep the payment data but free the date)
-            payment.status = "denied"
-            payment.save(update_fields=["status"])
+            if not product_allocations.exists():
+                return Response({"error": f"No product allocations found for {package_pax} pax."}, status=400)
 
-            # ✅ Do NOT set booking.confirmed to False. Keep the booking data intact.
-            # ✅ Just free the date by not including it in `greenDates`.
+            deducted_items = []  # for response summary
+
+            for allocation in product_allocations:
+                product_name = allocation.product_name.lower()
+                required_quantity = allocation.quantity_per_pax
+
+
+                try:
+                    todo_item = Todo.objects.get(body__iexact=product_name)
+                    current_quantity = int(todo_item.quantity)
+
+                    if required_quantity > current_quantity:
+                        return Response({"error": f"Insufficient stock for '{product_name}'."}, status=400)
+
+                    previous_quantity = current_quantity
+                    todo_item.quantity = str(current_quantity - required_quantity)
+                    todo_item.save()
+
+                    # Log the deduction
+                    TransactionHistory.objects.create(
+                        action="Stock-Out",
+                        item_name=todo_item.body,
+                        previous_quantity=previous_quantity,
+                        quantity=todo_item.quantity,
+                        stock_out_quantity=required_quantity,
+                        type=todo_item.type,
+                        volume=todo_item.volume,
+                        transaction_date=payment.booking.event_date
+                    )
+
+                    deducted_items.append({
+                        "product": todo_item.body,
+                        "deducted": required_quantity,
+                        "remaining": todo_item.quantity
+                    })
+
+                except Todo.DoesNotExist:
+                    return Response({"error": f"Product '{product_name}' not found in inventory."}, status=404)
+
+            # Send email confirmation
+            send_mail(
+                subject="Booking Approved ✅",
+                message=f"Your booking has been approved! {custom_message}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[payment.booking.email],
+                fail_silently=False,
+            )
 
             return Response({
-                "message": "Payment denied. Booking retained but date freed.",
-                "freed_date": booking.event_date.isoformat()
-            }, status=status.HTTP_200_OK)
+                "message": "Payment approved, inventory updated, and email sent.",
+                "deductions": deducted_items
+            }, status=200)
 
-        return Response({"error": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
+        elif action == "deny":
+            payment.status = "denied"
+            payment.save(update_fields=["status"])
+            return Response({"message": "Payment denied."}, status=200)
+
+        return Response({"error": "Invalid action."}, status=400)
+
+
 
 
 
@@ -510,33 +563,4 @@ class PaymentDeleteView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
-class AdminApprovePaymentView(APIView):
-    def post(self, request, payment_id):
-        payment = get_object_or_404(Payment, id=payment_id)
-        action = request.data.get("action")
-        custom_message = request.data.get("custom_message", "")  # ✅ Capture the custom message
-
-        if action == "approve":
-            payment.status = "approved"
-            payment.booking.confirmed = True
-            payment.booking.save()
-            payment.save(update_fields=["status"])
-            
-            # Send email to customer
-            send_mail(
-                subject="Booking Approved ✅",
-                message=f"Your booking has been approved! {custom_message}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[payment.booking.email],
-                fail_silently=False,
-            )
-
-            return Response({"message": "Payment approved and email sent."}, status=status.HTTP_200_OK)
-
-        elif action == "deny":
-            payment.status = "denied"
-            payment.save(update_fields=["status"])
-            return Response({"message": "Payment denied."}, status=status.HTTP_200_OK)
-
-        return Response({"error": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
 

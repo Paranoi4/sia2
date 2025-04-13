@@ -92,17 +92,12 @@ const Table = ({ todos, setTodos, isLoading }) => {
   >
     Stock In
   </button>
-  <button
-    className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-purple-700 transition-all duration-200"
-    onClick={() => document.getElementById('stock-out-modal').showModal()}
-  >
-    Stock Out
-  </button>
+  
   <button
     className="bg-cyan-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-cyan-700 transition-all duration-200"
     onClick={() => document.getElementById('stock-out-event-modal').showModal()}
   >
-    Stock Out (Event)
+    Stock Out
   </button>
   <button
     className="bg-teal-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-teal-700 transition-all duration-200"

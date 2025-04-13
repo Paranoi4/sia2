@@ -18,6 +18,7 @@ import ManageUnavailableDates from "./components/Admin/ManageUnavailableDates";
 import { FaBox, FaCubes, FaCocktail, FaAppleAlt, FaArchive } from 'react-icons/fa';
 
 
+
 function App() {
   const [todos, setTodos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,15 +105,16 @@ function App() {
                             </a>
                           </li>
                           <li>
-                            <a href="/stock-out" className="flex items-center gap-2 hover:text-white">
-                              ➖ Stock-Out
-                            </a>
+                          <a href="/stock-out-event" className="flex items-center gap-2 hover:text-white">
+                          ➖ Stock-Out
+            </a>
                           </li>
                           <li>
                             <a href="/edit" className="flex items-center gap-2 hover:text-white">
                               📜 Product History
                             </a>
                           </li>
+                      
                         </ul>
                       </div>
                     </li>
@@ -128,9 +130,9 @@ function App() {
         </span>
         <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300 group-hover:block hidden">
           <li>
-            <a href="/stock-out-event" className="flex items-center gap-2 hover:text-white">
-              🎯 Stock-Out Event
-            </a>
+          <a href="/stock-out" className="flex items-center gap-2 hover:text-white">
+          🎯 Stock-Out Event
+                            </a>
           </li>
           <li>
             <a href="/stock-in-return" className="flex items-center gap-2 hover:text-white">
@@ -243,6 +245,7 @@ function App() {
                   <Route path="/admin/*" element={<PrivateRoute><BookPage /></PrivateRoute>} />
                   <Route path="/manage-packages" element={<PrivateRoute><ManagePackages /></PrivateRoute>} />
                   <Route path="/unavailable" element={<PrivateRoute><ManageUnavailableDates /></PrivateRoute>} />
+                  
                 </Routes>
               </main>
             </div>

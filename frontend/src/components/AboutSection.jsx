@@ -36,31 +36,27 @@ const AboutSection = () => {
           </div>
         </div>
 
- {/* Drinks List */}
-<div className="max-w-6xl mx-auto mb-12">
-  <h2 className="text-4xl font-semibold text-center mb-8 text-white">Our Drinks</h2>
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-left text-sm sm:text-base">
-    {[
-      { title: "Cocktail", items: ["Shirley Temple", "Margarita Blue", "Margarita Red", "Tequila Sunrise", "Cuba Libre", "Mojito", "Gimlet", "Straight-up", "Blue Lagoon", "Blue Hawaii", "Tom Collins", "Kamikaze", "Screwdriver", "Sex on the Beach"] },
-      { title: "Mocktail", items: ["Cinderella", "Four Seasons", "Shirley Temple", "Appletini"] },
-      { title: "Shooters", items: ["Dirty Shirley", "Daiquiri", "Rainbow", "Summer Shot", "Mellon Ball", "Amnesia", "Blowjob", "4th of July", "Red Headed"] },
-      { title: "Special Requests", items: ["Lime Basil", "Dry Martini", "Manhattan", "Perfect Manhattan", "Cosmopolitan", "Gibson", "Harvey Wallbanger", "Grasshopper", "Brandy Alexander", "White Russian", "Black Russian", "Negroni", "Vodka Martini", "Mudshake", "Frozen Daiquiri", "Mango Daiquiri"] }
-    ].map((category, index) => (
-      <div 
-        key={index} 
-        className="bg-gray-900 text-gray-200 rounded-xl shadow-lg p-6 transition transform hover:scale-105 hover:shadow-2xl hover:bg-gray-800"
-      >
-        <h3 className="text-2xl font-bold mb-4 text-white">{category.title}</h3>
-        <ul className="space-y-2 font-sans text-base leading-relaxed">
-          {category.items.map((item, idx) => (
-            <li key={idx} className="text-gray-300 hover:text-white transition-colors">{item}</li>
-          ))}
-        </ul>
-      </div>
-    ))}
-  </div>
-</div>
-
+        {/* Drinks List */}
+        <div className="max-w-6xl mx-auto mb-12">
+          <h2 className="text-4xl font-semibold text-center mb-8 text-white">Our Drinks</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-left text-sm sm:text-base">
+            {[
+              { title: "Cocktail", items: ["Shirley Temple", "Margarita Blue", "Margarita Red", "Tequila Sunrise", "Cuba Libre", "Mojito", "Gimlet", "Straight-up", "Blue Lagoon", "Blue Hawaii", "Tom Collins", "Kamikaze", "Screwdriver", "Sex on the Beach"] },
+              { title: "Mocktail", items: ["Cinderella", "Four Seasons", "Shirley Temple", "Appletini"] },
+              { title: "Shooters", items: ["Dirty Shirley", "Daiquiri", "Rainbow", "Summer Shot", "Mellon Ball", "Amnesia", "Blowjob", "4th of July", "Red Headed"] },
+              { title: "Special Requests", items: ["Lime Basil", "Dry Martini", "Manhattan", "Perfect Manhattan", "Cosmopolitan", "Gibson", "Harvey Wallbanger", "Grasshopper", "Brandy Alexander", "White Russian", "Black Russian", "Negroni", "Vodka Martini", "Mudshake", "Frozen Daiquiri", "Mango Daiquiri"] }
+            ].map((category, index) => (
+              <div key={index} className="bg-gray-800 text-blue-400 rounded-xl shadow-lg p-4 transition transform hover:scale-105 hover:bg-blue-900">
+                <h3 className="text-xl font-bold mb-2 text-white">{category.title}</h3>
+                <ul className="space-y-1">
+                  {category.items.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Package Preview */}
         <div className="text-center mb-12">

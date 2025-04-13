@@ -106,9 +106,9 @@ const ManagePackages = () => {
       <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300 mb-6">
   <thead>
     <tr className="bg-gray-900 text-white">
-      <th className="border border-gray-300 px-4 py-3 text-left">PAX</th>
-      <th className="border border-gray-300 px-4 py-3 text-left">Price</th>
-      <th className="border border-gray-300 px-4 py-3 text-left">Available</th>
+      <th className="border border-gray-300 px-4 py-3 text-center">PAX</th>
+      <th className="border border-gray-300 px-4 py-3 text-center">Price</th>
+      <th className="border border-gray-300 px-4 py-3 text-center">Available</th>
     </tr>
   </thead>
         <tbody>
@@ -186,9 +186,9 @@ const ManagePackages = () => {
       <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300 mb-6">
   <thead>
     <tr className="bg-gray-900 text-white">
-      <th className="border border-gray-300 px-4 py-3 text-left">Category</th>
-      <th className="border border-gray-300 px-4 py-3 text-left">Items (comma separated)</th>
-      <th className="border border-gray-300 px-4 py-3 text-left">Action</th>
+      <th className="border border-gray-300 px-4 py-3 text-center">Category</th>
+      <th className="border border-gray-300 px-4 py-3 text-center">Items (comma separated)</th>
+      <th className="border border-gray-300 px-4 py-3 text-center">Action</th>
     </tr>
   </thead>
   <tbody>

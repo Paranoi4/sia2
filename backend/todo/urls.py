@@ -31,4 +31,6 @@ urlpatterns = [
     path("delete-unpaid-booking/<int:booking_id>/", DeleteUnpaidBookingView.as_view(), name="delete-unpaid-booking"),
     
     
+    
+    
 ]

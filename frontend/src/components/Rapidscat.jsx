@@ -6,7 +6,7 @@ import bevv1 from "../assets/bevv1.mp4";
 const Rapidscat = () => {
   return (
     <>
-      <section className="bg-primary">
+      <section className="bg-black">
         <div className="container ">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
             <div data-aos="zoom-in">
@@ -19,7 +19,7 @@ const Rapidscat = () => {
                 muted
               />
             </div>
-            <div className="space-y-3 xl:pr-36 p-4 border-r-2 border-b-2 border-r-sky-800 border-b-sky-800 ">
+            <div className="space-y-3 xl:pr-36 p-4 border-r-2 border-b-2 bg-black ">
               <p
                 data-aos="fade-up"
                 data-aos-delay="300"

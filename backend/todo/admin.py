@@ -1,7 +1,7 @@
 from django.contrib import admin
 #from . import models
 #from .models import Booking, UnavailableDate, Payment
-from .models import Booking, UnavailableDate, Payment, Todo, DrinkCategory
+from .models import Booking, UnavailableDate, Payment, Todo, DrinkCategory, ProductAllocation
 
 # ✅ Admin panel for Booking management (Red Dates)
 class BookingAdmin(admin.ModelAdmin):
@@ -24,4 +24,5 @@ admin.site.register(Booking, BookingAdmin)
 admin.site.register(UnavailableDate, UnavailableDateAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(DrinkCategory)
+admin.site.register(ProductAllocation)
 
