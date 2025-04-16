@@ -1,170 +1,118 @@
-/* ========================
-   Theme Variables
-========================= */
-:root {
-    --form-bg-color: #212121;
-    --form-text-color: #111;
-  
-    --input-bg-color: #d3d9e2;
-    --input-text-color: #000;
-  
-    --label-color: #c4c4c4;
-  
-    --summary-bg-color: #e6ffe6;
-    --summary-text-color: #000;
-  
-    --button-bg-color: #000;
-    --button-text-color: #ffffff;
-    --button-hover-bg: #ffc107;
-    --button-hover-text: #000;
-  
-    --booking-text-color: #ffffff;
-  }
-  
-  /* ========================
-     Layout Containers
-  ========================= */
-  .booking-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    width: 100vw;
-    background-color: #000000; /* Dark background */
-  }
-  
-  .booking-form-wrapper {
-    width: 100%;
-    max-width: 1100px;
-    background-color: var(--form-bg-color);
-    border-radius: 10px;
-    padding: 40px;
-    color: var(--form-text-color);
-    box-shadow:
-      0 0 15px rgba(255, 204, 0, 0.6),   /* soft yellow glow */
-      0 0 25px rgba(255, 204, 0, 0.4),
-      0 0 35px rgba(255, 204, 0, 0.2);
-    transition: box-shadow 0.3s ease;
-  }
-  
-  
-  /* ========================
-     Title & Section Headings
-  ========================= */
-  .booking-title {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #ffc107;
-    font-weight: bold;
-    font-size: 2rem;
-  }
-  
+/* 🔲 Booking Form Container */
+.booking-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(145deg, #1c1c1c, #2b2b2b);
+}
+
+/* 📦 Main Booking Box */
+.booking-form-wrapper {
+  width: 100%;
+  max-width: 900px;
+  background-color: #222;
+  border-radius: 12px;
+  padding: 30px;
+  color: white;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* 📝 Title */
+.booking-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 25px;
+  text-align: center;
+  color: #ffffff;
+}
+
+/* 🧭 Layout Grid */
+.booking-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+
+.booking-group {
+  flex: 1;
+}
+
+/* 🔖 Labels */
+.booking-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ccc;
+}
+
+/* ✏️ Inputs */
+.booking-input,
+.booking-select,
+.booking-date-picker {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background-color: #2e2e2e;
+  color: white;
+  margin-bottom: 15px;
+}
+
+.booking-input:focus,
+.booking-select:focus,
+.booking-date-picker:focus {
+  outline: none;
+  border-color: #ffc107;
+}
+
+/* 📊 Summary Text */
+.booking-summary-text {
+  background-color: #2e2e2e;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  color: #ccc;
+  margin-bottom: 15px;
+}
+
+/* 🧾 Errors */
+.error-text {
+  color: #ff4d4d;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+/* ✅ Submit Button */
+.booking-submit-button {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  background-color: #ffc107;
+  border: none;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.booking-submit-button:hover {
+  background-color: #ffca2c;
+}
+
+/* ✅ reCAPTCHA alignment */
+.recaptcha-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+@media (max-width: 768px) {
   .booking-section {
-    display: flex;
-    justify-content: space-between;
-    gap: 40px;
-    width: 100%;
+    flex-direction: column;
   }
-  
-  .booking-group {
-    flex: 1;
-  }
-  
-  .booking-section-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--booking-text-color);
-    margin-bottom: 10px;
-    text-align: center;
-  }
-  
-  /* ========================
-     Form Fields
-  ========================= */
-  .booking-label {
-    font-weight: 600;
-    margin-bottom: 5px;
-    display: block;
-    color: var(--label-color);
-  }
-  
-  .booking-input,
-  .booking-select,
-  .booking-date-picker {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #000;
-    border-radius: 5px;
-    background-color: var(--input-bg-color);
-    color: var(--input-text-color);
-    font-size: 1rem;
-  }
-  
-  .booking-input:focus,
-  .booking-select:focus,
-  .booking-date-picker:focus {
-    outline: none;
-    border-color: #04ff00;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
-  }
-  
-  /* ========================
-     Summary Display (PAX / Price)
-  ========================= */
-  .booking-summary {
-    text-align: center;
-    margin-top: 20px;
-    padding: 15px;
-    background-color: var(--summary-bg-color);
-    color: var(--summary-text-color);
-    border-radius: 8px;
-    font-weight: 600;
-  }
-  
-  .booking-summary-text {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--booking-text-color);
-  }
-  
-  /* ========================
-     Submit Button
-  ========================= */
-  .booking-submit-button {
-    margin-top: 30px;
-    width: 100%;
-    padding: 15px;
-    background-color: var(--button-bg-color);
-    color: var(--button-text-color);
-    border: none;
-    border-radius: 5px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .booking-submit-button:hover {
-    background-color: var(--button-hover-bg);
-    color: var(--button-hover-text);
-  }
-  
-  /* ========================
-     Calendar Highlight Styles
-  ========================= */
-  /* Existing styles */
-  .red-date {
-    background-color: #ff4d4d !important;
-    color: white;
-  }
-  
-  .grey-date {
-    background-color: #b3b3b3 !important;
-    color: white;
-  }
-  
-  /* New Style for Pending Dates */
-  .green-date {
-    background-color: #32CD32 !important; /* LimeGreen for pending dates */
-    color: white;
-  }
+}

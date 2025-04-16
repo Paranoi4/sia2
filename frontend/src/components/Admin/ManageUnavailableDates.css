@@ -26,12 +26,17 @@
     flex-direction: column;
     gap: 10px;
     margin-bottom: 30px;
+    
   }
   
   .unavailable-form input {
     padding: 8px;
     border: 1px solid #444;
     border-radius: 5px;
+  }
+  .unavailable-form input[type="date"] {
+    max-width: 200px;
+    width: 100%;
   }
   
 .unavailable-form button {
@@ -47,8 +52,34 @@
 .unavailable-form button:hover {
     background-color: #0056b3;
 }
+.form-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: flex-end;  /* ✅ aligns inputs by bottom instead of top */
+}
 
-  
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group input[type="date"] {
+  max-width: 200px;
+  width: 100%;
+}
+
+.form-group input[type="text"] {
+  width: 320px;
+  padding: 10px;
+  font-size: 14px;
+  height: auto;              /* allow natural height growth */
+  min-height: 100px;          /* base height */
+  resize: vertical;          /* 👈 allow vertical-only resize */
+  overflow-y: auto; 
+}
+
   /* Scrollable Table Wrapper */
   .table-body-scroll {
     max-height: 230px;

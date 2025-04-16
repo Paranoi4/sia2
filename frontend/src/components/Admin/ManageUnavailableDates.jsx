@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "./ManageUnavailableDates.css";
 
 const ManageUnavailableDates = () => {
   const [dates, setDates] = useState([]);
@@ -88,127 +87,282 @@ const ManageUnavailableDates = () => {
   );
 
   return (
-    <div className="table-scroll-wrapper">
-      <div className="unavailable-container">
-        <h2 className="text-4xl font-bold mb-2 text-gray-800 flex items-center gap-3">
-          <span>📅</span> Manage Unavailable Dates
-        </h2>
-        <p className="text-gray-600 mb-6 text-base">
-          Add, update, or remove event dates that are unavailable for booking.
-        </p>
+    <div style={{
+      width: '100%',
+      maxWidth: 1100,
+      margin: '20px auto',
+      padding: 20,
+      backgroundColor: 'white',
+      borderRadius: 10,
+      fontFamily: 'Arial, sans-serif',
+      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)'
+    }}>
+      <h2 style={{ fontSize: 26, fontWeight: 'bold', marginBottom: 10, color: '#1f2937' }}>
+        📅 Manage Unavailable Dates
+      </h2>
 
+      <input
+        type="text"
+        placeholder="🔍 Search by date or reason..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        style={{
+          width: '60%',
+          minWidth: 100,
+          maxWidth: 300,
+          display: 'block',
+          marginBottom: 12,
+          padding: '8px 10px',
+          border: '1px solid #bbb',
+          borderRadius: 6,
+          fontSize: 13,
+          height: '40px',
+        }}
+      />
+
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}
+      >
+        <input
+          type="date"
+          name="date"
+          value={formData.date}
+          onChange={handleChange}
+          required
+          style={{
+            padding: '8px 10px',
+            borderRadius: 5,
+            border: '1px solid #444',
+            height: '40px',
+            width: '160px'
+          }}
+        />
         <input
           type="text"
-          placeholder="🔍 Search by date or reason..."
-          className="search-input"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          name="reason"
+          placeholder="Optional reason"
+          value={formData.reason}
+          onChange={handleChange}
+          style={{
+            padding: '8px 10px',
+            borderRadius: 5,
+            border: '1px solid #444',
+            fontSize: 13,
+            height: '40px',
+            width: '240px'
+          }}
         />
+        {editId ? (
+          <>
+            <button type="submit" style={{
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              height: '40px',
+              padding: '0 12px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: 14,
+              marginTop: '1px'
+            }}>
+              Confirm
+            </button>
+            <button type="button" onClick={handleCancel} style={{
+              backgroundColor: '#6c757d',
+              color: 'white',
+              border: 'none',
+              height: '40px',
+              padding: '0 12px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: 14
+            }}>
+              Cancel
+            </button>
+          </>
+        ) : (
+          <button type="submit" style={{
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            height: '40px',
+            padding: '0 12px',
+            borderRadius: 6,
+            cursor: 'pointer',
+            fontSize: 14,
+            marginTop: '1px'
+          }}>
+            Add Date
+          </button>
+        )}
+      </form>
 
-        <form onSubmit={handleSubmit} className="unavailable-form form-card">
-          <label>Date:</label>
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            required
-          />
-
-          <label>Reason:</label>
-          <input
-            type="text"
-            name="reason"
-            placeholder="Optional reason"
-            value={formData.reason}
-            onChange={handleChange}
-          />
-
-          {editId ? (
-            <div className="edit-actions">
-              <button type="submit" className="confirm-btn">✅ Confirm</button>
-              <button type="button" className="cancel-btn" onClick={handleCancel}>❌ Cancel</button>
-            </div>
-          ) : (
-            <button type="submit" className="confirm-btn">➕ Add Date</button>
-          )}
-        </form>
-
-        <table className="unavailable-table">
-          <thead>
+      <table style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+        marginBottom: 16
+      }}>
+        <thead>
+          <tr style={{ backgroundColor: '#1f2937', color: 'white' }}>
+            <th style={{
+              padding: 8,
+              textAlign: 'center',
+              border: '1px solid #ccc'
+            }}>Select</th>
+            <th style={{
+              padding: 8,
+              textAlign: 'center',
+              border: '1px solid #ccc'
+            }}>Date</th>
+            <th style={{
+              padding: 8,
+              textAlign: 'center',
+              border: '1px solid #ccc'
+            }}>Reason</th>
+            <th style={{
+              padding: 8,
+              textAlign: 'center',
+              border: '1px solid #ccc'
+            }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredDates.length === 0 ? (
             <tr>
-              <th>Select</th>
-              <th>Date</th>
-              <th>Reason</th>
-              <th>Actions</th>
+              <td colSpan="4" style={{ textAlign: 'center', padding: 16 }}>No unavailable dates found.</td>
             </tr>
-          </thead>
-        </table>
+          ) : (
+            filteredDates.map((date) => (
+              <tr key={date.id}>
+                <td style={{
+                  padding: 8,
+                  border: '1px solid #ccc',
+                  textAlign: 'center',
+                  verticalAlign: 'middle'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(date.id)}
+                    onChange={() => handleCheckboxChange(date.id)}
+                  />
+                </td>
+                <td style={{
+                  padding: 8,
+                  border: '1px solid #ccc',
+                  textAlign: 'center',
+                  verticalAlign: 'middle'
+                }}>{date.date}</td>
+                <td style={{
+                  padding: 8,
+                  border: '1px solid #ccc',
+                  textAlign: 'center',
+                  verticalAlign: 'middle'
+                }}>{date.reason || '-'}</td>
+                <td style={{
+                  padding: 8,
+                  border: '1px solid #ccc',
+                  textAlign: 'center',
+                  verticalAlign: 'middle',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  {deleteId === date.id ? (
+                    <>
+                      <button onClick={() => handleDelete(date.id)} style={{
+                        backgroundColor: '#007bff',
+                        color: 'white',
+                        padding: '4px 8px',
+                        borderRadius: 4,
+                        border: 'none',
+                        fontSize: 12,
+                        cursor: 'pointer'
+                      }}>Confirm</button>
+                      <button onClick={() => setDeleteId(null)} style={{
+                        backgroundColor: '#6c757d',
+                        color: 'white',
+                        padding: '4px 8px',
+                        borderRadius: 4,
+                        border: 'none',
+                        fontSize: 12,
+                        cursor: 'pointer'
+                      }}>Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => handleEdit(date)} style={{
+                        backgroundColor: '#007bff',
+                        color: 'white',
+                        padding: '4px 8px',
+                        borderRadius: 4,
+                        border: 'none',
+                        fontSize: 12,
+                        cursor: 'pointer'
+                      }}>Edit</button>
+                      <button onClick={() => setDeleteId(date.id)} style={{
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        padding: '4px 8px',
+                        borderRadius: 4,
+                        border: 'none',
+                        fontSize: 12,
+                        cursor: 'pointer'
+                      }}>Delete</button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
 
-        <div className="table-body-scroll">
-          <table className="unavailable-table">
-            <tbody>
-              {filteredDates.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="text-center text-gray-500 py-4">
-                    No unavailable dates found.
-                  </td>
-                </tr>
-              ) : (
-                filteredDates.map((date, index) => (
-                  <tr key={date.id ?? `fallback-${index}`}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.includes(date.id)}
-                        onChange={() => handleCheckboxChange(date.id)}
-                      />
-                    </td>
-                    <td>{date.date}</td>
-                    <td>{date.reason || "-"}</td>
-                    <td>
-                      {deleteId === date.id ? (
-                        <div className="table-action-buttons">
-                          <button onClick={() => handleDelete(date.id)} className="confirm-btn">✅ Confirm</button>
-                          <button onClick={() => setDeleteId(null)} className="cancel-btn">❌ Cancel</button>
-                        </div>
-                      ) : (
-                        <>
-                          <button onClick={() => handleEdit(date)} className="confirm-btn">✏️ Edit</button>
-                          <button onClick={() => setDeleteId(date.id)} className="delete-btn">🗑️ Delete</button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-
-          {selectedIds.length > 0 && (
-            <div className="bulk-delete-wrapper">
-              {isBulkConfirming ? (
-                <>
-                  <button onClick={handleBulkDelete} className="confirm-btn">✅ Confirm</button>
-                  <button
-                    onClick={() => {
-                      setIsBulkConfirming(false);
-                      setSelectedIds([]);
-                    }}
-                    className="cancel-btn"
-                  >
-                    ❌ Cancel
-                  </button>
-                </>
-              ) : (
-                <button onClick={() => setIsBulkConfirming(true)} className="bulk-delete-btn">
-                  🗑️ Delete Selected ({selectedIds.length})
-                </button>
-              )}
-            </div>
+      {selectedIds.length > 0 && (
+        <div style={{ textAlign: 'right', marginTop: 10 }}>
+          {isBulkConfirming ? (
+            <>
+              <button onClick={handleBulkDelete} style={{
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                padding: '6px 12px',
+                fontWeight: 'bold',
+                fontSize: 13,
+                borderRadius: 5,
+                cursor: 'pointer'
+              }}>Confirm</button>
+              <button onClick={() => {
+                setIsBulkConfirming(false);
+                setSelectedIds([]);
+              }} style={{
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                padding: '6px 12px',
+                fontWeight: 'bold',
+                fontSize: 13,
+                borderRadius: 5,
+                cursor: 'pointer'
+              }}>Cancel</button>
+            </>
+          ) : (
+            <button onClick={() => setIsBulkConfirming(true)} style={{
+              backgroundColor: '#ff6347',
+              color: 'white',
+              fontWeight: 'bold',
+              padding: '6px 12px',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+              fontSize: 13
+            }}>
+              🗑️ Delete Selected ({selectedIds.length})
+            </button>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 };

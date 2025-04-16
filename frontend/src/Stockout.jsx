@@ -67,33 +67,38 @@ function StockOut() {
         <h1 className="text-4xl font-bold mb-6 text-gray-800">Preparation Inventory</h1>
 
         {/* Global Search Input */}
-        <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-  {/* Search Input */}
-  <input
-    type="text"
-    className="border border-gray-300 rounded px-4 py-2 w-full md:w-1/2"
-    placeholder="Search by any field..."
-    value={searchQuery}
-    onChange={handleSearch}
-  />
+        <div className="mb-4 flex flex-wrap items-center gap-3">
 
-  {/* Event Date Filter */}
-  <input
-    type="date"
-    className="border border-gray-300 rounded px-4 py-2 w-full md:w-1/3"
-    value={filterDate}
-    onChange={(e) => setFilterDate(e.target.value)}
-    placeholder="Filter by event date"
-  />
-   <button
-    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full sm:w-auto mt-1"
-    onClick={() => {
-      setSelectedDate("");
-      setFilteredTransactions(transactions);
-    }}
-  >
-    Reset
-  </button>
+ 
+  {/* Search Input */}
+<input
+  type="text"
+  className="border border-gray-300 rounded px-4 py-2 resize-x overflow-auto w-full md:w-auto min-w-[180px] max-w-full"
+  placeholder="Search by any field..."
+  value={searchQuery}
+  onChange={handleSearch}
+/>
+
+{/* Event Date Filter */}
+<input
+  type="date"
+  className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
+  value={filterDate}
+  onChange={(e) => setFilterDate(e.target.value)}
+/>
+
+{/* Reset Button */}
+<button
+  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full md:w-auto md:mt-1"
+
+  onClick={() => {
+    setSearchQuery("");
+    setFilterDate("");
+    setFilteredTransactions(transactions);
+  }}
+>
+  Reset
+</button>
 </div>
 
         {isLoading ? (

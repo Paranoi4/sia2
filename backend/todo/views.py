@@ -17,6 +17,7 @@ from rest_framework.generics import ListCreateAPIView
 from django.core.mail import send_mail  #added 4:30 pm 
 from django.conf import settings #added 4:30 pm 
 from .models import Package, DrinkCategory
+from django.template.loader import render_to_string
 
 
 
@@ -184,6 +185,7 @@ class TodoViewSet(viewsets.ModelViewSet):
         """Reduce stock quantity for an event-specific stock-out"""
         todo_item = get_object_or_404(Todo, pk=pk)
         stock_out_quantity = int(request.data.get('quantity', 0))
+        reason = request.data.get('reason', '')  # ✅ New
         previous_quantity = todo_item.quantity
         current_quantity = int(todo_item.quantity)
 
@@ -202,7 +204,8 @@ class TodoViewSet(viewsets.ModelViewSet):
             quantity=todo_item.quantity,
             type=todo_item.type,
             stock_out_quantity=stock_out_quantity,
-            volume=todo_item.volume
+            volume=todo_item.volume,
+            reason=reason 
         )
         '''
         # Log update for tracking purposes
@@ -511,15 +514,14 @@ class PaymentDetailView(APIView):
 class PaymentCreateView(ListCreateAPIView):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
-    parser_classes = (MultiPartParser, FormParser)  # ✅ Allow file uploads
+    parser_classes = (MultiPartParser, FormParser)
 
     def create(self, request, *args, **kwargs):
-        print("📥 Incoming Payment Data:", request.data)  # ✅ Debugging Log
+        print("📥 Incoming Payment Data:", request.data)
 
-        booking_id = request.data.get("booking_id")  # ✅ Match frontend field
+        booking_id = request.data.get("booking_id")
 
         if not booking_id:
-            print("🚨 ERROR: Missing booking ID in request:", request.data)  # ✅ Debugging Log
             return Response({"error": "Booking ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -530,7 +532,38 @@ class PaymentCreateView(ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             payment = serializer.save(booking=booking)
-            return Response({"message": "Payment submitted successfully!"}, status=status.HTTP_201_CREATED)
+
+            # ✅ Send email with booking details
+            subject = "Payment Received - Pending Confirmation"
+            message = f"""
+Hi {booking.first_name} {booking.last_name},
+
+Thank you for submitting your payment. We have received your proof of payment and your booking is now under review.
+
+📅 Event Details:
+- Event Type: {booking.event_type}
+- Event Date: {booking.event_date}
+- PAX: {booking.pax}
+- Price: ₱{booking.price}
+- Address: {booking.address}
+- Venue Contact: {booking.contact_number_venue}
+- Available Time: {booking.available_time}
+
+We will notify you once your payment is approved. If you have any questions, feel free to reach out.
+
+Best regards,  
+Bevanda Mobile Bar Team
+            """
+
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [booking.email],
+                fail_silently=False,
+            )
+
+            return Response({"message": "Payment submitted and email sent successfully!"}, status=status.HTTP_201_CREATED)
 
         return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     

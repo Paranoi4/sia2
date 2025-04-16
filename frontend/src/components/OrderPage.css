@@ -1,119 +1,125 @@
-/* Center the Order Page */
+/* 🌌 Background & Centering */
 .order-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    width: 100vw;
-    background-color: #000; /* Dark background */
-  }
-  
-  /* Card Style */
-  .order-card {
-    width: 800px;
-    background-color: #222;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.7);
-  }
-  
-  /* Title */
-  .order-title {
-    text-align: center;
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #ffc107;
-    margin-bottom: 20px;
-  }
-  
-  /* Order Content Layout */
-  .order-content {
-    display: flex;
-    justify-content: space-between;
-    gap: 30px;
-  }
-  
-  /* Left Side: Menu Section */
-  .menu-section {
-    flex: 1;
-    color: #fff;
-  }
-  
-  /* Category Titles */
-  .menu-title {
-    font-weight: bold;
-    color: #ffc107;
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  /* Right Side: Package Section */
-  .package-section {
-    flex: 1;
-    background-color: #111;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-  }
-  
-  /* Labels */
-  .order-label {
-    display: block;
-    color: #ffc107;
-    font-size: 1rem;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-  
-  /* Dropdown Select */
-  .order-select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 5px;
-    font-size: 1rem;
-    background-color: #333;
-    color: #fff;
-    border: 1px solid #ffc107;
-    margin-bottom: 20px;
-  }
-  
-  /* Price Display */
-  .order-price {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
-    margin-bottom: 20px;
-  }
-  
-  /* Confirm Button */
-  .order-button {
-    width: 100%;
-    padding: 12px;
-    background-color: black;
-    color: white;
-    border: 2px solid #fff;
-    border-radius: 5px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease-in-out;
-  }
-  
-  .order-button:hover {
-    background-color: #ffc107;
-    color: black;
-  }
-  /* Customer Unavailable Dates - Red */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(145deg, #1c1c1c, #2b2b2b);
+}
+
+/* 🧾 Card Box */
+.order-card {
+  width: 100%;
+  max-width: 900px;
+  background-color: #222;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* 🏷️ Title */
+.order-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 25px;
+  color: white;
+}
+
+/* 📦 Flex Layout */
+.order-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+
+/* 🥤 Menu (Left Side) */
+.menu-section {
+  flex: 1;
+  color: #ccc;
+}
+
+.menu-section h3 {
+  color: #ffc107;
+  margin-bottom: 5px;
+}
+
+/* 📋 Packages (Right Side) */
+.package-section {
+  flex: 1;
+  background-color: #2e2e2e;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* 🏷️ Labels */
+.order-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ffc107;
+}
+
+/* 🔽 Dropdown */
+.order-select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #333;
+  color: white;
+  border: 1px solid #ffc107;
+  margin-bottom: 20px;
+}
+
+/* 💰 Price Display */
+.order-price {
+  background-color: #333;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 20px;
+}
+
+/* ✅ Confirm Button */
+.order-button {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  background-color: #ffc107;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.order-button:hover {
+  background-color: #ffca2c;
+}
+
+/* 📆 Calendar Date Coloring (if used) */
 .unavailable-date {
-    background-color: red !important;
-    color: white !important;
-    border-radius: 50%;
-  }
-  
-  /* Admin Unavailable Dates - Grey */
+  background-color: red !important;
+  color: white !important;
+  border-radius: 50%;
+}
+
 .admin-unavailable-date {
-    background-color: grey !important;
-    color: white !important;
-    border-radius: 50%;
+  background-color: grey !important;
+  color: white !important;
+  border-radius: 50%;
+}
+
+@media (max-width: 768px) {
+  .order-content {
+    flex-direction: column;
   }
-  
+}

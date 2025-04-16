@@ -194,35 +194,35 @@ function App() {
                             <h1 className="text-5xl text-center pb-8">Bevanda Inventory</h1>
                           </nav>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4">
+      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4 w-full max-w-[280px]">
         <FaBox className="text-blue-500 text-3xl" />
         <div>
           <h3 className="text-gray-500 text-sm">Total Items</h3>
           <p className="text-2xl font-semibold text-blue-700">{todos.length}</p>
         </div>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4">
+      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4 w-full max-w-[280px]">
         <FaCubes className="text-green-500 text-3xl" />
         <div>
           <h3 className="text-gray-500 text-sm">Total Quantity</h3>
           <p className="text-2xl font-semibold text-green-700">{todos.reduce((acc, item) => acc + parseInt(item.quantity), 0)}</p>
         </div>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4">
+      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4 w-full max-w-[280px]">
         <FaCocktail className="text-purple-500 text-3xl" />
         <div>
           <h3 className="text-gray-500 text-sm">Beverages</h3>
           <p className="text-2xl font-semibold text-purple-700">{todos.filter(item => item.type === "Beverage").length}</p>
         </div>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4">
+      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4 w-full max-w-[280px]">
         <FaAppleAlt className="text-red-500 text-3xl" />
         <div>
           <h3 className="text-gray-500 text-sm">Fruits</h3>
           <p className="text-2xl font-semibold text-red-700">{todos.filter(item => item.type === "Fruits").length}</p>
         </div>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4">
+      <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition flex items-center gap-4 w-full max-w-[280px]">
         <FaArchive className="text-yellow-500 text-3xl" />
         <div>
           <h3 className="text-gray-500 text-sm">Non-Perishable Items</h3>

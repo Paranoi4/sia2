@@ -52,11 +52,11 @@ function StockInReturn() {
         <h1 className="text-4xl font-bold mb-6 text-gray-800">Stock-In Return Transactions</h1>
 
         {/* Search + Date + Reset */}
-        <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="mb-4 flex flex-wrap items-center gap-3">
           {/* Search */}
           <input
             type="text"
-            className="border border-gray-300 rounded px-4 py-2 w-full md:w-1/2"
+            className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto resize-x overflow-auto min-w-[150px] max-w-full"
             placeholder="Search by any field..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
@@ -65,7 +65,7 @@ function StockInReturn() {
           {/* Date */}
           <input
             type="date"
-            className="border border-gray-300 rounded px-4 py-2 w-full md:w-1/3"
+            className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto resize-x overflow-auto min-w-[150px] max-w-full"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
           />
@@ -88,7 +88,7 @@ function StockInReturn() {
           <p>Loading return transactions...</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300">
+            <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300 ">
               <thead>
                 <tr className="bg-gray-900 text-white">
                   

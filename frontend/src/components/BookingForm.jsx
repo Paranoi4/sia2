@@ -4,12 +4,15 @@ import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./BookingForm.css";
+import ReCAPTCHA from "react-google-recaptcha"; // ✅ Import
+import backgroundImage from "../assets/1113bg.png";
+
 
 const BookingForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const selectedPackage = location.state?.selectedPackage || null;
-
+  const [captchaToken, setCaptchaToken] = useState(null);
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -34,6 +37,10 @@ const BookingForm = () => {
     return storedGreenDates;
 });
 
+const handleCaptchaChange = (token) => {
+  console.log("✅ CAPTCHA Token received:", token);
+  setCaptchaToken(token);
+};
 
 useEffect(() => {
     const storedGreenDates = JSON.parse(sessionStorage.getItem("greenDates")) || [];
@@ -122,6 +129,12 @@ useEffect(() => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!captchaToken) {
+      alert("Please verify the CAPTCHA before submitting.");
+      return;
+    }
+
     if (!validateForm()) return;
 
     try {
@@ -151,10 +164,18 @@ useEffect(() => {
 
   
   return (
-    <div className="booking-container">
+    <div
+  className="booking-container relative bg-cover bg-center overflow-hidden"
+  style={{ backgroundImage: `url(${backgroundImage})` }}
+>
+  
+<div className="absolute top-0 left-0 w-full h-[60px] bg-gradient-to-b from-black to-transparent z-20" />
+<div className="absolute bottom-0 left-0 w-full h-[60px] bg-gradient-to-t from-black to-transparent z-20" />
+<div className="absolute top-0 left-0 h-full w-16 bg-gradient-to-r from-black to-transparent z-20" />
+<div className="absolute top-0 right-0 h-full w-16 bg-gradient-to-l from-black to-transparent z-20" />
       <div className="booking-form-wrapper">
         <form onSubmit={handleSubmit} className="booking-form">
-          <h2 className="booking-title">Book your party with us</h2>
+          <h2 className="booking-title text-white">Book your party with us</h2>
 
           <div className="booking-section">
             <div className="booking-group">
@@ -232,7 +253,12 @@ useEffect(() => {
               {errors.available_time && <p className="error-text">{errors.available_time}</p>}
             </div>
           </div>
-
+<div style={{ marginTop: "20px", marginBottom: "10px" }}>
+  <ReCAPTCHA
+    sitekey="6LfPMRgrAAAAAGA_dLWqSa8ggLj1E0ynFsIFUlPC" // ✅ Your site key
+    onChange={handleCaptchaChange}
+  />
+</div>
           <button type="submit" className="booking-submit-button">CONFIRM</button>
         </form>
       </div>

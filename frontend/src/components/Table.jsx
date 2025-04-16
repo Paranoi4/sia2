@@ -5,7 +5,7 @@ import { MdOutlineDeleteOutline, MdEditNote } from 'react-icons/md';
 const Table = ({ todos, setTodos, isLoading }) => {
   const [stockOutData, setStockOutData] = useState({ id: '', quantity: '' });
   const [stockInData, setStockInData] = useState({ id: '', quantity: '' });
-  const [stockOutEventData, setStockOutEventData] = useState({ id: '', quantity: '' });
+  const [stockOutEventData, setStockOutEventData] = useState({ id: '', quantity: '', reason: ''  });
   const [stockInReturnData, setStockInReturnData] = useState({ id: '', quantity: '' });
   const [editText, setEditText] = useState({ id: '', body: '', quantity: '', volume: '', type: '' });
   const [filterText, setFilterText] = useState('');
@@ -56,7 +56,10 @@ const Table = ({ todos, setTodos, isLoading }) => {
   const handleStockAction = async (endpoint, data, modalId, successMsg, errorMsg) => {
     if (!data.id || !data.quantity) return alert("Please enter both ID and quantity.");
     try {
-      const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${data.id}/${endpoint}/`, { quantity: data.quantity });
+      const response = await axios.patch(
+        `http://127.0.0.1:8000/api/todo/${data.id}/${endpoint}/`,
+        data
+      );
       const updatedTodos = todos.map(todo =>
         todo.id.toString() === data.id ? { ...todo, quantity: response.data.updated_quantity } : todo
       );
@@ -164,6 +167,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
           <h3 className="font-bold text-lg mb-4">Stock In</h3>
           <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3" />
           <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3" />
+          
           <div className="modal-action">
             <button type="button" className="btn btn-primary" onClick={() => handleStockAction("stock_in", stockInData, "stock-in-modal", "Stock added", "Failed to stock in")}>Submit</button>
             <button className="btn">Cancel</button>
@@ -176,6 +180,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
           <h3 className="font-bold text-lg mb-4">Stock Out</h3>
           <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3" />
           <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3" />
+         
           <div className="modal-action">
             <button type="button" className="btn btn-secondary" onClick={() => handleStockAction("stock_out", stockOutData, "stock-out-modal", "Stock updated", "Failed to stock out")}>Submit</button>
             <button className="btn">Cancel</button>
@@ -188,6 +193,12 @@ const Table = ({ todos, setTodos, isLoading }) => {
           <h3 className="font-bold text-lg mb-4">Stock Out (Event)</h3>
           <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockOutEventData)} className="input input-bordered w-full mb-3" />
           <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockOutEventData)} className="input input-bordered w-full mb-3" />
+          <input
+  name="reason"
+  placeholder="Reason for stock-out"
+  onChange={(e) => handleStockChange(e, setStockOutEventData)}
+  className="input input-bordered w-full mb-3"
+/>
           <div className="modal-action">
             <button type="button" className="btn btn-info" onClick={() => handleStockAction("stockoutevent", stockOutEventData, "stock-out-event-modal", "Event stock updated", "Failed to update")}>Submit</button>
             <button className="btn">Cancel</button>

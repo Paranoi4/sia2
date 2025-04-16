@@ -49,6 +49,9 @@ class TransactionHistory(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     volume = models.CharField(max_length=100, null=True, blank=True)
     transaction_date = models.DateField(null=True, blank=True)  # 🆕 Add this line
+    # models.py
+    reason = models.TextField(blank=True, null=True)
+
 
     
 

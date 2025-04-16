@@ -1,15 +1,24 @@
-import React, { useEffect } from "react";
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import HeroCard from "./components/HeroCard";
-import liquors from "./assets/liquors.mp4";
-import Rapidscat from "./components/Rapidscat";
-import Satelite from "./components/Satelite";
-import Footer5 from "./components/Footer5";
-import AboutSection from "./components/AboutSection";
+import { useEffect } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
-//import { Satellite } from "@mui/icons-material";
+
+// Components
+import Navbar from "./components/LANDINGPAGE/Navbar";
+import Hero from "./components/LANDINGPAGE/Hero";
+//import HeroCard from "./components/LANDINGPAGE/HeroCard";
+//import Rapidscat from "./components/LANDINGPAGE/Rapidscat";
+//import Satelite from "./components/LANDINGPAGE/Satelite";
+import MissionAndVision from "./components/LANDINGPAGE/MissionAndVision";
+import AboutSection from "./components/LANDINGPAGE/AboutSection";
+import Package from "./components/LANDINGPAGE/Package";
+import WebSlider from "./components/LANDINGPAGE/WebSlider";
+import Highlights from "./components/LANDINGPAGE/Highlights";
+import Reviews from "./components/LANDINGPAGE/Reviews";
+import Coffee from "./components/LANDINGPAGE/Coffee";
+import Footer5 from "./components/LANDINGPAGE/Footer5";
+
+// Assets
+import liquors from "./assets/liquors.mp4";
 
 const LandingPage = () => {
   useEffect(() => {
@@ -18,8 +27,10 @@ const LandingPage = () => {
       easing: "ease-in-out",
     });
   }, []);
+
   return (
-    <div className="">
+    <div>
+      {/* 🔥 Hero Section with Video */}
       <div className="h-[700px] relative">
         <video
           autoPlay
@@ -32,11 +43,37 @@ const LandingPage = () => {
         <Navbar />
         <Hero />
       </div>
-      <HeroCard />
-      <Rapidscat />
-      <Satelite />
-      <AboutSection />
-      {/* <Footer /> */}
+  {/* 🎞 WebSlider (Slides with bg) */}
+  <WebSlider />
+      {/* 💳 Hero Content Cards */}
+    
+      {/* 🎬 Brand Highlights Section */}
+    
+      
+
+   
+
+
+      {/* 🍹 Package Display */}
+      <Package />
+
+    
+      <Coffee />
+      {/* 🎠 Highlights Carousel */}
+      <Highlights />
+
+      {/* ⭐ Reviews Carousel */}
+      
+
+      {/* ☕ Coffee Coming Soon Section */}
+
+       {/* 📖 About Bevanda Section */}
+       <AboutSection />
+        {/* 🌐 Company Vision & Mission */}
+        <MissionAndVision />
+     
+      <Reviews />
+      {/* ⚓ Footer */}
       <Footer5 />
     </div>
   );
