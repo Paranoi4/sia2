@@ -9,6 +9,12 @@ const OrderPage = () => {
   const [packages, setPackages] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [drinkCategories, setDrinkCategories] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleSelect = (pkg) => {
+    setSelectedPackage(pkg);
+    setShowDropdown(false);
+  };
 
   useEffect(() => {
     axios.get("http://127.0.0.1:8000/api/packages/")
@@ -27,11 +33,6 @@ const OrderPage = () => {
       .then((res) => setDrinkCategories(res.data))
       .catch((err) => console.error("Failed to load drink categories", err));
   }, []);
-
-  const handlePackageChange = (event) => {
-    const selected = packages.find((pkg) => pkg.pax === event.target.value);
-    setSelectedPackage(selected);
-  };
 
   const handleConfirm = () => {
     if (!selectedPackage) return;
@@ -71,24 +72,50 @@ const OrderPage = () => {
             ))}
           </div>
 
-          <div className="package-section">
+          {/* 📦 Package Selector and Price */}
+          <div className="package-section w-full max-w-xs mx-auto">
+
             <label className="order-label">PAX</label>
-            <select
-              className="order-select"
-              value={selectedPackage.pax}
-              onChange={handlePackageChange}
-            >
-              {packages.map((pkg, index) => (
-                <option key={index} value={pkg.pax}>
-                  {pkg.pax} - ₱{pkg.price.toLocaleString()}
-                </option>
-              ))}
-            </select>
 
-            <label className="order-label">PRICE</label>
-            <p className="order-price">₱{selectedPackage.price.toLocaleString()}</p>
+            {/* Custom Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="w-full px-4 py-2 border border-yellow-400 rounded text-left bg-white text-black hover:bg-gray-100"
+              >
+               <div className="flex justify-between font-mono items-center">
+  <span>{selectedPackage?.pax} pax</span>
+  <span className="mx-4 text-gray-500">-</span>
+  <span>₱{Number(selectedPackage?.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+</div>
 
-            <button className="order-button" onClick={handleConfirm}>
+              </button>
+
+              {showDropdown && (
+                <div className="absolute z-50 mt-1 w-full bg-white border border-yellow-400 rounded shadow-lg">
+                  {packages.map((pkg) => (
+                    <div
+                    key={pkg.id}
+                    onClick={() => handleSelect(pkg)}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex justify-between font-mono text-black items-center"
+                  >
+                    <span>{pkg.pax} pax</span>
+                    <span className="mx-4 text-gray-500">-</span>
+                    <span>₱{Number(pkg.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <label className="order-label mt-4">PRICE</label>
+            <p className="order-price w-full text-center font-bold py-2 rounded bg-gray-800 text-white">
+  ₱{Number(selectedPackage?.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+</p>
+
+
+            <button className="order-button mt-4" onClick={handleConfirm}>
               Confirm
             </button>
           </div>

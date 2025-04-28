@@ -7,7 +7,9 @@ function Transaction() {
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterDate, setFilterDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+const [endDate, setEndDate] = useState("");
+
 
   const navigate = useNavigate();
 
@@ -37,15 +39,18 @@ function Transaction() {
         String(value).toLowerCase().includes(searchQuery)
       );
 
+      const transactionDate = new Date(transaction.timestamp).toISOString().split("T")[0];
       const matchesDate =
-        !filterDate ||
-        new Date(transaction.timestamp).toISOString().split("T")[0] === filterDate;
+        (!startDate || transactionDate >= startDate) &&
+        (!endDate || transactionDate <= endDate);
+      
 
       return matchesSearch && matchesDate;
     });
 
     setFilteredTransactions(filtered);
-  }, [searchQuery, filterDate, transactions]);
+  }, [startDate, endDate, transactions, searchQuery]);
+
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -67,17 +72,29 @@ function Transaction() {
 {/* Date Filter */}
 <input
   type="date"
+  value={startDate}
+  onChange={(e) => setStartDate(e.target.value)}
   className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
-  value={filterDate}
-  onChange={(e) => setFilterDate(e.target.value)}
+  placeholder="From"
 />
+<span className="text-gray-600 mx-1">to</span>
+<input
+  type="date"
+  value={endDate}
+  onChange={(e) => setEndDate(e.target.value)}
+  className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
+  placeholder="To"
+/>
+
 
 {/* Reset Button */}
 <button
   className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full md:w-auto md:mt-1"
   onClick={() => {
     setSearchQuery("");
-    setFilterDate("");
+    setStartDate("");
+setEndDate("");
+
   }}
 >
   Reset
@@ -117,8 +134,17 @@ function Transaction() {
                     <td className="border border-gray-300 px-4 py-2 text-center">{transaction.quantity}</td>
                
                     <td className="border border-gray-300 px-4 py-2 text-center">
-                      {new Date(transaction.timestamp).toLocaleString()}
-                    </td>
+  {new Date(transaction.timestamp).toLocaleString("en-US", {
+    timeZone: "Asia/Manila",
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  })}
+</td>
+
                   </tr>
                 ))}
               </tbody>

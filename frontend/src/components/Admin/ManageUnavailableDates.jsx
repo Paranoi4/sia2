@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { MdEditNote, MdOutlineDeleteOutline } from "react-icons/md";
+
 
 const ManageUnavailableDates = () => {
   const [dates, setDates] = useState([]);
@@ -98,12 +100,12 @@ const ManageUnavailableDates = () => {
       boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)'
     }}>
       <h2 style={{ fontSize: 26, fontWeight: 'bold', marginBottom: 10, color: '#1f2937' }}>
-        📅 Manage Unavailable Dates
+         Manage Unavailable Dates
       </h2>
 
       <input
         type="text"
-        placeholder="🔍 Search by date or reason..."
+        placeholder=" Search by date or reason..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         style={{
@@ -292,24 +294,21 @@ const ManageUnavailableDates = () => {
                     </>
                   ) : (
                     <>
-                      <button onClick={() => handleEdit(date)} style={{
-                        backgroundColor: '#007bff',
-                        color: 'white',
-                        padding: '4px 8px',
-                        borderRadius: 4,
-                        border: 'none',
-                        fontSize: 12,
-                        cursor: 'pointer'
-                      }}>Edit</button>
-                      <button onClick={() => setDeleteId(date.id)} style={{
-                        backgroundColor: '#dc3545',
-                        color: 'white',
-                        padding: '4px 8px',
-                        borderRadius: 4,
-                        border: 'none',
-                        fontSize: 12,
-                        cursor: 'pointer'
-                      }}>Delete</button>
+                      <div className="flex justify-center items-center space-x-2 relative -translate-y-1">
+  <button
+    onClick={() => handleEdit(date)}
+    className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
+  >
+    <MdEditNote className="text-xl text-indigo-600 hover:text-indigo-800" />
+  </button>
+  <button
+    onClick={() => setDeleteId(date.id)}
+    className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
+  >
+    <MdOutlineDeleteOutline className="text-xl text-red-600 hover:text-red-800" />
+  </button>
+</div>
+
                     </>
                   )}
                 </td>
@@ -358,7 +357,7 @@ const ManageUnavailableDates = () => {
               cursor: 'pointer',
               fontSize: 13
             }}>
-              🗑️ Delete Selected ({selectedIds.length})
+               Delete Selected ({selectedIds.length})
             </button>
           )}
         </div>

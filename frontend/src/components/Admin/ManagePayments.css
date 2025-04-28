@@ -333,3 +333,19 @@
 
 
 
+.custom-message-textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  color: #000000; /* ✅ Black text */
+  resize: vertical; /* optional: allows resizing */
+}
+
+.custom-message-textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}

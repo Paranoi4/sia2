@@ -57,8 +57,8 @@
   padding: 12px;
   border: 1px solid #333;
   border-radius: 8px;
-  background-color: #2e2e2e;
-  color: white;
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
   margin-bottom: 15px;
 }
 
@@ -115,4 +115,24 @@
   .booking-section {
     flex-direction: column;
   }
+}
+/* 🔴 RED - Confirmed Dates */
+.react-datepicker__day.red-date {
+  background-color: #ff4d4d;
+  color: white;
+  border-radius: 50%;
+}
+
+/* ⚫ GREY - Admin Unavailable Dates */
+.react-datepicker__day.grey-date {
+  background-color: #808080;
+  color: white;
+  border-radius: 50%;
+}
+
+/* 🟢 GREEN - Pending Dates */
+.react-datepicker__day.green-date {
+  background-color: #a3df35;
+  color: white;
+  border-radius: 50%;
 }

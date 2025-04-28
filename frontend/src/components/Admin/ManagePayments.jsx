@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "./ManagePayments.css";
-
+import { MdOutlineRemoveRedEye, MdOutlineDeleteOutline } from "react-icons/md";
 const ITEMS_PER_PAGE = 6;
 
 const ManagePayments = () => {
@@ -18,7 +18,9 @@ const ManagePayments = () => {
 const fetchAllPayments = async () => {
   try {
       const response = await axios.get("http://127.0.0.1:8000/api/payments/");
-      setPayments(response.data); // Retrieve all payments, including denied ones
+      const sorted = response.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setPayments(sorted);
+      
   } catch (error) {
       console.error("Error fetching payments:", error);
   } finally {
@@ -93,7 +95,7 @@ const handleDelete = async (paymentId) => {
   if (!confirmed) return;
 
   try {
-      const response = await axios.delete(`http://127.0.0.1:8000/api/payments/${paymentId}/`);
+      const response = await axios.delete(`http://127.0.0.1:8000/api/payments/delete/${paymentId}/`);
       if (response.status === 200) {
           alert("Payment record deleted successfully.");
           fetchAllPayments();  // Refresh the payments list after deletion
@@ -155,10 +157,23 @@ const getStatusClass = (status) => {
                   <td className={getStatusClass(payment.status)}>{payment.status}</td>
                   <td>{payment.booking.event_date}</td>
                   <td>{new Date(payment.created_at).toLocaleString()}</td>
-                  <td>
-                    <button className="view-btn" onClick={() => fetchPaymentDetails(payment.id)}>View</button>
-                    <button className="delete-btn" onClick={() => handleDelete(payment.id)}>Delete</button>
-                </td>
+                  <td className="text-center">
+  <div className="flex justify-center items-center space-x-2 relative -translate-y-1">
+    <button
+      onClick={() => fetchPaymentDetails(payment.id)}
+      className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
+    >
+      <MdOutlineRemoveRedEye className="text-xl text-blue-600 hover:text-blue-800" />
+    </button>
+    <button
+      onClick={() => handleDelete(payment.id)}
+      className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
+    >
+      <MdOutlineDeleteOutline className="text-xl text-red-600 hover:text-red-800" />
+    </button>
+  </div>
+</td>
+
                 </tr>
               ))}
             </tbody>
@@ -255,6 +270,7 @@ const getStatusClass = (status) => {
           {selectedPayment.status === "pending" && (
             <div>
                 <textarea
+                 className="custom-message-textarea"
             value={customMessage}
             onChange={(e) => setCustomMessage(e.target.value)}
             placeholder="Enter your custom message here..."

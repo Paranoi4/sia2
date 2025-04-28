@@ -7,7 +7,9 @@ function StockOut() {
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");  // Added search query for global filter
-  const [filterDate, setFilterDate] = useState("");  // 🆕 Filter by event date
+  const [startDate, setStartDate] = useState("");
+const [endDate, setEndDate] = useState("");
+  // 🆕 Filter by event date
 
   const navigate = useNavigate();
 
@@ -52,13 +54,17 @@ function StockOut() {
         String(value).toLowerCase().includes(searchQuery)
       );
   
-      const matchesDate = !filterDate || transaction.transaction_date === filterDate;
-  
+      const transactionDate = new Date(transaction.timestamp).toISOString().split("T")[0];
+      const matchesDate =
+        (!startDate || transactionDate >= startDate) &&
+        (!endDate || transactionDate <= endDate);
+      
       return matchesSearch && matchesDate;
     });
   
     setFilteredTransactions(filtered);
-  }, [filterDate, transactions, searchQuery]);
+  }, [startDate, endDate, transactions, searchQuery]);
+
   
 
   return (
@@ -83,9 +89,21 @@ function StockOut() {
 <input
   type="date"
   className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
-  value={filterDate}
-  onChange={(e) => setFilterDate(e.target.value)}
+  value={startDate}
+  onChange={(e) => setStartDate(e.target.value)}
+  placeholder="From"
 />
+
+<span className="text-gray-600 mx-1">to</span>
+
+<input
+  type="date"
+  className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
+  value={endDate}
+  onChange={(e) => setEndDate(e.target.value)}
+  placeholder="To"
+/>
+
 
 {/* Reset Button */}
 <button
@@ -93,7 +111,9 @@ function StockOut() {
 
   onClick={() => {
     setSearchQuery("");
-    setFilterDate("");
+    setStartDate("");
+setEndDate("");
+
     setFilteredTransactions(transactions);
   }}
 >
@@ -135,11 +155,25 @@ function StockOut() {
                     <td className="border border-gray-300 px-4 py-2 text-center">{transaction.quantity}</td>
                     
                     <td className="border border-gray-300 px-4 py-2 text-center">
-                      {new Date(transaction.timestamp).toLocaleString()}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2 text-center">
-  {transaction.transaction_date ? new Date(transaction.transaction_date).toLocaleDateString() : "N/A"}
+  {new Date(transaction.timestamp).toLocaleString("en-US", {
+    timeZone: "Asia/Manila",
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  })}
 </td>
+
+<td className="border border-gray-300 px-4 py-2 text-center">
+  {transaction.transaction_date ? new Date(transaction.transaction_date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric"
+  }) : "N/A"}
+</td>
+
                   </tr>
                 ))}
               </tbody>

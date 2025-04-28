@@ -1,7 +1,7 @@
 
 from django.urls import path, include
 from rest_framework import routers
-from .views import TodoViewSet, TransactionHistoryViewSet, CustomTokenObtainPairView, protected_view, BookingView, UnavailableDatesView,AdminUnavailableDateView, UnavailableDateDeleteView, UnavailableDateUpdateView, PaymentCreateView, CleanupExpiredBookings, AdminApprovePaymentView, PaymentStatusView, DeleteUnpaidBookingView,PaymentListView,PaymentDetailView, PackageViewSet, DrinkCategoryViewSet
+from .views import TodoViewSet, TransactionHistoryViewSet, CustomTokenObtainPairView, protected_view, BookingView, UnavailableDatesView,AdminUnavailableDateView, UnavailableDateDeleteView, UnavailableDateUpdateView, PaymentCreateView, CleanupExpiredBookings, AdminApprovePaymentView, PaymentStatusView, DeleteUnpaidBookingView,PaymentListView,PaymentDetailView, PackageViewSet, DrinkCategoryViewSet, PaymentDeleteView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 router = routers.DefaultRouter()
@@ -29,7 +29,7 @@ urlpatterns = [
     path("admin/approve-payment/<int:payment_id>/", AdminApprovePaymentView.as_view(), name="approve_payment"),
     path("payment-status/<int:booking_id>/", PaymentStatusView.as_view(), name="payment_status"),
     path("delete-unpaid-booking/<int:booking_id>/", DeleteUnpaidBookingView.as_view(), name="delete-unpaid-booking"),
-    
+    path("payments/delete/<int:payment_id>/", PaymentDeleteView.as_view(), name="payment-delete"),  # ✅ Add this
     
     
     

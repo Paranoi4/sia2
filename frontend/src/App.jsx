@@ -16,6 +16,8 @@ import ManagePackages from "./components/Admin/ManagePackages";
 import logo from "./assets/logo.jpg";
 import ManageUnavailableDates from "./components/Admin/ManageUnavailableDates";
 import { FaBox, FaCubes, FaCocktail, FaAppleAlt, FaArchive } from 'react-icons/fa';
+import { NavLink } from "react-router-dom";
+
 
 
 
@@ -23,6 +25,10 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [openTransaction, setOpenTransaction] = useState(false);
+  const [openPreparation, setOpenPreparation] = useState(false);
+  const [openBooking, setOpenBooking] = useState(false);
+  
 
   useEffect(() => {
     const token = localStorage.getItem("access");
@@ -47,6 +53,11 @@ function App() {
     setIsAuthenticated(false);
     window.location.href = "/login";
   };
+
+  const groups = JSON.parse(localStorage.getItem("groups") || "[]");
+  const isInventoryOnly = groups.includes("inventory_only");
+  const isSuperUser = groups.includes("admin") || groups.length === 0;
+
 
   const PrivateRoute = ({ children }) => {
     const token = localStorage.getItem("access");
@@ -77,109 +88,149 @@ function App() {
   <h2 className="text-2xl font-bold text-indigo-400">Bevanda</h2>
   <p className="text-sm text-gray-400">Admin Panel</p>
 </div>
-                  <ul className="space-y-4 text-sm font-medium">
-                    <li>
-                      <a href="/landing-page" className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-md">
-                        🏠 Dashboard
-                      </a>
-                    </li>
-                    <li>
-                      <a href="/main-inventory" className="flex items-center gap-3 hover:bg-gray-700 p-2 rounded-md">
-                        📦 Main Inventory
-                      </a>
-                    </li>
+<hr className="my-6 border-t border-gray-600 opacity-50" />
 
-                    {/* Transaction History Dropdown */}
-                    <li className="group">
-                      <div className="flex flex-col">
-                        <span className="flex items-center justify-between gap-3 hover:bg-gray-700 p-2 rounded-md cursor-pointer">
-                          <span className="flex items-center gap-3">📂 Transaction History</span>
-                          <svg className="w-4 h-4 transform group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </span>
-                        <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300 group-hover:block hidden">
-                          <li>
-                            <a href="/transaction" className="flex items-center gap-2 hover:text-white">
-                              ➕ Stock-In
-                            </a>
-                          </li>
-                          <li>
-                          <a href="/stock-out-event" className="flex items-center gap-2 hover:text-white">
-                          ➖ Stock-Out
-            </a>
-                          </li>
-                          <li>
-                            <a href="/edit" className="flex items-center gap-2 hover:text-white">
-                              📜 Product History
-                            </a>
-                          </li>
-                      
-                        </ul>
-                      </div>
-                    </li>
+<ul className="space-y-4 text-sm font-medium">
+  {/* 🏠 Dashboard */}
+  <li>
+  <NavLink
+  to="/landing-page"
+  className={({ isActive }) =>
+    `flex items-center justify-between w-full gap-3 ${
+      isActive ? "bg-indigo-600 text-white" : "bg-blue-600 text-white hover:bg-blue-700"
+    } p-2 rounded-md`
+  }
+>
+  <span className="flex items-center gap-3">🏠 Dashboard</span>
 
-                    {/* Preparation Inventory Dropdown */}
-    <li className="group">
-      <div className="flex flex-col">
-        <span className="flex items-center justify-between gap-3 hover:bg-gray-700 p-2 rounded-md cursor-pointer">
-          <span className="flex items-center gap-3">🎉 Preparation Inventory</span>
-          <svg className="w-4 h-4 transform group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </span>
-        <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300 group-hover:block hidden">
-          <li>
-          <a href="/stock-out" className="flex items-center gap-2 hover:text-white">
-          🎯 Stock-Out Event
-                            </a>
-          </li>
-          <li>
-            <a href="/stock-in-return" className="flex items-center gap-2 hover:text-white">
-              🔁 Stock-In Return
-            </a>
-          </li>
-        </ul>
-      </div>
-    </li>
-                   {/* Booking Management Dropdown */}
-    <li className="group">
-      <div className="flex flex-col">
-        <span className="flex items-center justify-between gap-3 hover:bg-gray-700 p-2 rounded-md cursor-pointer">
-          <span className="flex items-center gap-3">📅 Booking Management</span>
-          <svg className="w-4 h-4 transform group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </span>
-        <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300 group-hover:block hidden">
-          <li>
-            <a href="/admin/payments" className="flex items-center gap-2 hover:text-white">
-              💳 Payment Management
-            </a>
-          </li>
-          <li>
-            <a href="/manage-packages" className="flex items-center gap-2 hover:text-white">
-              🎁 Manage Packages
-            </a>
-          </li>
-          <li>
-            <a href="/unavailable" className="flex items-center gap-2 hover:text-white">
-              📅 Manage Unavailable Dates
-            </a>
-          </li>
-        </ul>
-      </div>
-    </li>
-                               
-                    <li>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 bg-red-600 hover:bg-red-700 p-2 rounded-md mt-6"
-                      >
-                        🚪 Logout
-                      </button>
-                    </li>
-                  </ul>
+</NavLink>
+
+  </li>
+
+  {/* ✅ Inventory-only and Admin Shared Section */}
+  {(isInventoryOnly || isSuperUser) && (
+    <>
+     
+
+      <li>
+        <NavLink
+  to="/main-inventory"
+  className={({ isActive }) =>
+    `flex items-center justify-between w-full gap-3 ${
+      isActive ? "bg-indigo-600 text-white" : "bg-blue-600 text-white hover:bg-blue-700"
+    } p-2 rounded-md`
+  }
+>
+  <span className="flex items-center gap-3">📦 Main Inventory</span>
+  
+</NavLink>
+
+      </li>
+
+      {/* 📂 Transaction History */}
+      <li>
+      <button
+  onClick={() => setOpenTransaction(!openTransaction)}
+  className={`flex items-center justify-between w-full gap-3 ${
+    openTransaction
+      ? "bg-indigo-600 text-white"
+      : "bg-blue-600 text-white hover:bg-blue-700"
+  } p-2 rounded-md`}
+>
+  <span className="flex items-center gap-3">📂 Transaction History</span>
+  <span className="text-white">›</span>
+</button>
+
+
+  {openTransaction && (
+    <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300">
+      <li>
+        <NavLink to="/transaction" className={({ isActive }) => `block p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>➕ Stock-In</NavLink>
+      </li>
+      <li>
+        <NavLink to="/stock-out-event" className={({ isActive }) => `block p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>➖ Stock-Out</NavLink>
+      </li>
+      <li>
+        <NavLink to="/edit" className={({ isActive }) => `block p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>📜 Product History</NavLink>
+      </li>
+    </ul>
+  )}
+</li>
+
+      {/* 🎉 Preparation Inventory */}
+      <li>
+      <button
+  onClick={() => setOpenPreparation(!openPreparation)}
+  className={`flex items-center justify-between w-full gap-3 ${
+    openPreparation
+      ? "bg-indigo-600 text-white"
+      : "bg-blue-600 text-white hover:bg-blue-700"
+  } p-2 rounded-md`}
+>
+  <span className="flex items-center gap-3">🎉 Preparation Inventory</span>
+  <span className="text-white">›</span>
+</button>
+
+        {openPreparation && (
+          <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300">
+            <li>
+              <NavLink to="/stock-out" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>🎯 Stock-Out Event</NavLink>
+            </li>
+            <li>
+              <NavLink to="/stock-in-return" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>🔁 Stock-In Return</NavLink>
+            </li>
+          </ul>
+        )}
+      </li>
+    </>
+  )}
+
+  {/* 📅 Booking Management */}
+  {isSuperUser && (
+    <>
+      
+
+      <li>
+      <button
+  onClick={() => setOpenBooking(!openBooking)}
+  className={`flex items-center justify-between w-full gap-3 ${
+    openBooking
+      ? "bg-indigo-600 text-white"
+      : "bg-blue-600 text-white hover:bg-blue-700"
+  } p-2 rounded-md`}
+>
+  <span className="flex items-center gap-3">📅 Booking Management</span>
+  <span className="text-white">›</span>
+</button>
+
+        {openBooking && (
+          <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300">
+            <li>
+              <NavLink to="/admin/payments" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>💳 Payment Management</NavLink>
+            </li>
+            <li>
+              <NavLink to="/manage-packages" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>🎁 Manage Packages</NavLink>
+            </li>
+            <li>
+              <NavLink to="/unavailable" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>📅 Manage Unavailable Dates</NavLink>
+            </li>
+          </ul>
+        )}
+      </li>
+    </>
+  )}
+
+  {/* 🚪 Logout button */}
+  <li>
+    <button
+      onClick={handleLogout}
+      className="w-full flex items-center gap-3 bg-red-600 hover:bg-red-700 p-2 rounded-md mt-6"
+    >
+      🚪 Logout
+    </button>
+  </li>
+</ul>
+
                 </aside>
               )}
 

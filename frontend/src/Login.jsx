@@ -23,6 +23,8 @@ const Login = () => {
       localStorage.setItem("access", response.data.access);
       localStorage.setItem("refresh", response.data.refresh);
       localStorage.setItem("username", response.data.username);
+      localStorage.setItem("groups", JSON.stringify(response.data.groups));
+
 
       window.location.href = "/";
     } catch (err) {

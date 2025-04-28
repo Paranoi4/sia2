@@ -40,6 +40,8 @@ const Table = ({ todos, setTodos, isLoading }) => {
   };
 
   const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+  if (!confirmDelete) return;
     try {
       await axios.delete(`http://127.0.0.1:8000/api/todo/${id}/`);
       setTodos(todos.filter(todo => todo.id !== id));
@@ -122,6 +124,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
                 <th className="border border-gray-300 px-4 py-3">Volume</th>
                 <th className="border border-gray-300 px-4 py-3">Type</th>
                 <th className="border border-gray-300 px-4 py-3">Date Added</th>
+                
                 <th className="border border-gray-300 px-4 py-3">Actions</th>
               </tr>
             </thead>
@@ -129,14 +132,25 @@ const Table = ({ todos, setTodos, isLoading }) => {
             {isLoading ? (
               <tr><td colSpan="7" className="text-center py-4">Loading...</td></tr>
             ) : (
-              filteredTodos.map((todo) => (
+              [...filteredTodos].reverse().map((todo) => (
+
                 <tr key={todo.id} className="hover:bg-gray-100 transition">
                 <td className="border border-gray-300 px-4 py-2 text-center">{todo.id}</td>
                 <td className="border border-gray-300 px-4 py-2 text-center">{todo.body}</td>
                 <td className="border border-gray-300 px-4 py-2 text-center">{todo.quantity}</td>
                 <td className="border border-gray-300 px-4 py-2 text-center">{todo.volume}</td>
                 <td className="border border-gray-300 px-4 py-2 text-center">{todo.type}</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">{todo.created}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center">
+  {new Date(todo.created).toLocaleString("en-US", {
+    timeZone: "Asia/Manila",
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  })}
+</td>
                 <td className="border border-gray-300 px-4 py-2 text-center w-1/6">
                   <div className="flex justify-center items-center space-x-2 relative -translate-y-3">
                     <button
@@ -218,8 +232,8 @@ const Table = ({ todos, setTodos, isLoading }) => {
         </form>
       </dialog>
 
-      <dialog id="edit-modal" className="modal">
-  <form method="dialog" className="modal-box">
+    <dialog id="edit-modal" className="modal">
+    <form method="dialog" className="modal-box">
     <h3 className="font-bold text-lg mb-4">Edit Todo</h3>
     <label className="block font-medium mb-2">Product</label>
     <input

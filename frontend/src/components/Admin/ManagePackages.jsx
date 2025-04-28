@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { MdOutlineDeleteOutline } from "react-icons/md";
 
 const ManagePackages = () => {
   const [packages, setPackages] = useState([]);
@@ -102,6 +103,37 @@ const ManagePackages = () => {
   return (
     <div className="p-4 bg-white rounded shadow">
       <h2 className="text-4xl font-bold mb-6 text-gray-800">Manage Packages</h2>
+      <h3 className="text-xl font-semibold mb-2">Add New Package</h3>
+<div className="flex items-center gap-4 mb-10">
+  <input
+    type="text"
+    placeholder="e.g. 50 pax"
+    value={newPackage.pax}
+    onChange={(e) => setNewPackage({ ...newPackage, pax: e.target.value })}
+    className="border rounded p-2 w-1/3"
+  />
+  <input
+    type="number"
+    placeholder="e.g. 15000"
+    value={newPackage.price}
+    onChange={(e) => setNewPackage({ ...newPackage, price: e.target.value })}
+    className="border rounded p-2 w-1/3"
+  />
+  <label className="flex items-center gap-1">
+    <input
+      type="checkbox"
+      checked={newPackage.available}
+      onChange={(e) => setNewPackage({ ...newPackage, available: e.target.checked })}
+    />
+    Available
+  </label>
+  <button
+    onClick={handleAddPackage}
+    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 -mt-1"
+  >
+    Add Package
+  </button>
+</div>
 
       <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300 mb-6">
   <thead>
@@ -114,22 +146,23 @@ const ManagePackages = () => {
         <tbody>
           {packages.map((pkg, index) => (
             <tr key={pkg.id} className="hover:bg-gray-100 transition">
-            <td className="border border-gray-300 px-4 py-2">
-              <input
-                type="text"
-                value={pkg.pax}
-                onChange={(e) => handlePackageChange(index, "pax", e.target.value)}
-                className="border border-gray-300 rounded px-4 py-2 w-full"
-              />
-            </td>
-            <td className="border border-gray-300 px-4 py-2">
-              <input
-                type="number"
-                value={pkg.price}
-                onChange={(e) => handlePackageChange(index, "price", e.target.value)}
-                className="border border-gray-300 rounded px-4 py-2 w-full"
-              />
-            </td>
+            <td className="border border-gray-300 px-4 py-2 text-right">
+  <input
+    type="text"
+    value={pkg.pax}
+    onChange={(e) => handlePackageChange(index, "pax", e.target.value)}
+    className="border border-gray-300 rounded px-4 py-2 w-full text-right"
+  />
+</td>
+<td className="border border-gray-300 px-4 py-2 text-right">
+  <input
+    type="number"
+    value={pkg.price}
+    onChange={(e) => handlePackageChange(index, "price", e.target.value)}
+    className="border border-gray-300 rounded px-4 py-2 w-full text-right"
+  />
+</td>
+
             <td className="border border-gray-300 px-4 py-2 text-center">
               <input
                 type="checkbox"
@@ -149,40 +182,33 @@ const ManagePackages = () => {
         Save Package Changes
       </button>
 
-      <h3 className="text-xl font-semibold mb-2">Add New Package</h3>
-      <div className="flex items-center gap-4 mb-10">
-        <input
-          type="text"
-          placeholder="e.g. 50 pax"
-          value={newPackage.pax}
-          onChange={(e) => setNewPackage({ ...newPackage, pax: e.target.value })}
-          className="border rounded p-2 w-1/3"
-        />
-        <input
-          type="number"
-          placeholder="e.g. 15000"
-          value={newPackage.price}
-          onChange={(e) => setNewPackage({ ...newPackage, price: e.target.value })}
-          className="border rounded p-2 w-1/3"
-        />
-        <label className="flex items-center gap-1">
-          <input
-            type="checkbox"
-            checked={newPackage.available}
-            onChange={(e) => setNewPackage({ ...newPackage, available: e.target.checked })}
-          />
-          Available
-        </label>
-        <button
-          onClick={handleAddPackage}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 -mt-1"
-        >
-          Add Package
-        </button>
-      </div>
+     
 
       <h2 className="text-4xl font-bold mb-6 text-gray-800">Manage Beverages</h2>
 
+<h3 className="text-xl font-semibold mb-2 mt-10">Add New Drink Category</h3>
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
+        <input
+          type="text"
+          placeholder="Category Name (e.g. Mocktail)"
+          value={newCategory.name}
+          onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+          className="border rounded p-2 w-full md:w-1/3"
+        />
+        <textarea
+          placeholder="Drink items (e.g. Margarita, Mojito)"
+          value={newCategory.items}
+          onChange={(e) => setNewCategory({ ...newCategory, items: e.target.value })}
+          className="border rounded p-2 w-full md:w-1/2"
+          rows={2}
+        />
+        <button
+          onClick={handleAddCategory}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 -mt-1"
+        >
+          Add Drink Category
+        </button>
+      </div>
       <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300 mb-6">
   <thead>
     <tr className="bg-gray-900 text-white">
@@ -211,12 +237,15 @@ const ManagePackages = () => {
           />
         </td>
         <td className="border border-gray-300 px-4 py-2 text-center">
-        <button
-          onClick={() => handleDeleteCategory(category.id)}
-          className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 -mt-1"
-        >
-          Delete
-        </button>
+        <div className="flex justify-center items-center">
+  <button
+    onClick={() => handleDeleteCategory(category.id)}
+    className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
+  >
+    <MdOutlineDeleteOutline className="text-xl text-red-600 hover:text-red-800" title="Delete" />
+  </button>
+</div>
+
       </td>
       </tr>
     ))}
@@ -230,29 +259,7 @@ const ManagePackages = () => {
         Save Drink Categories
       </button>
 
-      <h3 className="text-xl font-semibold mb-2 mt-10">Add New Drink Category</h3>
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Category Name (e.g. Mocktail)"
-          value={newCategory.name}
-          onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-          className="border rounded p-2 w-full md:w-1/3"
-        />
-        <textarea
-          placeholder="Drink items (e.g. Margarita, Mojito)"
-          value={newCategory.items}
-          onChange={(e) => setNewCategory({ ...newCategory, items: e.target.value })}
-          className="border rounded p-2 w-full md:w-1/2"
-          rows={2}
-        />
-        <button
-          onClick={handleAddCategory}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 -mt-1"
-        >
-          Add Drink Category
-        </button>
-      </div>
+      
     </div>
   );
 };

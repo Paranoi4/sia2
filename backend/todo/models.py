@@ -57,6 +57,8 @@ class TransactionHistory(models.Model):
 
     def __str__(self):
         return f"{self.item_name} - {self.action} on {self.timestamp}"
+    class Meta:
+        unique_together = ('action', 'item_name', 'quantity', 'type', 'volume')
     
 
 class Booking(models.Model):

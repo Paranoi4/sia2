@@ -214,6 +214,7 @@ useEffect(() => {
 
               <label className="booking-label">Event Date*</label>
               <DatePicker
+                className="booking-date-picker"
                 selected={formData.event_date ? new Date(formData.event_date) : null}
                 onChange={handleDateChange}
                 dateFormat="dd/MM/yyyy"

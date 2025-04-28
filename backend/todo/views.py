@@ -22,7 +22,6 @@ from django.template.loader import render_to_string
 
 
 
-
 class TodoViewSet(viewsets.ModelViewSet):
     queryset = models.Todo.objects.all()
     serializer_class = serializers.TodoSerializer
@@ -94,7 +93,8 @@ class TodoViewSet(viewsets.ModelViewSet):
             action="Deleted",
             item_name=instance.body,
             quantity=instance.quantity,
-            type=instance.type
+            type=instance.type,
+            volume=instance.volume 
         )
 
         self.perform_destroy(instance)
@@ -281,7 +281,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             "access": response.data["access"],
             "refresh": response.data["refresh"],
             "username": username,
-            "is_superuser": user.is_superuser
+            "is_superuser": user.is_superuser,
+            "groups": list(user.groups.values_list("name", flat=True)),
         })
 
 # Protected Route Example
@@ -511,61 +512,7 @@ class PaymentDetailView(APIView):
         return Response(serializer.data)
     
 
-class PaymentCreateView(ListCreateAPIView):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-    parser_classes = (MultiPartParser, FormParser)
 
-    def create(self, request, *args, **kwargs):
-        print("📥 Incoming Payment Data:", request.data)
-
-        booking_id = request.data.get("booking_id")
-
-        if not booking_id:
-            return Response({"error": "Booking ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            booking = Booking.objects.get(id=booking_id)
-        except Booking.DoesNotExist:
-            return Response({"error": "Invalid Booking ID."}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            payment = serializer.save(booking=booking)
-
-            # ✅ Send email with booking details
-            subject = "Payment Received - Pending Confirmation"
-            message = f"""
-Hi {booking.first_name} {booking.last_name},
-
-Thank you for submitting your payment. We have received your proof of payment and your booking is now under review.
-
-📅 Event Details:
-- Event Type: {booking.event_type}
-- Event Date: {booking.event_date}
-- PAX: {booking.pax}
-- Price: ₱{booking.price}
-- Address: {booking.address}
-- Venue Contact: {booking.contact_number_venue}
-- Available Time: {booking.available_time}
-
-We will notify you once your payment is approved. If you have any questions, feel free to reach out.
-
-Best regards,  
-Bevanda Mobile Bar Team
-            """
-
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [booking.email],
-                fail_silently=False,
-            )
-
-            return Response({"message": "Payment submitted and email sent successfully!"}, status=status.HTTP_201_CREATED)
-
-        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
 
 class PackageViewSet(viewsets.ModelViewSet):
@@ -597,3 +544,91 @@ class PaymentDeleteView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 
+class PaymentCreateView(ListCreateAPIView):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+    parser_classes = (MultiPartParser, FormParser)
+
+    def create(self, request, *args, **kwargs):
+        print("📥 Incoming Payment Data:", request.data)
+
+        booking_id = request.data.get("booking_id")
+
+        if not booking_id:
+            return Response({"error": "Booking ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            booking = Booking.objects.get(id=booking_id)
+        except Booking.DoesNotExist:
+            return Response({"error": "Invalid Booking ID."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            payment = serializer.save(booking=booking)
+
+            # ✅ Send email to customer after payment submission
+            subject = "Payment Received - Pending Confirmation"
+            message = f"""
+Hi {booking.first_name} {booking.last_name},
+
+Thank you for submitting your payment. We have received your proof of payment and your booking is now under review.
+
+📅 Event Details:
+- Event Type: {booking.event_type}
+- Event Date: {booking.event_date}
+- PAX: {booking.pax}
+- Price: ₱{booking.price}
+- Address: {booking.address}
+- Venue Contact: {booking.contact_number_venue}
+- Available Time: {booking.available_time}
+
+We will notify you once your payment is approved. If you have any questions, feel free to reach out.
+
+Best regards,  
+Bevanda Mobile Bar Team
+"""
+
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[booking.email],
+                fail_silently=False,
+            )
+
+            # ✅ Send email to admin after customer payment
+            admin_email = "joshnarcisoo@gmail.com"  # 🔁 Replace with actual admin email
+
+            admin_subject = f"New Payment Submitted by {booking.first_name} {booking.last_name}"
+            admin_message = f"""
+A new payment has been submitted and is awaiting approval.
+
+📢 Customer Info:
+- Name: {booking.first_name} {booking.last_name}
+- Email: {booking.email}
+
+📅 Event Details:
+- Type: {booking.event_type}
+- Date: {booking.event_date}
+- PAX: {booking.pax}
+- Price: ₱{booking.price}
+- Venue Address: {booking.venue_address}
+- Venue Contact: {booking.contact_number_venue}
+- Time: {booking.available_time}
+
+Please log in to the admin panel to review and confirm the payment.
+
+— Bevanda Booking System
+"""
+
+            send_mail(
+                subject=admin_subject,
+                message=admin_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[admin_email],
+                fail_silently=False,
+            )
+
+            return Response({"message": "Payment submitted and email sent successfully!"}, status=status.HTTP_201_CREATED)
+
+        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
