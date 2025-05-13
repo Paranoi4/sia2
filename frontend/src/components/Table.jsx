@@ -234,7 +234,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
 
     <dialog id="edit-modal" className="modal">
     <form method="dialog" className="modal-box">
-    <h3 className="font-bold text-lg mb-4">Edit Todo</h3>
+    <h3 className="font-bold text-lg mb-4">Edit Item</h3>
     <label className="block font-medium mb-2">Product</label>
     <input
       type="text"
@@ -244,15 +244,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
       placeholder="Type here"
       className="input input-bordered w-full mb-3"
     />
-    <label className="block font-medium mb-2">Quantity</label>
-    <input
-      type="number"
-      name="quantity"
-      value={editText.quantity}
-      onChange={handleChange}
-      placeholder="Quantity"
-      className="input input-bordered w-full mb-3"
-    />
+
     <label className="block font-medium mb-2">Volume</label>
     <input
       type="text"

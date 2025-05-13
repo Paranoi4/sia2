@@ -50,12 +50,19 @@
 
 /* 📋 Packages (Right Side) */
 .package-section {
-  flex: 1;
+  flex: none; /* ⬅️ Important! Remove automatic flex growing */
+  width: 100%;
+  max-width: 300px;
   background-color: #2e2e2e;
   padding: 20px;
   border-radius: 10px;
   text-align: center;
+  height: 350px; /* ⬅️ Add a fixed height */
+  display: flex; /* ⬅️ Add flexbox */
+  flex-direction: column; /* ⬅️ Stack content vertically */
+  justify-content: space-between; /* ⬅️ Push Confirm button near bottom */
 }
+
 
 /* 🏷️ Labels */
 .order-label {
