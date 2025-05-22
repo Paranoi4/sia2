@@ -47,12 +47,10 @@ const Footer = () => {
               <a href="#" className="hover:text-sky-400">
                 <FaInstagram className="text-4xl" />
               </a>
-              <a href="#" className="hover:text-sky-400">
+              <a href="https://www.facebook.com/bevandamobilebar" className="hover:text-sky-400">
                 <FaFacebook className="text-4xl" />
               </a>
-              <a href="#" className="hover:text-sky-400">
-                <FaLinkedin className="text-4xl" />
-              </a>
+            
             </div>
 
             {/* Links */}

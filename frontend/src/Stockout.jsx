@@ -9,6 +9,9 @@ function StockOut() {
   const [searchQuery, setSearchQuery] = useState("");  // Added search query for global filter
   const [startDate, setStartDate] = useState("");
 const [endDate, setEndDate] = useState("");
+const [eventStartDate, setEventStartDate] = useState("");
+const [eventEndDate, setEventEndDate] = useState("");
+
   // 🆕 Filter by event date
 
   const navigate = useNavigate();
@@ -49,21 +52,31 @@ const [endDate, setEndDate] = useState("");
   };
 
   useEffect(() => {
-    const filtered = transactions.filter(transaction => {
-      const matchesSearch = Object.values(transaction).some(value =>
+    const filtered = transactions.filter((transaction) => {
+      const matchesSearch = Object.values(transaction).some((value) =>
         String(value).toLowerCase().includes(searchQuery)
       );
   
+      // Transaction Timestamp Filter
       const transactionDate = new Date(transaction.timestamp).toISOString().split("T")[0];
-      const matchesDate =
+      const matchesTransactionDate =
         (!startDate || transactionDate >= startDate) &&
         (!endDate || transactionDate <= endDate);
-      
-      return matchesSearch && matchesDate;
+  
+      // Event Date Filter
+      const eventDate = transaction.transaction_date
+        ? new Date(transaction.transaction_date).toISOString().split("T")[0]
+        : null;
+      const matchesEventDate =
+        (!eventStartDate || (eventDate && eventDate >= eventStartDate)) &&
+        (!eventEndDate || (eventDate && eventDate <= eventEndDate));
+  
+      return matchesSearch && matchesTransactionDate && matchesEventDate;
     });
   
     setFilteredTransactions(filtered);
-  }, [startDate, endDate, transactions, searchQuery]);
+  }, [startDate, endDate, eventStartDate, eventEndDate, searchQuery, transactions]);
+  
 
   
 
@@ -85,37 +98,60 @@ const [endDate, setEndDate] = useState("");
   onChange={handleSearch}
 />
 
-{/* Event Date Filter */}
-<input
-  type="date"
-  className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
-  value={startDate}
-  onChange={(e) => setStartDate(e.target.value)}
-  placeholder="From"
-/>
+{/* Timestamp Filter (T) */}
+<div className="flex items-center gap-2">
+  <span className="font-bold text-gray-600">T:</span>
+  <input
+    type="date"
+    className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
+    value={startDate}
+    onChange={(e) => setStartDate(e.target.value)}
+    placeholder="From"
+  />
+  <span className="text-gray-600 mx-1">to</span>
+  <input
+    type="date"
+    className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
+    value={endDate}
+    onChange={(e) => setEndDate(e.target.value)}
+    placeholder="To"
+  />
+</div>
 
-<span className="text-gray-600 mx-1">to</span>
+{/* Event Date Filter (E) */}
+<div className="flex items-center gap-2">
+  <span className="font-bold text-gray-600">E:</span>
+  <input
+    type="date"
+    className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
+    value={eventStartDate}
+    onChange={(e) => setEventStartDate(e.target.value)}
+    placeholder="Event From"
+  />
+  <span className="text-gray-600 mx-1">to</span>
+  <input
+    type="date"
+    className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
+    value={eventEndDate}
+    onChange={(e) => setEventEndDate(e.target.value)}
+    placeholder="Event To"
+  />
+</div>
 
-<input
-  type="date"
-  className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
-  value={endDate}
-  onChange={(e) => setEndDate(e.target.value)}
-  placeholder="To"
-/>
 
 
 {/* Reset Button */}
 <button
   className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full md:w-auto md:mt-1"
-
   onClick={() => {
     setSearchQuery("");
     setStartDate("");
-setEndDate("");
-
+    setEndDate("");
+    setEventStartDate(""); // ← this was missing
+    setEventEndDate("");   // ← this was missing
     setFilteredTransactions(transactions);
   }}
+  
 >
   Reset
 </button>

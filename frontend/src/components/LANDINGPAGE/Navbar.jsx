@@ -20,7 +20,14 @@ const Navbar = () => {
             <div className="text-white hidden sm:block">
               <ul className="flex items-center gap-6 text-xl py-4 ">
                 <li>
-                  <a href="#">About</a>
+                <a
+  href="https://www.facebook.com/bevandamobilebar"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  Facebook
+</a>
+
                 </li>
               </ul>
             </div>

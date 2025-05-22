@@ -39,7 +39,7 @@ class TransactionHistory(models.Model):
         ('Stock-In', 'Stock-In'),
     ]
     
-    action = models.CharField(max_length=10, choices=ACTION_CHOICES)
+    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
     item_name = models.CharField(max_length=300)  # The product name
     quantity = models.CharField(max_length=100, null=True, blank=True)
     previous_quantity = models.CharField(max_length=100, null=True, blank=True)
@@ -58,7 +58,8 @@ class TransactionHistory(models.Model):
     def __str__(self):
         return f"{self.item_name} - {self.action} on {self.timestamp}"
     class Meta:
-        unique_together = ('action', 'item_name', 'quantity', 'type', 'volume')
+        constraints = []  # or just delete the Meta class entirely if unused
+
     
 
 class Booking(models.Model):

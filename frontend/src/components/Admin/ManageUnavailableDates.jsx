@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { MdEditNote, MdOutlineDeleteOutline } from "react-icons/md";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { FaRegCalendarAlt } from "react-icons/fa";
 
 
 const ManageUnavailableDates = () => {
@@ -11,10 +14,34 @@ const ManageUnavailableDates = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [isBulkConfirming, setIsBulkConfirming] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showPreviewCalendar, setShowPreviewCalendar] = useState(false);
+const [previewDates, setPreviewDates] = useState({
+  redDates: [],
+  greyDates: [],
+  greenDates: [],
+});
+
 
   useEffect(() => {
     fetchDates();
   }, []);
+  useEffect(() => {
+    const fetchBookingPreviewDates = async () => {
+      try {
+        const { data } = await axios.get("http://127.0.0.1:8000/api/unavailable-dates/");
+        setPreviewDates({
+          redDates: data.confirmed_dates.map(date => new Date(date + "T00:00:00")),
+          greyDates: data.admin_unavailable_dates.map(date => new Date(date + "T00:00:00")),
+          greenDates: data.pending_dates.map(date => new Date(date + "T00:00:00")),
+        });
+      } catch (err) {
+        console.error("Error fetching preview dates:", err);
+      }
+    };
+  
+    fetchBookingPreviewDates();
+  }, []);
+  
 
   const fetchDates = async () => {
     try {
@@ -122,83 +149,63 @@ const ManageUnavailableDates = () => {
         }}
       />
 
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}
-      >
-        <input
-          type="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          required
-          style={{
-            padding: '8px 10px',
-            borderRadius: 5,
-            border: '1px solid #444',
-            height: '40px',
-            width: '160px'
-          }}
-        />
+<form onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 8 }}>
+          <input
+            type="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            required
+            style={{ padding: '8px 10px', borderRadius: 5, border: '1px solid #444', height: '40px', width: '160px' }}
+          />
+          <FaRegCalendarAlt
+            onClick={() => setShowPreviewCalendar(prev => !prev)}
+            style={{ fontSize: 20, color: showPreviewCalendar ? "#2563eb" : "#6b7280", cursor: "pointer" }}
+            title={showPreviewCalendar ? "Hide preview calendar" : "Show preview calendar"}
+          />
+
+          {showPreviewCalendar && (
+            <div style={{ position: "absolute", top: "45px", left: 0, zIndex: 999, backgroundColor: "#fff", border: "1px solid #ccc", borderRadius: 8, padding: 10, boxShadow: "0 4px 8px rgba(0,0,0,0.1)" }}>
+              <h4 style={{ fontSize: "14px", fontWeight: "bold", marginBottom: 8 }}>📅 Booking Preview</h4>
+              <DatePicker
+                inline
+                dayClassName={(date) => {
+                  const dateString = date.toISOString().split("T")[0];
+                  if (previewDates.redDates.some(d => d.toISOString().split("T")[0] === dateString)) return "red-date";
+                  if (previewDates.greyDates.some(d => d.toISOString().split("T")[0] === dateString)) return "grey-date";
+                  if (previewDates.greenDates.some(d => d.toISOString().split("T")[0] === dateString)) return "green-date";
+                  return null;
+                }}
+              />
+              <style>{`
+                .red-date { background-color: #f87171 !important; color: white; }
+                .grey-date { background-color: #9ca3af !important; color: white; }
+                .green-date { background-color: #34d399 !important; color: white; }
+              `}</style>
+            </div>
+          )}
+        </div>
         <input
           type="text"
           name="reason"
           placeholder="Optional reason"
           value={formData.reason}
           onChange={handleChange}
-          style={{
-            padding: '8px 10px',
-            borderRadius: 5,
-            border: '1px solid #444',
-            fontSize: 13,
-            height: '40px',
-            width: '240px'
-          }}
+          style={{ padding: '8px 10px', borderRadius: 5, border: '1px solid #444', fontSize: 13, height: '40px', width: '240px' }}
         />
-        {editId ? (
-          <>
-            <button type="submit" style={{
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              height: '40px',
-              padding: '0 12px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontSize: 14,
-              marginTop: '1px'
-            }}>
-              Confirm
-            </button>
-            <button type="button" onClick={handleCancel} style={{
-              backgroundColor: '#6c757d',
-              color: 'white',
-              border: 'none',
-              height: '40px',
-              padding: '0 12px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontSize: 14
-            }}>
-              Cancel
-            </button>
-          </>
-        ) : (
-          <button type="submit" style={{
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            height: '40px',
-            padding: '0 12px',
-            borderRadius: 6,
-            cursor: 'pointer',
-            fontSize: 14,
-            marginTop: '1px'
-          }}>
-            Add Date
+        <button type="submit" style={{ backgroundColor: '#007bff', color: 'white', border: 'none', height: '40px', padding: '0 12px', borderRadius: 6, cursor: 'pointer', fontSize: 14, marginTop: '1px' }}>
+          {editId ? 'Confirm' : 'Add Date'}
+        </button>
+        {editId && (
+          <button type="button" onClick={handleCancel} style={{ backgroundColor: '#6c757d', color: 'white', border: 'none', height: '40px', padding: '0 12px', borderRadius: 6, cursor: 'pointer', fontSize: 14 }}>
+            Cancel
           </button>
         )}
       </form>
+
+      {/* The rest of the table and logic continues here... */}
+  
 
       <table style={{
         width: '100%',

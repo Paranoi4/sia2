@@ -231,8 +231,9 @@ class TodoViewSet(viewsets.ModelViewSet):
         previous_quantity = todo_item.quantity
         current_quantity = int(todo_item.quantity)
 
-        if stock_return_quantity > current_quantity:
-            return Response({"error": "Insufficient stock to return."}, status=status.HTTP_400_BAD_REQUEST)
+        if stock_return_quantity <= 0:
+            return Response({"error": "Quantity must be greater than zero."}, status=status.HTTP_400_BAD_REQUEST)
+
 
         # Subtract stock due to return and save
         todo_item.quantity = str(current_quantity + stock_return_quantity)

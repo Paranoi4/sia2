@@ -76,11 +76,15 @@ const LandingPage = () => {
       {/* ⚓ Footer */}
       <Footer5 />
       {/* 🛜 Messenger Icon */}
+      <div className="fixed bottom-6 right-6 flex items-center gap-3 z-50">
+  <span className="bg-white text-black px-4 py-2 rounded-lg shadow-md text-sm font-medium">
+    For concerns, please message us
+  </span>
   <a
     href="https://www.facebook.com/messages/t/208991199769575"
     target="_blank"
     rel="noopener noreferrer"
-    className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg z-50"
+    className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -91,6 +95,8 @@ const LandingPage = () => {
       <path d="M12 2C6.48 2 2 6.19 2 11c0 2.4 1.08 4.56 2.82 6.16V22l2.62-1.44c1.26.34 2.62.52 4.04.52 5.52 0 10-4.19 10-9.34S17.52 2 12 2zm1.45 12.58-2.42-2.58-5.03 2.58 5.45-5.82 2.4 2.6 5.05-2.6-5.45 5.82z" />
     </svg>
   </a>
+</div>
+
     </div>
   );
 };
