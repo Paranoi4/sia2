@@ -103,18 +103,10 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bevanda_db',         # ✅ Your MySQL database name
-        'USER': 'root',               # ✅ Your MySQL username
-        'PASSWORD': 'atejassy7',  # ✅ Your MySQL password
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",  # SQLite file will be created in your project root
     }
 }
-
 
 
 # Password validation
