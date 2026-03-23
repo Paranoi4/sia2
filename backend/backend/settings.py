@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-gvv&(wdw76^8+3s*@hwc_h)a08c33zr-l7lxn#09j2vg8l*m-q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.254.101']
 
 
 CORS_ALLOWED_ORIGINS = [
@@ -34,7 +34,7 @@ CORS_ALLOWED_ORIGINS = [
       "http://localhost:5173",
   ]
 
-
+CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
 
 INSTALLED_APPS = [

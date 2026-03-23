@@ -17,7 +17,7 @@ const OrderPage = () => {
   };
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/packages/")
+    axios.get("http://192.168.254.101:8000/api/packages/")
       .then((res) => {
         const available = res.data.filter((pkg) => pkg.available);
         setPackages(available);
@@ -29,7 +29,7 @@ const OrderPage = () => {
   }, []);
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/drink-categories/")
+    axios.get("http://192.168.254.101:8000/api/drink-categories/")
       .then((res) => setDrinkCategories(res.data))
       .catch((err) => console.error("Failed to load drink categories", err));
   }, []);

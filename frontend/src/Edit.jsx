@@ -32,7 +32,7 @@ function Edit() {
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/transactions/");
+      const response = await axios.get("http://192.168.254.101:8000/api/transactions/");
       const allowedActions = ["Added", "Deleted", "Updated"];
       const filteredTransactions = response.data.filter(transaction =>
         allowedActions.includes(transaction.action) && transaction.volume

@@ -18,7 +18,7 @@ const [endDate, setEndDate] = useState("");
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/transactions/");
+      const response = await axios.get("http://192.168.254.101:8000/api/transactions/");
       const returnTransactions = response.data.filter(
         (transaction) => transaction.action === "Stock-In-Return"
       );

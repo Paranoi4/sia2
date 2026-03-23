@@ -54,7 +54,7 @@ function App() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/todo/");
+      const response = await axios.get("http://192.168.254.101:8000/api/todo/");
       setTodos(response.data);
       setIsLoading(false);
     } catch (error) {

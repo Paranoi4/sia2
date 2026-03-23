@@ -60,7 +60,7 @@ useEffect(() => {
 
       const storedBookingId = sessionStorage.getItem("bookingId");
       if (storedBookingId) {
-        axios.delete(`http://127.0.0.1:8000/api/delete-unpaid-booking/${storedBookingId}/`)
+        axios.delete(`http://192.168.254.101:8000/api/delete-unpaid-booking/${storedBookingId}/`)
           .then(() => console.log("✅ Unpaid booking deleted successfully."))
           .catch((err) => console.error("🚨 Error deleting booking:", err));
       }
@@ -73,7 +73,7 @@ useEffect(() => {
   useEffect(() => {
     const fetchUnavailableDates = async () => {
         try {
-            const { data } = await axios.get("http://127.0.0.1:8000/api/unavailable-dates/");
+            const { data } = await axios.get("http://192.168.254.101:8000/api/unavailable-dates/");
             
             setRedDates(data.confirmed_dates.map(date => new Date(date + "T00:00:00")));
             setGreyDates(data.admin_unavailable_dates.map(date => new Date(date + "T00:00:00")));
@@ -138,7 +138,7 @@ useEffect(() => {
     if (!validateForm()) return;
 
     try {
-        const response = await axios.post("http://127.0.0.1:8000/api/bookings/", {
+        const response = await axios.post("http://192.168.254.101:8000/api/bookings/", {
             ...formData,
             confirmed: false  // Save as pending
         });

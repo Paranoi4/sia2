@@ -58,7 +58,7 @@ const PaymentForm = () => {
 
     try {
       setIsSubmitting(true);
-      const response = await axios.post("http://127.0.0.1:8000/api/payments/", formData, {
+      const response = await axios.post("http://192.168.254.101:8000/api/payments/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

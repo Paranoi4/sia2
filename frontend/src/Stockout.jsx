@@ -22,7 +22,7 @@ const [eventEndDate, setEventEndDate] = useState("");
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/transactions/");
+      const response = await axios.get("http://192.168.254.101:8000/api/transactions/");
 
       // Filter only Stock-Out transactions
       const stockOutTransactions = response.data.filter(

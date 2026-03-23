@@ -24,7 +24,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
 
   const handleEdit = async (id, updatedTodo) => {
     try {
-      const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${id}/`, updatedTodo);
+      const response = await axios.patch(`http://192.168.254.101:8000/api/todo/${id}/`, updatedTodo);
       const updatedTodos = todos.map(todo =>
         todo.id === id ? { ...todo, ...response.data } : todo
       );
@@ -43,7 +43,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this item?");
   if (!confirmDelete) return;
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/todo/${id}/`);
+      await axios.delete(`http://192.168.254.101:8000/api/todo/${id}/`);
       setTodos(todos.filter(todo => todo.id !== id));
     } catch (error) {
       console.error(error);
@@ -59,7 +59,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
     if (!data.id || !data.quantity) return alert("Please enter both ID and quantity.");
     try {
       const response = await axios.patch(
-        `http://127.0.0.1:8000/api/todo/${data.id}/${endpoint}/`,
+        `http://192.168.254.101:8000/api/todo/${data.id}/${endpoint}/`,
         data
       );
       const updatedTodos = todos.map(todo =>
