@@ -579,6 +579,46 @@ class POSTransactionViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    @action(detail=True, methods=['post'], url_path='void')
+    def void(self, request, pk=None):
+        transaction = self.get_object()
+        if transaction.voided:
+            return Response({"error": "Transaction is already voided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Restore inventory for each sold item
+        for tx_item in transaction.items.all():
+            try:
+                pos_item = POSItem.objects.get(item_key=tx_item.item_key)
+            except POSItem.DoesNotExist:
+                continue
+            if not pos_item.inventory_item:
+                continue
+            inventory = pos_item.inventory_item
+            restore_amount = tx_item.quantity * pos_item.deduct_per_sale
+            try:
+                current_qty = int(inventory.quantity or 0)
+            except ValueError:
+                continue
+            new_qty = current_qty + restore_amount
+            inventory.quantity = str(new_qty)
+            inventory.save()
+            TransactionHistory.objects.create(
+                action="Stock-In",
+                item_name=inventory.body,
+                previous_quantity=str(current_qty),
+                quantity=str(new_qty),
+                stock_in_quantity=restore_amount,
+                type=inventory.type,
+                volume=inventory.volume,
+                reason=f"Void of POS Transaction #{transaction.id}",
+            )
+
+        transaction.voided = True
+        transaction.voided_at = now()
+        transaction.voided_by = request.user.username
+        transaction.save()
+        return Response({"message": f"Transaction #{transaction.id} voided successfully."}, status=status.HTTP_200_OK)
+
 @api_view(["POST"])
 def approve_payment(request, payment_id):
     try:

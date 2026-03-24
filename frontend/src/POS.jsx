@@ -28,6 +28,104 @@ const getAuthHeaders = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
 });
 
+function DailySummary({ history, historyLoading }) {
+  const [summaryDate, setSummaryDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const dayTx = history.filter((tx) => !tx.voided && tx.created_at.slice(0, 10) === summaryDate);
+  const totalRevenue = dayTx.reduce((s, tx) => s + parseFloat(tx.total), 0);
+  const totalTransactions = dayTx.length;
+  const byCash = dayTx.filter((tx) => !tx.payment_method || tx.payment_method === "cash").reduce((s, tx) => s + parseFloat(tx.total), 0);
+  const byGcash = dayTx.filter((tx) => tx.payment_method === "gcash").reduce((s, tx) => s + parseFloat(tx.total), 0);
+  const byCard = dayTx.filter((tx) => tx.payment_method === "card").reduce((s, tx) => s + parseFloat(tx.total), 0);
+  const totalDiscount = dayTx.reduce((s, tx) => s + parseFloat(tx.senior_discount || 0), 0);
+  const itemMap = {};
+  dayTx.forEach((tx) => tx.items.forEach((item) => {
+    if (!itemMap[item.item_name]) itemMap[item.item_name] = { qty: 0, revenue: 0 };
+    itemMap[item.item_name].qty += item.quantity;
+    itemMap[item.item_name].revenue += parseFloat(item.subtotal);
+  }));
+  const topItems = Object.entries(itemMap).sort((a, b) => b[1].qty - a[1].qty).slice(0, 5);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">📊 Daily Summary</h1>
+        <input
+          type="date"
+          value={summaryDate}
+          onChange={(e) => setSummaryDate(e.target.value)}
+          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      {historyLoading ? (
+        <p className="text-gray-500">Loading...</p>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-blue-600 text-white rounded-xl p-4">
+              <p className="text-xs opacity-80">Total Revenue</p>
+              <p className="text-2xl font-bold mt-1">₱{totalRevenue.toFixed(2)}</p>
+            </div>
+            <div className="bg-gray-800 text-white rounded-xl p-4">
+              <p className="text-xs opacity-80">Transactions</p>
+              <p className="text-2xl font-bold mt-1">{totalTransactions}</p>
+            </div>
+            <div className="bg-green-700 text-white rounded-xl p-4">
+              <p className="text-xs opacity-80">Cash</p>
+              <p className="text-2xl font-bold mt-1">₱{byCash.toFixed(2)}</p>
+            </div>
+            <div className="bg-indigo-600 text-white rounded-xl p-4">
+              <p className="text-xs opacity-80">GCash / Card</p>
+              <p className="text-2xl font-bold mt-1">₱{(byGcash + byCard).toFixed(2)}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow p-5 mb-6 max-w-md">
+            <h2 className="font-bold text-gray-700 mb-3">Payment Breakdown</h2>
+            {[["Cash", byCash, "text-green-600"], ["GCash", byGcash, "text-indigo-600"], ["Card", byCard, "text-blue-600"]].map(([label, amt, color]) => (
+              <div key={label} className="flex justify-between text-sm py-1 border-b border-gray-100 last:border-0">
+                <span className="text-gray-600">{label}</span>
+                <span className={`font-semibold ${color}`}>₱{parseFloat(amt).toFixed(2)}</span>
+              </div>
+            ))}
+            {totalDiscount > 0 && (
+              <div className="flex justify-between text-sm py-1 mt-1">
+                <span className="text-yellow-600">Senior Discounts Given</span>
+                <span className="font-semibold text-yellow-600">−₱{totalDiscount.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
+          <div className="bg-white rounded-xl shadow p-5 max-w-md">
+            <h2 className="font-bold text-gray-700 mb-3">Top Selling Items</h2>
+            {topItems.length === 0 ? (
+              <p className="text-gray-400 text-sm">No sales on this date.</p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-gray-400 text-xs border-b">
+                    <th className="text-left py-1">Item</th>
+                    <th className="text-center py-1">Qty Sold</th>
+                    <th className="text-right py-1">Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topItems.map(([name, data], i) => (
+                    <tr key={name} className="border-b border-gray-50 last:border-0">
+                      <td className="py-1.5 text-gray-800">
+                        <span className="text-xs text-gray-400 mr-1">#{i + 1}</span>{name}
+                      </td>
+                      <td className="text-center py-1.5 font-semibold text-gray-700">{data.qty}</td>
+                      <td className="text-right py-1.5 text-green-600 font-semibold">₱{data.revenue.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function POS() {
   const [searchParams] = useSearchParams();
   const activeSection = searchParams.get("view") || "items";
@@ -39,14 +137,19 @@ export default function POS() {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", price: "", category: "", description: "", inventory_item: "", deduct_per_sale: 1 });
   const [inventoryItems, setInventoryItems] = useState([]);
+  const groups = JSON.parse(localStorage.getItem("groups") || "[]");
+  const isSuperUser = groups.includes("admin") || groups.length === 0;
 
   // Cashier state
   const [cart, setCart] = useState([]);
   const [cashTendered, setCashTendered] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
   const [receiptData, setReceiptData] = useState(null);
+  const [numPax, setNumPax] = useState("");
+  const [numSeniors, setNumSeniors] = useState("");
 
   // History state
   const [history, setHistory] = useState([]);
@@ -73,7 +176,12 @@ export default function POS() {
   const removeFromCart = (id) => setCart((prev) => prev.filter((c) => c.id !== id));
 
   const cartTotal = cart.reduce((sum, c) => sum + parseFloat(c.price) * c.qty, 0);
-  const change = parseFloat(cashTendered || 0) - cartTotal;
+  const pax = parseInt(numPax) || 0;
+  const seniors = parseInt(numSeniors) || 0;
+  const perPaxAmount = pax > 0 ? cartTotal / pax : 0;
+  const seniorDiscount = seniors > 0 && pax > 0 ? seniors * (perPaxAmount * 0.20) : 0;
+  const discountedTotal = cartTotal - seniorDiscount;
+  const change = paymentMethod === "cash" ? parseFloat(cashTendered || 0) - discountedTotal : 0;
 
   const fetchHistory = async () => {
     setHistoryLoading(true);
@@ -87,8 +195,19 @@ export default function POS() {
     }
   };
 
+  const handleVoid = async (txId) => {
+    if (!window.confirm(`Void transaction #${txId}? This will restore inventory stock.`)) return;
+    try {
+      await axios.post(`${BASE_URL}/pos-transactions/${txId}/void/`, {}, getAuthHeaders());
+      setHistory((prev) => prev.map((tx) => tx.id === txId ? { ...tx, voided: true } : tx));
+      setExpandedTx(null);
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to void transaction.");
+    }
+  };
+
   useEffect(() => {
-    if (activeSection === "history") fetchHistory();
+    if (activeSection === "history" || activeSection === "summary") fetchHistory();
   }, [activeSection]);
 
   const handleSaveTransaction = async () => {
@@ -96,10 +215,14 @@ export default function POS() {
     setSaving(true);
     setSaveError("");
     const payload = {
-      total: cartTotal.toFixed(2),
-      cash_tendered: parseFloat(cashTendered).toFixed(2),
-      change: change.toFixed(2),
+      total: discountedTotal.toFixed(2),
+      cash_tendered: paymentMethod === "cash" ? parseFloat(cashTendered).toFixed(2) : discountedTotal.toFixed(2),
+      change: paymentMethod === "cash" ? change.toFixed(2) : "0.00",
+      payment_method: paymentMethod,
       served_by: localStorage.getItem("username") || "",
+      senior_discount: seniorDiscount.toFixed(2),
+      num_pax: pax,
+      num_seniors: seniors,
       items: cart.map((c) => ({
         item_name: c.name,
         item_key: c.item_key,
@@ -110,9 +233,12 @@ export default function POS() {
     };
     try {
       await axios.post(`${BASE_URL}/pos-transactions/`, payload, getAuthHeaders());
-      setReceiptData({ ...payload, date: new Date() });
+      setReceiptData({ ...payload, date: new Date(), senior_discount: seniorDiscount, num_seniors: seniors, num_pax: pax });
       setCart([]);
       setCashTendered("");
+      setPaymentMethod("cash");
+      setNumPax("");
+      setNumSeniors("");
     } catch {
       setSaveError("Failed to save transaction. Please try again.");
     } finally {
@@ -224,22 +350,23 @@ export default function POS() {
                 return [filtered.filter((_, i) => i % 2 === 0), filtered.filter((_, i) => i % 2 !== 0)].map((col, colIdx) => (
                   <div key={colIdx} className="flex-1 flex flex-col gap-4">
                     {col.map((tx) => (
-                  <div key={tx.id} className="rounded-lg shadow overflow-hidden border border-gray-800 bg-gray-900">
+                  <div key={tx.id} className={`rounded-lg shadow overflow-hidden border ${tx.voided ? "border-red-800 bg-gray-900 opacity-60" : "border-gray-800 bg-gray-900"}`}>
                     <button
-                      onClick={() => setExpandedTx(expandedTx === tx.id ? null : tx.id)}
+                      onClick={() => !tx.voided && setExpandedTx(expandedTx === tx.id ? null : tx.id)}
                       style={{ background: "transparent" }}
-                      className={`w-full flex items-center justify-between px-4 py-1.5 hover:bg-gray-800 transition text-left`}
+                      className={`w-full flex items-center justify-between px-4 py-1.5 transition text-left ${tx.voided ? "cursor-default" : "hover:bg-gray-800"}`}
                     >
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-xs text-gray-400">#{tx.id}</span>
                           {tx.served_by && <span className="text-xs text-gray-300">by {tx.served_by}</span>}
+                          {tx.voided && <span className="text-xs font-bold text-red-400 border border-red-600 rounded px-1">VOIDED</span>}
                         </div>
                         <span className="font-semibold text-white text-sm">{new Date(tx.created_at).toLocaleString()}</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="font-bold text-green-400">₱{parseFloat(tx.total).toFixed(2)}</span>
-                        <span className="text-xs text-gray-400">{expandedTx === tx.id ? "▲" : "▼"}</span>
+                        <span className={`font-bold ${tx.voided ? "text-gray-500 line-through" : "text-green-400"}`}>₱{parseFloat(tx.total).toFixed(2)}</span>
+                        {!tx.voided && <span className="text-xs text-gray-400">{expandedTx === tx.id ? "▲" : "▼"}</span>}
                       </div>
                     </button>
                     {expandedTx === tx.id && (
@@ -265,10 +392,29 @@ export default function POS() {
                           </tbody>
                         </table>
                         <div className="flex flex-wrap justify-end gap-3 text-xs pt-1">
-                          <span className="text-gray-400">Cash: <strong className="text-gray-200">₱{parseFloat(tx.cash_tendered).toFixed(2)}</strong></span>
-                          <span className="text-gray-400">Change: <strong className="text-gray-200">₱{parseFloat(tx.change).toFixed(2)}</strong></span>
+                          {tx.senior_discount > 0 && (
+                            <span className="text-yellow-400">Senior Discount ({tx.num_seniors}/{tx.num_pax} pax): <strong>−₱{parseFloat(tx.senior_discount).toFixed(2)}</strong></span>
+                          )}
+                          {tx.payment_method && tx.payment_method !== "cash" ? (
+                            <span className="text-blue-300 font-semibold capitalize">{tx.payment_method === "gcash" ? "GCash" : "Card"}</span>
+                          ) : (
+                            <>
+                              <span className="text-gray-400">Cash: <strong className="text-gray-200">₱{parseFloat(tx.cash_tendered).toFixed(2)}</strong></span>
+                              <span className="text-gray-400">Change: <strong className="text-gray-200">₱{parseFloat(tx.change).toFixed(2)}</strong></span>
+                            </>
+                          )}
                           <span className="text-green-400 font-bold">Total: ₱{parseFloat(tx.total).toFixed(2)}</span>
                         </div>
+                        {isSuperUser && (
+                          <div className="flex justify-end mt-2">
+                            <button
+                              onClick={() => handleVoid(tx.id)}
+                              className="text-xs bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded transition"
+                            >
+                              Void Transaction
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -331,19 +477,10 @@ export default function POS() {
                     <button
                       key={item.id}
                       onClick={() => addToCart(item)}
-                      className="flex flex-col items-center rounded-xl overflow-hidden group transition hover:scale-105"
-                      style={{ width: "90px" }}
+                      className="flex flex-col items-center justify-center rounded-xl bg-gray-800 hover:bg-gray-700 transition px-2 py-3 text-center w-24 border border-white"
                     >
-                      <div
-                        className="w-full flex items-center justify-center text-white text-lg font-bold group-hover:brightness-110 transition"
-                        style={{ height: "70px", backgroundColor: TILE_COLORS[idx % TILE_COLORS.length] }}
-                      >
-                        {item.name.substring(0, 2).toUpperCase()}
-                      </div>
-                      <div className="w-full bg-gray-800 px-1 py-1.5 text-center">
-                        <p className="text-gray-200 text-xs truncate w-full">{item.name}</p>
-                        <p className="text-green-400 text-xs font-semibold">₱{parseFloat(item.price).toFixed(2)}</p>
-                      </div>
+                      <p className="text-gray-100 text-xs leading-tight break-words w-full">{item.name}</p>
+                      <p className="text-green-400 text-xs font-semibold mt-1">₱{parseFloat(item.price).toFixed(2)}</p>
                     </button>
                   ))}
                 </div>
@@ -392,26 +529,77 @@ export default function POS() {
                     <div className="border-t border-gray-600 mt-1" />
                   </div>
                 )}
+                {/* Senior Discount */}
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="text-gray-400 text-xs block mb-1">No. of Pax</label>
+                    <input
+                      type="number" min="1"
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g. 3"
+                      value={numPax}
+                      onChange={(e) => setNumPax(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-gray-400 text-xs block mb-1">Senior Pax</label>
+                    <input
+                      type="number" min="0"
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g. 1"
+                      value={numSeniors}
+                      onChange={(e) => setNumSeniors(e.target.value)}
+                    />
+                  </div>
+                </div>
+                {seniorDiscount > 0 && (
+                  <div className="space-y-0.5">
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>Subtotal</span>
+                      <span>₱{cartTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-yellow-400">
+                      <span>Senior Discount ({seniors} pax × ₱{perPaxAmount.toFixed(2)} × 20%)</span>
+                      <span>−₱{seniorDiscount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-white text-lg">
                   <span>Total</span>
-                  <span className="text-blue-400">₱{cartTotal.toFixed(2)}</span>
+                  <span className="text-blue-400">₱{discountedTotal.toFixed(2)}</span>
                 </div>
                 <div>
-                  <label className="text-gray-400 text-xs block mb-1">Cash Tendered (₱)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="0.00"
-                    value={cashTendered}
-                    onChange={(e) => setCashTendered(e.target.value)}
-                  />
+                  <label className="text-gray-400 text-xs block mb-1">Payment Method</label>
+                  <div className="flex gap-2">
+                    {["cash", "gcash", "card"].map((method) => (
+                      <button
+                        key={method}
+                        onClick={() => { setPaymentMethod(method); setCashTendered(""); }}
+                        className={`flex-1 py-1.5 rounded-lg text-sm font-semibold border transition capitalize ${paymentMethod === method ? "bg-blue-600 border-blue-600 text-white" : "bg-transparent border-gray-600 text-gray-400 hover:border-gray-400"}`}
+                      >
+                        {method === "gcash" ? "GCash" : method.charAt(0).toUpperCase() + method.slice(1)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                {cashTendered !== "" && (
-                  <div className={`flex justify-between font-semibold text-sm ${change >= 0 ? "text-green-400" : "text-red-400"}`}>
-                    <span>{change >= 0 ? "Change" : "Shortage"}</span>
-                    <span>₱{Math.abs(change).toFixed(2)}</span>
+                {paymentMethod === "cash" && (
+                  <div>
+                    <label className="text-gray-400 text-xs block mb-1">Cash Tendered (₱)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0.00"
+                      value={cashTendered}
+                      onChange={(e) => setCashTendered(e.target.value)}
+                    />
+                    {cashTendered !== "" && (
+                      <div className={`flex justify-between font-semibold text-sm mt-1 ${change >= 0 ? "text-green-400" : "text-red-400"}`}>
+                        <span>{change >= 0 ? "Change" : "Shortage"}</span>
+                        <span>₱{Math.abs(change).toFixed(2)}</span>
+                      </div>
+                    )}
                   </div>
                 )}
                 {saveError && (
@@ -419,10 +607,10 @@ export default function POS() {
                 )}
                 <button
                   onClick={handleSaveTransaction}
-                  disabled={cart.length === 0 || change < 0 || saving}
+                  disabled={cart.length === 0 || (paymentMethod === "cash" && change < 0) || (paymentMethod === "cash" && cashTendered === "") || saving}
                   className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition text-base shadow-lg"
                 >
-                  {saving ? "Processing..." : `Charge ₱${cartTotal.toFixed(2)}`}
+                  {saving ? "Processing..." : `Charge ₱${discountedTotal.toFixed(2)}`}
                 </button>
               </div>
             </div>
@@ -646,6 +834,12 @@ export default function POS() {
             </form>
           </div>
         )}
+
+        {/* ── DAILY SUMMARY ── */}
+        {activeSection === "summary" && (
+          <DailySummary history={history} historyLoading={historyLoading} />
+        )}
+
         {/* ── RECEIPT MODAL ── */}
         {receiptData && (
           <>
@@ -688,18 +882,38 @@ export default function POS() {
                   </table>
                   <div className="border-t-2 border-dashed border-gray-300 my-2" />
                   <div className="space-y-1 text-sm">
+                    {receiptData.senior_discount > 0 && (
+                      <>
+                        <div className="flex justify-between text-gray-500 text-xs">
+                          <span>Subtotal</span>
+                          <span>₱{(parseFloat(receiptData.total) + receiptData.senior_discount).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span>Senior Discount ({receiptData.num_seniors}/{receiptData.num_pax} pax × 20%)</span>
+                          <span className="text-yellow-600">−₱{receiptData.senior_discount.toFixed(2)}</span>
+                        </div>
+                      </>
+                    )}
                     <div className="flex justify-between font-bold text-base">
                       <span>Total</span>
                       <span>₱{parseFloat(receiptData.total).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-gray-500 text-xs">
-                      <span>Cash</span>
-                      <span>₱{parseFloat(receiptData.cash_tendered).toFixed(2)}</span>
+                      <span>Payment</span>
+                      <span className="capitalize font-semibold">{receiptData.payment_method === "gcash" ? "GCash" : receiptData.payment_method === "card" ? "Card" : "Cash"}</span>
                     </div>
-                    <div className="flex justify-between text-gray-500 text-xs">
-                      <span>Change</span>
-                      <span>₱{parseFloat(receiptData.change).toFixed(2)}</span>
-                    </div>
+                    {receiptData.payment_method === "cash" && (
+                      <>
+                        <div className="flex justify-between text-gray-500 text-xs">
+                          <span>Cash</span>
+                          <span>₱{parseFloat(receiptData.cash_tendered).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-gray-500 text-xs">
+                          <span>Change</span>
+                          <span>₱{parseFloat(receiptData.change).toFixed(2)}</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="border-t-2 border-dashed border-gray-300 my-3" />
                   <p className="text-center text-xs text-gray-400">Thank you for your purchase!</p>

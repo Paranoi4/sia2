@@ -129,8 +129,8 @@ class POSTransactionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = POSTransaction
-        fields = ['id', 'created_at', 'total', 'cash_tendered', 'change', 'served_by', 'items']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'created_at', 'total', 'cash_tendered', 'change', 'payment_method', 'served_by', 'senior_discount', 'num_pax', 'num_seniors', 'voided', 'voided_at', 'voided_by', 'items']
+        read_only_fields = ['id', 'created_at', 'voided', 'voided_at', 'voided_by']
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')

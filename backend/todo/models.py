@@ -164,6 +164,13 @@ class POSTransaction(models.Model):
     cash_tendered = models.DecimalField(max_digits=10, decimal_places=2)
     change = models.DecimalField(max_digits=10, decimal_places=2)
     served_by = models.CharField(max_length=150, blank=True, null=True)
+    senior_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    num_pax = models.PositiveIntegerField(default=0)
+    num_seniors = models.PositiveIntegerField(default=0)
+    voided = models.BooleanField(default=False)
+    voided_at = models.DateTimeField(null=True, blank=True)
+    voided_by = models.CharField(max_length=150, blank=True, null=True)
+    payment_method = models.CharField(max_length=20, default="cash")  # cash, gcash, card
 
     def __str__(self):
         return f"Transaction #{self.id} - ₱{self.total} on {self.created_at:%Y-%m-%d %H:%M}"

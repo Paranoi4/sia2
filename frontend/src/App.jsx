@@ -16,7 +16,7 @@ import ManagePackages from "./components/Admin/ManagePackages";
 import logo from "./assets/logo.jpg";
 import ManageUnavailableDates from "./components/Admin/ManageUnavailableDates";
 import POS from "./POS";
-import { FaListUl, FaPlusCircle } from "react-icons/fa";
+import { FaListUl, FaPlusCircle, FaChartBar } from "react-icons/fa";
 import {
   FaHome,
   FaBox,
@@ -188,6 +188,12 @@ function App() {
               <NavLink to="/pos?view=create" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
                 <FaPlusCircle className="text-gray-400" />
                 Create Item
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/pos?view=summary" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                <FaChartBar className="text-gray-400" />
+                Daily Summary
               </NavLink>
             </li>
           </ul>
