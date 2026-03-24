@@ -214,10 +214,6 @@ const getStatusClass = (status) => {
         <p>{selectedPayment.booking.venue_address}</p>
       </div>
       <div className="booking-info-row">
-        <strong>PAX:</strong>
-        <p>{selectedPayment.booking.pax}</p>
-      </div>
-      <div className="booking-info-row">
         <strong>Price:</strong>
         <p>₱{selectedPayment.booking.price}</p>
       </div>

@@ -25,7 +25,7 @@ const Package = () => {
           <div className="h-[600px] rounded-lg shadow-inner overflow-hidden flex items-center justify-center transition-transform transform hover:scale-105">
             <img
               src={packagesImage}
-              alt="Packages with Pax and Drinks"
+              alt="Bevanda Packages and Drinks"
               className="w-auto h-full object-contain"
             />
           </div>

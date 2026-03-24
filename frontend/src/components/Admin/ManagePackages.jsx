@@ -4,7 +4,7 @@ import { MdOutlineDeleteOutline } from "react-icons/md";
 
 const ManagePackages = () => {
   const [packages, setPackages] = useState([]);
-  const [newPackage, setNewPackage] = useState({ pax: "", price: "", available: true });
+  const [newPackage, setNewPackage] = useState({ price: "", available: true });
   const [drinkCategories, setDrinkCategories] = useState([]);
   const [newCategory, setNewCategory] = useState({ name: "", items: "" });
 
@@ -42,14 +42,14 @@ const ManagePackages = () => {
   };
 
   const handleAddPackage = async () => {
-    if (!newPackage.pax || !newPackage.price) {
-      alert("Please enter pax and price.");
+    if (!newPackage.price) {
+      alert("Please enter price.");
       return;
     }
     try {
       const res = await axios.post("http://127.0.0.1:8000/api/packages/", newPackage);
       setPackages([...packages, res.data]);
-      setNewPackage({ pax: "", price: "", available: true });
+      setNewPackage({ price: "", available: true });
     } catch (error) {
       console.error("Failed to add package", error);
     }
@@ -106,18 +106,11 @@ const ManagePackages = () => {
       <h3 className="text-xl font-semibold mb-2">Add New Package</h3>
 <div className="flex items-center gap-4 mb-10">
   <input
-    type="text"
-    placeholder="e.g. 50 pax"
-    value={newPackage.pax}
-    onChange={(e) => setNewPackage({ ...newPackage, pax: e.target.value })}
-    className="border rounded p-2 w-1/3"
-  />
-  <input
     type="number"
     placeholder="e.g. 15000"
     value={newPackage.price}
     onChange={(e) => setNewPackage({ ...newPackage, price: e.target.value })}
-    className="border rounded p-2 w-1/3"
+    className="border rounded p-2 w-1/2"
   />
   <label className="flex items-center gap-1">
     <input
@@ -138,7 +131,6 @@ const ManagePackages = () => {
       <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300 mb-6">
   <thead>
     <tr className="bg-gray-900 text-white">
-      <th className="border border-gray-300 px-4 py-3 text-center">PAX</th>
       <th className="border border-gray-300 px-4 py-3 text-center">Price</th>
       <th className="border border-gray-300 px-4 py-3 text-center">Available</th>
     </tr>
@@ -146,14 +138,6 @@ const ManagePackages = () => {
         <tbody>
           {packages.map((pkg, index) => (
             <tr key={pkg.id} className="hover:bg-gray-100 transition">
-            <td className="border border-gray-300 px-4 py-2 text-right">
-  <input
-    type="text"
-    value={pkg.pax}
-    onChange={(e) => handlePackageChange(index, "pax", e.target.value)}
-    className="border border-gray-300 rounded px-4 py-2 w-full text-right"
-  />
-</td>
 <td className="border border-gray-300 px-4 py-2 text-right">
   <input
     type="number"

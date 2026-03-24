@@ -2,34 +2,24 @@ import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
 import Login from "./Login";
-import Transaction from "./Transaction";
-import Edit from "./Edit";
-import Stockin from "./Stockin";
-import Stockout from "./Stockout";
-import StockOutEvent from "./StockOutEvent";
-import StockInReturn from "./StockInReturn";
+
 import Table from "./components/Table";
 import TodoForm from "./components/TodoForm";
 import LandingPage from "./LandingPage";
 import BookPage from "./BookPage";
-import ManagePackages from "./components/Admin/ManagePackages";
+import CourtBooking from "./components/CourtBooking";
 import logo from "./assets/logo.jpg";
 import ManageUnavailableDates from "./components/Admin/ManageUnavailableDates";
 import {
   FaHome,
   FaBox,
-  FaHistory,
   FaCalendarAlt,
-  FaGift,
   FaPowerOff,
   FaAppleAlt,
   FaCocktail,
   FaCubes,
   FaArchive,
   FaCreditCard,
-  FaRegCalendarMinus,
-  FaTruckLoading,
-  FaUndoAlt,
 } from 'react-icons/fa';
 
 import { NavLink } from "react-router-dom";
@@ -41,8 +31,7 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [openTransaction, setOpenTransaction] = useState(false);
-  const [openPreparation, setOpenPreparation] = useState(false);
+
   const [openBooking, setOpenBooking] = useState(false);
   
 
@@ -83,10 +72,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<CourtBooking />} />
         <Route path="/first/*" element={<BookPage />} />
         <Route path="/landing-page" element={<LandingPage />} />
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/main-inventory" /> : <Login />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
 
         {/* Authenticated Routes */}
         <Route
@@ -135,94 +124,11 @@ function App() {
     <>
      
 
-      <li>
-        <NavLink
-  to="/main-inventory"
-  className={({ isActive }) =>
-    `flex items-center justify-between w-full gap-3 ${
-      isActive ? "bg-indigo-600 text-white" : "bg-blue-600 text-white hover:bg-blue-700"
-    } p-2 rounded-md`
-  }
->
-  <span className="flex items-center gap-3"><FaBox className="text-white" />
-  Main Inventory</span>
-  
-</NavLink>
-
-      </li>
-
-      {/* 📂 Transaction History */}
-      <li>
-      <button
-  onClick={() => setOpenTransaction(!openTransaction)}
-  className={`flex items-center justify-between w-full gap-3 ${
-    openTransaction
-      ? "bg-indigo-600 text-white"
-      : "bg-blue-600 text-white hover:bg-blue-700"
-  } p-2 rounded-md`}
->
-  <span className="flex items-center gap-3"><FaHistory className="text-white" />
-  Transaction History</span>
-  <span className="text-white">›</span>
-</button>
 
 
-  {openTransaction && (
-    <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300">
-      <li>
-      <NavLink
-  to="/transaction"
-  className={({ isActive }) =>
-    `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`
-  }
->
-  <FaTruckLoading className="text-white" />
-  Stock-In
-</NavLink>
 
-      </li>
-      <li>
-        <NavLink to="/stock-out-event" className={({ isActive }) =>
-            `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>
-        <FaBox className="text-white" />
-        Stock-Out</NavLink>
-      </li>
-      <li>
-        <NavLink to="/edit" className={({ isActive }) =>  `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaHistory className="text-white" />
-        Product History</NavLink>
-      </li>
-    </ul>
-  )}
-</li>
 
-      {/* 🎉 Preparation Inventory */}
-      <li>
-      <button
-  onClick={() => setOpenPreparation(!openPreparation)}
-  className={`flex items-center justify-between w-full gap-3 ${
-    openPreparation
-      ? "bg-indigo-600 text-white"
-      : "bg-blue-600 text-white hover:bg-blue-700"
-  } p-2 rounded-md`}
->
-  <span className="flex items-center gap-3"><FaGift className="text-white" />
-  Preparation Inventory</span>
-  <span className="text-white">›</span>
-</button>
 
-        {openPreparation && (
-          <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300">
-            <li>
-              <NavLink to="/stock-out" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaBox className="text-white" />
-              Stock-Out Event</NavLink>
-            </li>
-            <li>
-              <NavLink to="/stock-in-return" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaUndoAlt className="text-white" />
-              Stock-In Return</NavLink>
-            </li>
-          </ul>
-        )}
-      </li>
     </>
   )}
 
@@ -252,10 +158,6 @@ function App() {
               Payment Management</NavLink>
             </li>
             <li>
-              <NavLink to="/manage-packages" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaRegCalendarMinus className="text-white" />
-              Manage Packages</NavLink>
-            </li>
-            <li>
               <NavLink to="/unavailable" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaPowerOff className="text-white" />
               Manage Unavailable Dates</NavLink>
             </li>
@@ -282,72 +184,9 @@ function App() {
 
               <main className="flex-1 p-8">
                 <Routes>
-                  <Route
-                    path="/main-inventory"
-                    element={
-                      <PrivateRoute>
-                        <>
-                          <nav className="pt-8">
-                            <h1 className="text-5xl text-center pb-8">Bevanda Inventory</h1>
-                          </nav>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                          <div className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
-  <FaCubes className="text-white text-3xl" />
-  <div>
-    <h3 className="text-white text-sm">Total Items</h3>
-    <p className="text-2xl font-semibold text-white">{todos.length}</p>
-  </div>
-</div>
 
-<div className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
-    <FaBox className="text-white text-3xl" />
-    <div>
-      <h3 className="text-white text-sm">Total Quantity</h3>
-      <p className="text-white text-2xl font-semibold">
-        {todos.reduce((acc, item) => acc + parseInt(item.quantity), 0)}
-      </p>
-    </div>
-  </div>
-      <div className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
-  <FaCocktail className="text-white text-3xl" />
-  <div>
-    <h3 className="text-white text-sm">Beverages</h3>
-    <p className="text-2xl font-semibold text-white">{todos.filter(item => item.type === "Beverage").length}</p>
-  </div>
-</div>
 
-<div className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
-  <FaAppleAlt className="text-white text-3xl" />
-  <div>
-    <h3 className="text-white text-sm">Fruits</h3>
-    <p className="text-2xl font-semibold text-white">{todos.filter(item => item.type === "Fruits").length}</p>
-  </div>
-</div>
-
-<div className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
-    <FaArchive className="text-white text-3xl" />
-    <div>
-      <h3 className="text-white text-sm">Non-Perishable Items</h3>
-      <p className="text-white text-2xl font-semibold">
-        {todos.filter(item => item.type === "Non-Perishable Item").length}
-      </p>
-    </div>
-  </div>
-    </div>
-                          <TodoForm setTodos={setTodos} todos={todos} />
-                          <Table todos={todos} setTodos={setTodos} isLoading={isLoading} />
-                        </>
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route path="/transaction" element={<PrivateRoute><Transaction /></PrivateRoute>} />
-                  <Route path="/edit" element={<PrivateRoute><Edit /></PrivateRoute>} />
-                  <Route path="/stock-in" element={<PrivateRoute><Stockin /></PrivateRoute>} />
-                  <Route path="/stock-out" element={<PrivateRoute><Stockout /></PrivateRoute>} />
-                  <Route path="/stock-out-event" element={<PrivateRoute><StockOutEvent /></PrivateRoute>} />
-                  <Route path="/stock-in-return" element={<PrivateRoute><StockInReturn /></PrivateRoute>} />
                   <Route path="/admin/*" element={<PrivateRoute><BookPage /></PrivateRoute>} />
-                  <Route path="/manage-packages" element={<PrivateRoute><ManagePackages /></PrivateRoute>} />
                   <Route path="/unavailable" element={<PrivateRoute><ManageUnavailableDates /></PrivateRoute>} />
                   
                 </Routes>

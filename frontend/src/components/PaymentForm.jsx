@@ -20,8 +20,7 @@ const PaymentForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!bookingData) {
-    alert("No booking data found. Redirecting to home.");
-    navigate("/");
+    navigate("/first/booking");
     return null;
   }
 
@@ -126,7 +125,6 @@ const PaymentForm = () => {
           <div className="order-details">
             <h3>Order Details:</h3>
             <p><strong>Event Type:</strong> {bookingData?.event_type}</p>
-            <p><strong>PAX:</strong> {bookingData?.pax}</p>
             <p><strong>Price:</strong> ₱{bookingData?.price?.toLocaleString()}</p>
             <p><strong>Event Date:</strong> {bookingData?.event_date}</p>
           </div>

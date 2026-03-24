@@ -73,7 +73,7 @@ class Booking(models.Model):
     event_date = models.DateField()
     available_time = models.CharField(max_length=10)
     contact_number_venue = models.CharField(max_length=15)
-    pax = models.IntegerField()
+    pax = models.IntegerField(null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)  # ✅ Remove `default=now`
     confirmed = models.BooleanField(default=False)  # ✅ Check if payment was made
@@ -111,12 +111,11 @@ class Payment(models.Model):
     
 
 class Package(models.Model):
-    pax = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     available = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.pax} - ₱{self.price}"
+        return f"₱{self.price}"
     
 class DrinkCategory(models.Model):
     name = models.CharField(max_length=100)  # e.g. "Cocktail"
@@ -126,10 +125,10 @@ class DrinkCategory(models.Model):
         return self.name
 
 class ProductAllocation(models.Model):
-    package_pax = models.IntegerField()  # Number of pax (e.g. 10, 20, 30)
+    package_pax = models.IntegerField(null=True, blank=True)  # Number of pax (e.g. 10, 20, 30) - made optional
     product_name = models.CharField(max_length=100)  # Must match Todo.product name
-    quantity_per_pax = models.IntegerField()  # How many of this product per pax
+    quantity_per_pax = models.IntegerField(null=True, blank=True)  # How many of this product per pax - made optional
 
     def __str__(self):
-        return f"{self.package_pax} pax - {self.product_name} ({self.quantity_per_pax} per pax)"
+        return f"{self.product_name} allocation"
 

@@ -11,7 +11,7 @@ import backgroundImage from "../assets/1113bg.png";
 const BookingForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const selectedPackage = location.state?.selectedPackage || null;
+
   const [captchaToken, setCaptchaToken] = useState(null);
   const [formData, setFormData] = useState({
     first_name: "",
@@ -24,8 +24,7 @@ const BookingForm = () => {
     event_date: null,
     available_time: "",
     contact_number_venue: "",
-    pax: selectedPackage ? parseInt(selectedPackage.pax, 10) : 0,
-    price: selectedPackage ? parseFloat(selectedPackage.price) : 0,
+    price: 15000, // Default package price
   });
 
   const [errors, setErrors] = useState({});
@@ -48,12 +47,6 @@ useEffect(() => {
 }, []);
 
   useEffect(() => {
-    if (!selectedPackage) {
-      alert("You must select a package first!");
-      navigate("/");
-    }
-  
-
     const handleBeforeUnload = (event) => {
       event.preventDefault();
       event.returnValue = "";
@@ -68,7 +61,7 @@ useEffect(() => {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [selectedPackage, navigate]);
+  }, [navigate]);
 
   useEffect(() => {
     const fetchUnavailableDates = async () => {
@@ -90,9 +83,6 @@ useEffect(() => {
     fetchUnavailableDates();
 }, []);
 
-
-
-  if (!selectedPackage) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -205,9 +195,6 @@ useEffect(() => {
 
               <label className="booking-label">Venue Address*</label>
               <input type="text" name="venue_address" value={formData.venue_address} onChange={handleChange} required className="booking-input" />
-
-              <label className="booking-label">PAX</label>
-              <p className="booking-summary-text">{formData.pax}</p>
 
               <label className="booking-label">PRICE</label>
               <p className="booking-summary-text">₱{formData.price.toLocaleString()}</p>

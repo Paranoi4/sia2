@@ -1,0 +1,350 @@
+/* Court Booking Styles */
+.court-booking {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.court-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.brand-name {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #2d3748;
+}
+
+.header-nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.header-nav button {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 2px solid transparent;
+  color: #4a5568;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.header-nav button:hover {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+/* Main Content */
+.booking-container {
+  display: flex;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 2rem;
+  gap: 2rem;
+  min-height: calc(100vh - 100px);
+}
+
+/* Sidebar */
+.booking-sidebar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 320px;
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+}
+
+.booking-title {
+  font-size: 2rem;
+  color: #2d3748;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.booking-subtitle {
+  color: #718096;
+  margin: 0 0 2rem 0;
+  font-size: 1rem;
+}
+
+.date-picker-section {
+  margin-bottom: 2rem;
+}
+
+.date-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.selected-date {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 1rem;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Legend */
+.legend {
+  margin-bottom: 2rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+}
+
+.legend-color.available {
+  background: #48bb78;
+}
+
+.legend-color.selected {
+  background: #4299e1;
+  border: 3px solid #2b6cb0;
+}
+
+.legend-color.waiting {
+  background: #ed8936;
+}
+
+.legend-color.booked {
+  background: #e53e3e;
+}
+
+.legend-color.open-play {
+  background: #9f7aea;
+}
+
+/* Book Now Button */
+.book-now-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+.book-now-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+}
+
+/* Courts Grid */
+.courts-grid-container {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.courts-grid {
+  display: grid;
+  grid-template-columns: 140px repeat(8, 1fr);
+  gap: 4px;
+  min-width: 1400px;
+}
+
+.time-header {
+  background: #2d3748;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.court-header-cell {
+  background: #4a5568;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.time-slot {
+  background: #f7fafc;
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #4a5568;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.court-slot {
+  min-height: 50px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+}
+
+.court-slot.available {
+  background: #c6f6d5;
+  border-color: #48bb78;
+}
+
+.court-slot.available:hover {
+  background: #9ae6b4;
+  transform: scale(1.02);
+}
+
+.court-slot.booked {
+  background: #fed7d7;
+  border-color: #e53e3e;
+  cursor: not-allowed;
+}
+
+.court-slot.waiting {
+  background: #feebc8;
+  border-color: #ed8936;
+}
+
+.court-slot.waiting:hover {
+  background: #fbd38d;
+  transform: scale(1.02);
+}
+
+.court-slot.open-play {
+  background: #e9d8fd;
+  border-color: #9f7aea;
+}
+
+.court-slot.selected-slot {
+  background: #bee3f8 !important;
+  border-color: #4299e1 !important;
+  border-width: 3px !important;
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+}
+
+.open-play-text {
+  color: #553c9a;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.waiting-text {
+  color: #c05621;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .booking-container {
+    flex-direction: column;
+  }
+  
+  .booking-sidebar {
+    width: 100%;
+    position: static;
+  }
+  
+  .courts-grid {
+    grid-template-columns: 100px repeat(8, minmax(80px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .header-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .booking-container {
+    padding: 1rem;
+  }
+  
+  .booking-sidebar {
+    padding: 1.5rem;
+  }
+  
+  .courts-grid-container {
+    padding: 1rem;
+  }
+  
+  .courts-grid {
+    grid-template-columns: 80px repeat(8, minmax(60px, 1fr));
+  }
+  
+  .court-header-cell,
+  .time-slot {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+}

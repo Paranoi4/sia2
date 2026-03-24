@@ -6,7 +6,7 @@ const Hero = () => {
   const navigate = useNavigate();
 
   const handleBookNow = () => {
-    navigate("/first/");
+    navigate("/");
   };
 
   return (
