@@ -5,12 +5,12 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes
 from . import serializers
 from . import models
-from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment, ProductAllocation
+from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment, ProductAllocation, POSItem, POSTransaction
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
-from .serializers import BookingSerializer, UnavailableDateSerializer, PaymentSerializer, PackageSerializer, DrinkCategorySerializer
+from .serializers import BookingSerializer, UnavailableDateSerializer, PaymentSerializer, PackageSerializer, DrinkCategorySerializer, POSItemSerializer, POSTransactionSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from datetime import timedelta
 from rest_framework.generics import ListCreateAPIView
@@ -523,6 +523,61 @@ class PackageViewSet(viewsets.ModelViewSet):
 class DrinkCategoryViewSet(viewsets.ModelViewSet):
     queryset = DrinkCategory.objects.all()
     serializer_class = DrinkCategorySerializer
+
+class POSItemViewSet(viewsets.ModelViewSet):
+    queryset = POSItem.objects.all().order_by('-created_at')
+    serializer_class = POSItemSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class POSTransactionViewSet(viewsets.ModelViewSet):
+    queryset = POSTransaction.objects.all().order_by('-created_at')
+    serializer_class = POSTransactionSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'post', 'head', 'options']
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        transaction = serializer.save()
+
+        # Auto-deduct inventory for each sold item
+        for tx_item in transaction.items.all():
+            # Find the matching POSItem by item_key
+            try:
+                pos_item = POSItem.objects.get(item_key=tx_item.item_key)
+            except POSItem.DoesNotExist:
+                continue
+
+            if not pos_item.inventory_item:
+                continue
+
+            inventory = pos_item.inventory_item
+            deduct_amount = tx_item.quantity * pos_item.deduct_per_sale
+
+            try:
+                current_qty = int(inventory.quantity or 0)
+            except ValueError:
+                continue
+
+            previous_qty = str(current_qty)
+            new_qty = max(0, current_qty - deduct_amount)
+            inventory.quantity = str(new_qty)
+            inventory.save()
+
+            TransactionHistory.objects.create(
+                action="Stock-Out",
+                item_name=inventory.body,
+                previous_quantity=previous_qty,
+                quantity=str(new_qty),
+                stock_out_quantity=deduct_amount,
+                type=inventory.type,
+                volume=inventory.volume,
+                reason=f"POS Sale: {tx_item.quantity}x {tx_item.item_name}",
+            )
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 @api_view(["POST"])
 def approve_payment(request, payment_id):

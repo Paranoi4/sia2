@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from . import models
-from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment, Package, DrinkCategory
+from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment, Package, DrinkCategory, POSItem, POSTransaction, POSTransactionItem
 
 class TodoSerializer(serializers.ModelSerializer):
     
@@ -107,3 +107,34 @@ class UnavailableDateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnavailableDate
         fields = ['id', 'date', 'reason']
+
+class POSItemSerializer(serializers.ModelSerializer):
+    inventory_item_name = serializers.CharField(source='inventory_item.body', read_only=True)
+
+    class Meta:
+        model = POSItem
+        fields = ['id', 'item_key', 'name', 'price', 'category', 'description',
+                  'inventory_item', 'inventory_item_name', 'deduct_per_sale', 'created_at']
+        read_only_fields = ['item_key', 'created_at', 'inventory_item_name']
+
+
+class POSTransactionItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = POSTransactionItem
+        fields = ['id', 'item_name', 'item_key', 'price', 'quantity', 'subtotal']
+
+
+class POSTransactionSerializer(serializers.ModelSerializer):
+    items = POSTransactionItemSerializer(many=True)
+
+    class Meta:
+        model = POSTransaction
+        fields = ['id', 'created_at', 'total', 'cash_tendered', 'change', 'served_by', 'items']
+        read_only_fields = ['id', 'created_at']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        transaction = POSTransaction.objects.create(**validated_data)
+        for item in items_data:
+            POSTransactionItem.objects.create(transaction=transaction, **item)
+        return transaction

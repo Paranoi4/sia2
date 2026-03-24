@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Login from "./Login";
 import Transaction from "./Transaction";
@@ -15,6 +15,8 @@ import BookPage from "./BookPage";
 import ManagePackages from "./components/Admin/ManagePackages";
 import logo from "./assets/logo.jpg";
 import ManageUnavailableDates from "./components/Admin/ManageUnavailableDates";
+import POS from "./POS";
+import { FaListUl, FaPlusCircle } from "react-icons/fa";
 import {
   FaHome,
   FaBox,
@@ -30,6 +32,7 @@ import {
   FaRegCalendarMinus,
   FaTruckLoading,
   FaUndoAlt,
+  FaCashRegister,
 } from 'react-icons/fa';
 
 import { NavLink } from "react-router-dom";
@@ -40,15 +43,14 @@ import { NavLink } from "react-router-dom";
 function App() {
   const [todos, setTodos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem("access"));
   const [openTransaction, setOpenTransaction] = useState(false);
   const [openPreparation, setOpenPreparation] = useState(false);
   const [openBooking, setOpenBooking] = useState(false);
+  const [openPOS, setOpenPOS] = useState(false);
   
 
   useEffect(() => {
-    const token = localStorage.getItem("access");
-    setIsAuthenticated(!!token);
     fetchData();
   }, []);
 
@@ -149,6 +151,47 @@ function App() {
   
 </NavLink>
 
+      </li>
+
+      <li>
+        <button
+          onClick={() => setOpenPOS(!openPOS)}
+          className={`flex items-center justify-between w-full gap-3 ${
+            openPOS ? "bg-indigo-600 text-white" : "bg-blue-600 text-white hover:bg-blue-700"
+          } p-2 rounded-md`}
+        >
+          <span className="flex items-center gap-3"><FaCashRegister className="text-white" />
+          POS</span>
+          <span className="text-white">›</span>
+        </button>
+        {openPOS && (
+          <ul className="pl-4 pt-1 space-y-0.5 text-sm">
+            <li>
+              <NavLink to="/pos?view=cashier" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                <FaCashRegister className="text-gray-400" />
+                Cashier
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/pos?view=history" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                <FaHistory className="text-gray-400" />
+                Sales History
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/pos?view=items" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                <FaListUl className="text-gray-400" />
+                All POS Items
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/pos?view=create" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                <FaPlusCircle className="text-gray-400" />
+                Create Item
+              </NavLink>
+            </li>
+          </ul>
+        )}
       </li>
 
       {/* 📂 Transaction History */}
@@ -346,6 +389,7 @@ function App() {
                   <Route path="/stock-out" element={<PrivateRoute><Stockout /></PrivateRoute>} />
                   <Route path="/stock-out-event" element={<PrivateRoute><StockOutEvent /></PrivateRoute>} />
                   <Route path="/stock-in-return" element={<PrivateRoute><StockInReturn /></PrivateRoute>} />
+                  <Route path="/pos" element={<PrivateRoute><POS /></PrivateRoute>} />
                   <Route path="/admin/*" element={<PrivateRoute><BookPage /></PrivateRoute>} />
                   <Route path="/manage-packages" element={<PrivateRoute><ManagePackages /></PrivateRoute>} />
                   <Route path="/unavailable" element={<PrivateRoute><ManageUnavailableDates /></PrivateRoute>} />

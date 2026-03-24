@@ -1,7 +1,7 @@
 
 from django.urls import path, include
 from rest_framework import routers
-from .views import TodoViewSet, TransactionHistoryViewSet, CustomTokenObtainPairView, protected_view, BookingView, UnavailableDatesView,AdminUnavailableDateView, UnavailableDateDeleteView, UnavailableDateUpdateView, PaymentCreateView, CleanupExpiredBookings, AdminApprovePaymentView, PaymentStatusView, DeleteUnpaidBookingView,PaymentListView,PaymentDetailView, PackageViewSet, DrinkCategoryViewSet, PaymentDeleteView
+from .views import TodoViewSet, TransactionHistoryViewSet, CustomTokenObtainPairView, protected_view, BookingView, UnavailableDatesView,AdminUnavailableDateView, UnavailableDateDeleteView, UnavailableDateUpdateView, PaymentCreateView, CleanupExpiredBookings, AdminApprovePaymentView, PaymentStatusView, DeleteUnpaidBookingView,PaymentListView,PaymentDetailView, PackageViewSet, DrinkCategoryViewSet, PaymentDeleteView, POSItemViewSet, POSTransactionViewSet
 from rest_framework_simplejwt.views import TokenRefreshView
 
 router = routers.DefaultRouter()
@@ -9,6 +9,8 @@ router.register('todo', TodoViewSet, basename='todo')
 router.register('transactions', TransactionHistoryViewSet, basename='transactions')
 router.register('packages', PackageViewSet, basename='packages')  # 👈 Add this
 router.register('drink-categories', DrinkCategoryViewSet, basename='drinkcategory')
+router.register('pos-items', POSItemViewSet, basename='positem')
+router.register('pos-transactions', POSTransactionViewSet, basename='postransaction')
 
 
 

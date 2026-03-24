@@ -90,7 +90,7 @@ function StockIn() {
               </thead>
               <tbody>
                 {filteredTransactions.map((transaction) => (
-                  <tr key={transaction.id} className="border-b hover:bg-gray-100 transition">
+                  <tr key={transaction.id} className="border-b hover:bg-gray-100 transition text-gray-900">
                     <td className="px-4 py-2">{transaction.action}</td>
                     <td className="px-4 py-2">{transaction.item_name}</td>
                     <td className="px-4 py-2">{transaction.quantity}</td>

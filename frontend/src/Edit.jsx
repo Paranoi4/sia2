@@ -109,7 +109,7 @@ function Edit() {
               </thead>
               <tbody>
                 {filteredTransactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-gray-100 transition text-sm">
+                  <tr key={transaction.id} className="hover:bg-gray-100 transition text-sm text-gray-900">
                     <td className="border border-gray-300 px-4 py-2 text-center">
                       <span className={`px-2 py-1 rounded text-white text-xs font-semibold ${
                         transaction.action === "Added"

@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
 from datetime import timedelta
+import uuid
 
 
 ### Inventory Models ###
@@ -132,4 +133,50 @@ class ProductAllocation(models.Model):
 
     def __str__(self):
         return f"{self.package_pax} pax - {self.product_name} ({self.quantity_per_pax} per pax)"
+
+
+### POS Model ###
+class POSItem(models.Model):
+    item_key = models.CharField(max_length=20, unique=True, editable=False)
+    name = models.CharField(max_length=200)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    category = models.CharField(max_length=100, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    inventory_item = models.ForeignKey(
+        'Todo', on_delete=models.SET_NULL, null=True, blank=True, related_name='pos_items'
+    )
+    deduct_per_sale = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.item_key:
+            self.item_key = uuid.uuid4().hex[:8].upper()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"[{self.item_key}] {self.name}"
+
+
+### POS Transaction Models ###
+class POSTransaction(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    cash_tendered = models.DecimalField(max_digits=10, decimal_places=2)
+    change = models.DecimalField(max_digits=10, decimal_places=2)
+    served_by = models.CharField(max_length=150, blank=True, null=True)
+
+    def __str__(self):
+        return f"Transaction #{self.id} - ₱{self.total} on {self.created_at:%Y-%m-%d %H:%M}"
+
+
+class POSTransactionItem(models.Model):
+    transaction = models.ForeignKey(POSTransaction, on_delete=models.CASCADE, related_name="items")
+    item_name = models.CharField(max_length=200)
+    item_key = models.CharField(max_length=20)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField()
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.item_name} x{self.quantity}"
 

@@ -130,7 +130,7 @@ setEndDate("");
               </thead>
               <tbody>
                 {filteredTransactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-gray-100 transition">
+                  <tr key={transaction.id} className="hover:bg-gray-100 transition text-gray-900">
                     
                     <td className="border border-gray-300 px-4 py-2 text-center">{transaction.item_name}</td>
                     <td className="border border-gray-300 px-4 py-2 text-center">{transaction.type}</td>
