@@ -13,6 +13,7 @@ import {
   FaShoppingCart,
   FaHistory,
   FaListUl,
+  FaSearch
 } from "react-icons/fa";
 import { MdEditNote, MdOutlineDeleteOutline } from "react-icons/md";
 
@@ -127,6 +128,7 @@ function DailySummary({ history, historyLoading }) {
 }
 
 export default function POS() {
+    const [itemSearch, setItemSearch] = useState("");
   const [searchParams] = useSearchParams();
   const activeSection = searchParams.get("view") || "items";
   const [items, setItems] = useState([]);
@@ -431,24 +433,37 @@ export default function POS() {
 
         {/* ── CASHIER ── */}
         {activeSection === "cashier" && (
-          <div className="flex rounded-xl overflow-hidden shadow-2xl" style={{ minHeight: "78vh" }}>
-            {/* LEFT: Items Panel */}
-            <div className="flex-1 bg-gray-900 flex flex-col p-5">
+           <div className="flex rounded-xl overflow-hidden shadow-2xl" style={{ minHeight: "78vh", background: '#fff' }}>
+             {/* LEFT: Items Panel */}
+            <div className="flex-1 bg-white flex flex-col p-5">
               <div className="flex items-center mb-5">
-                <h1 className="text-white text-xl font-bold flex items-center gap-2">
-                  <FaCashRegister className="text-blue-400" /> Cashier
+                <h1 className="text-gray-800 text-xl font-bold flex items-center gap-2">
+                  <FaCashRegister className="text-gray-800" /> Cashier
                 </h1>
               </div>
 
               {/* Category Tabs */}
               {items.length > 0 && (
-                <div className="flex gap-2 mb-5 flex-wrap">
+                <>
+                  <div className="mb-3 flex items-center w-full md:w-72 relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                      <FaSearch className="text-lg" />
+                    </span>
+                    <input
+                      type="text"
+                      className="flex-1 bg-gray-100 border-none rounded-full pl-10 pr-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-0"
+                      placeholder="Search items here..."
+                      value={itemSearch}
+                      onChange={e => setItemSearch(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex gap-2 mb-5 flex-wrap">
                   <button
                     onClick={() => setActiveCategory("all")}
-                    className={`px-4 py-1.5 rounded-full text-xs font-semibold transition border ${
+                    className={`flex flex-col items-center justify-center w-16 h-8 mx-1 my-1 rounded-md shadow transition-all duration-150 cursor-pointer bg-white text-gray-800 border border-gray-900 hover:bg-gray-100 hover:text-black hover:shadow-lg text-xs ${
                       activeCategory === "all"
-                        ? "bg-blue-600 border-blue-600 text-white"
-                        : "bg-transparent border-gray-600 text-gray-400 hover:border-blue-500 hover:text-blue-400"
+                        ? "ring-2 ring-gray-900 text-black font-bold bg-gray-100"
+                        : ""
                     }`}
                   >
                     All
@@ -457,16 +472,17 @@ export default function POS() {
                     <button
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
-                      className={`px-4 py-1.5 rounded-full text-xs font-semibold transition border ${
-                        activeCategory === cat
-                          ? "bg-blue-600 border-blue-600 text-white"
-                          : "bg-transparent border-gray-600 text-gray-400 hover:border-blue-500 hover:text-blue-400"
-                      }`}
+                      className={`flex flex-col items-center justify-center w-16 h-8 mx-1 my-1 rounded-md shadow transition-all duration-150 cursor-pointer bg-white text-gray-800 border border-gray-900 hover:bg-gray-100 hover:text-black hover:shadow-lg text-xs ${
+                          activeCategory === cat
+                            ? "ring-2 ring-gray-900 text-black font-bold bg-gray-100"
+                            : ""
+                        }`}
                     >
                       {cat}
                     </button>
                   ))}
                 </div>
+                </>
               )}
 
               {/* Items Grid */}
@@ -476,9 +492,13 @@ export default function POS() {
                 <p className="text-gray-400">No items available. Create some first.</p>
               ) : (
                 <div className="flex flex-wrap gap-3 overflow-y-auto flex-1 pr-1 content-start">
-                  {(activeCategory === "all"
-                    ? [...items].sort((a, b) => a.name.localeCompare(b.name))
-                    : items.filter((i) => i.category === activeCategory).sort((a, b) => a.name.localeCompare(b.name))
+                  {(
+                    (activeCategory === "all"
+                      ? [...items]
+                      : items.filter((i) => i.category === activeCategory)
+                    )
+                    .filter((item) => item.name.toLowerCase().includes(itemSearch.toLowerCase()))
+                    .sort((a, b) => a.name.localeCompare(b.name))
                   ).map((item, idx) => (
                     <button
                       key={item.id}
@@ -861,7 +881,7 @@ export default function POS() {
                     <p className="text-xs text-gray-500">Mobile Bar</p>
                     <p className="text-xs text-gray-400 mt-1">{receiptData.date.toLocaleString()}</p>
                     {receiptData.served_by && (
-                      <p className="text-xs text-gray-400">Cashier: {receiptData.served_by}</p>
+                      <p className="text-xs text-gray-900 font-bold flex items-center gap-1"><FaCashRegister className="text-gray-900" /> Cashier: {receiptData.served_by}</p>
                     )}
                   </div>
                   <div className="border-t-2 border-dashed border-gray-300 my-2" />
