@@ -346,7 +346,10 @@ export default function POS() {
             ) : history.length === 0 ? (
               <p className="text-gray-400">No transactions recorded yet.</p>
             ) : (
-              <div className="flex gap-4 max-w-4xl">{(() => { const filtered = history;
+              <div className="flex gap-4 max-w-4xl">{(() => { 
+                const filtered = filterDate
+                  ? history.filter((tx) => tx.created_at.slice(0, 10) === filterDate)
+                  : history;
                 return [filtered.filter((_, i) => i % 2 === 0), filtered.filter((_, i) => i % 2 !== 0)].map((col, colIdx) => (
                   <div key={colIdx} className="flex-1 flex flex-col gap-4">
                     {col.map((tx) => (
@@ -473,7 +476,10 @@ export default function POS() {
                 <p className="text-gray-400">No items available. Create some first.</p>
               ) : (
                 <div className="flex flex-wrap gap-3 overflow-y-auto flex-1 pr-1 content-start">
-                  {(activeCategory === "all" ? items : items.filter((i) => i.category === activeCategory)).map((item, idx) => (
+                  {(activeCategory === "all"
+                    ? [...items].sort((a, b) => a.name.localeCompare(b.name))
+                    : items.filter((i) => i.category === activeCategory).sort((a, b) => a.name.localeCompare(b.name))
+                  ).map((item, idx) => (
                     <button
                       key={item.id}
                       onClick={() => addToCart(item)}
@@ -817,13 +823,10 @@ export default function POS() {
                   value={form.deduct_per_sale}
                   onChange={(e) => setForm({ ...form, deduct_per_sale: e.target.value })}
                 />
-                <p className="text-xs text-gray-500 mt-1">How many units to deduct from inventory each time this item is sold (×quantity ordered).</p>
+
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <FaKey />
-                Unique key will be auto-generated upon creation.
-              </div>
+
 
               <button
                 type="submit"

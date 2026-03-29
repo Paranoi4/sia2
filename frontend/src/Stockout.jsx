@@ -9,8 +9,7 @@ function StockOut() {
   const [searchQuery, setSearchQuery] = useState("");  // Added search query for global filter
   const [startDate, setStartDate] = useState("");
 const [endDate, setEndDate] = useState("");
-const [eventStartDate, setEventStartDate] = useState("");
-const [eventEndDate, setEventEndDate] = useState("");
+
 
   // 🆕 Filter by event date
 
@@ -56,26 +55,15 @@ const [eventEndDate, setEventEndDate] = useState("");
       const matchesSearch = Object.values(transaction).some((value) =>
         String(value).toLowerCase().includes(searchQuery)
       );
-  
       // Transaction Timestamp Filter
       const transactionDate = new Date(transaction.timestamp).toISOString().split("T")[0];
       const matchesTransactionDate =
         (!startDate || transactionDate >= startDate) &&
         (!endDate || transactionDate <= endDate);
-  
-      // Event Date Filter
-      const eventDate = transaction.transaction_date
-        ? new Date(transaction.transaction_date).toISOString().split("T")[0]
-        : null;
-      const matchesEventDate =
-        (!eventStartDate || (eventDate && eventDate >= eventStartDate)) &&
-        (!eventEndDate || (eventDate && eventDate <= eventEndDate));
-  
-      return matchesSearch && matchesTransactionDate && matchesEventDate;
+      return matchesSearch && matchesTransactionDate;
     });
-  
     setFilteredTransactions(filtered);
-  }, [startDate, endDate, eventStartDate, eventEndDate, searchQuery, transactions]);
+  }, [startDate, endDate, searchQuery, transactions]);
   
 
   
@@ -118,25 +106,7 @@ const [eventEndDate, setEventEndDate] = useState("");
   />
 </div>
 
-{/* Event Date Filter (E) */}
-<div className="flex items-center gap-2">
-  <span className="font-bold text-gray-600">E:</span>
-  <input
-    type="date"
-    className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
-    value={eventStartDate}
-    onChange={(e) => setEventStartDate(e.target.value)}
-    placeholder="Event From"
-  />
-  <span className="text-gray-600 mx-1">to</span>
-  <input
-    type="date"
-    className="border border-gray-300 rounded px-4 py-2 w-full md:w-auto"
-    value={eventEndDate}
-    onChange={(e) => setEventEndDate(e.target.value)}
-    placeholder="Event To"
-  />
-</div>
+
 
 
 
@@ -147,8 +117,6 @@ const [eventEndDate, setEventEndDate] = useState("");
     setSearchQuery("");
     setStartDate("");
     setEndDate("");
-    setEventStartDate(""); // ← this was missing
-    setEventEndDate("");   // ← this was missing
     setFilteredTransactions(transactions);
   }}
   

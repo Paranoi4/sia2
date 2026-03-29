@@ -6,7 +6,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
   const [stockOutData, setStockOutData] = useState({ id: '', quantity: '' });
   const [stockInData, setStockInData] = useState({ id: '', quantity: '' });
   const [stockOutEventData, setStockOutEventData] = useState({ id: '', quantity: '', reason: ''  });
-  const [stockInReturnData, setStockInReturnData] = useState({ id: '', quantity: '' });
+
   const [editText, setEditText] = useState({ id: '', body: '', quantity: '', volume: '', type: '' });
   const [filterText, setFilterText] = useState('');
 
@@ -133,42 +133,40 @@ const Table = ({ todos, setTodos, isLoading }) => {
               <tr><td colSpan="7" className="text-center py-4">Loading...</td></tr>
             ) : (
               [...filteredTodos].reverse().map((todo) => (
-
                 <tr key={todo.id} className="hover:bg-gray-100 transition">
-                <td className="border border-gray-300 px-4 py-2 text-center">{todo.id}</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">{todo.body}</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">{todo.quantity}</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">{todo.volume}</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">{todo.type}</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">
-  {new Date(todo.created).toLocaleString("en-US", {
-    timeZone: "Asia/Manila",
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true
-  })}
-</td>
-                <td className="border border-gray-300 px-4 py-2 text-center w-1/6">
-                  <div className="flex justify-center items-center space-x-2 relative -translate-y-3">
-                    <button
-                      onClick={() => { setEditText(todo); document.getElementById("edit-modal").showModal(); }}
-                      className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
-                    >
-                      <MdEditNote className="text-xl text-indigo-600 hover:text-indigo-800" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(todo.id)}
-                      className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
-                    >
-                      <MdOutlineDeleteOutline className="text-xl text-red-600 hover:text-red-800" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              
+                  <td className="border border-gray-300 px-4 py-2 text-center">{todo.id}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{todo.body}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{todo.quantity}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{todo.volume}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{todo.type}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+                    {new Date(todo.created).toLocaleString("en-US", {
+                      timeZone: "Asia/Manila",
+                      month: "short",
+                      day: "2-digit",
+                      year: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true
+                    })}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-center w-1/6">
+                    <div className="flex justify-center items-center space-x-2 relative -translate-y-3">
+                      <button
+                        onClick={() => { setEditText(todo); document.getElementById("edit-modal").showModal(); }}
+                        className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
+                      >
+                        <MdEditNote className="text-xl text-indigo-600 hover:text-indigo-800" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(todo.id)}
+                        className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
+                      >
+                        <MdOutlineDeleteOutline className="text-xl text-red-600 hover:text-red-800" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
               ))
             )}
           </tbody>
@@ -223,10 +221,9 @@ const Table = ({ todos, setTodos, isLoading }) => {
       <dialog id="stock-in-return-modal" className="modal">
         <form method="dialog" className="modal-box">
           <h3 className="font-bold text-lg mb-4">Stock-In Return</h3>
-          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockInReturnData)} className="input input-bordered w-full mb-3" />
-          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockInReturnData)} className="input input-bordered w-full mb-3" />
+          {/* StockInReturn inputs removed */}
           <div className="modal-action">
-            <button type="button" className="btn btn-accent" onClick={() => handleStockAction("stockinreturn", stockInReturnData, "stock-in-return-modal", "Return updated", "Failed to return stock")}>Submit</button>
+            {/* StockInReturn button removed */}
             <button className="btn">Cancel</button>
           </div>
         </form>

@@ -7,7 +7,7 @@ import Edit from "./Edit";
 import Stockin from "./Stockin";
 import Stockout from "./Stockout";
 import StockOutEvent from "./StockOutEvent";
-import StockInReturn from "./StockInReturn";
+
 import Table from "./components/Table";
 import TodoForm from "./components/TodoForm";
 import LandingPage from "./LandingPage";
@@ -266,8 +266,7 @@ function App() {
               Stock-Out Event</NavLink>
             </li>
             <li>
-              <NavLink to="/stock-in-return" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaUndoAlt className="text-white" />
-              Stock-In Return</NavLink>
+
             </li>
           </ul>
         )}
@@ -394,7 +393,7 @@ function App() {
                   <Route path="/stock-in" element={<PrivateRoute><Stockin /></PrivateRoute>} />
                   <Route path="/stock-out" element={<PrivateRoute><Stockout /></PrivateRoute>} />
                   <Route path="/stock-out-event" element={<PrivateRoute><StockOutEvent /></PrivateRoute>} />
-                  <Route path="/stock-in-return" element={<PrivateRoute><StockInReturn /></PrivateRoute>} />
+
                   <Route path="/pos" element={<PrivateRoute><POS /></PrivateRoute>} />
                   <Route path="/admin/*" element={<PrivateRoute><BookPage /></PrivateRoute>} />
                   <Route path="/manage-packages" element={<PrivateRoute><ManagePackages /></PrivateRoute>} />
