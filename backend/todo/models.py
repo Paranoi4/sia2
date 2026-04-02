@@ -19,7 +19,6 @@ class Todo(models.Model):
     quantity = models.CharField(max_length=100, null=True, blank=True)  # Field for quantity
     type = models.CharField(
         max_length=100,
-        choices=TYPE_CHOICES,  # Dropdown choices
         null=True,
         blank=True
     )
@@ -184,6 +183,27 @@ class POSTransactionItem(models.Model):
     quantity = models.PositiveIntegerField()
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
 
+
     def __str__(self):
         return f"{self.item_name} x{self.quantity}"
+
+
+# --- Expense Model for Daily Expenses ---
+class Expense(models.Model):
+    CATEGORY_CHOICES = [
+        ("Utilities", "Utilities"),
+        ("Supplies", "Supplies"),
+        ("Salary", "Salary"),
+        ("Maintenance", "Maintenance"),
+        ("Other", "Other"),
+    ]
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.CharField(max_length=255)
+    date = models.DateField(default=now)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default="Other")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.date} - {self.category}: ₱{self.amount} ({self.description})"
 

@@ -30,16 +30,22 @@ const getAuthHeaders = () => ({
 });
 
 function DailySummary({ history, historyLoading }) {
-  const [summaryDate, setSummaryDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const dayTx = history.filter((tx) => !tx.voided && tx.created_at.slice(0, 10) === summaryDate);
-  const totalRevenue = dayTx.reduce((s, tx) => s + parseFloat(tx.total), 0);
-  const totalTransactions = dayTx.length;
-  const byCash = dayTx.filter((tx) => !tx.payment_method || tx.payment_method === "cash").reduce((s, tx) => s + parseFloat(tx.total), 0);
-  const byGcash = dayTx.filter((tx) => tx.payment_method === "gcash").reduce((s, tx) => s + parseFloat(tx.total), 0);
-  const byCard = dayTx.filter((tx) => tx.payment_method === "card").reduce((s, tx) => s + parseFloat(tx.total), 0);
-  const totalDiscount = dayTx.reduce((s, tx) => s + parseFloat(tx.senior_discount || 0), 0);
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [endDate, setEndDate] = useState(() => new Date().toISOString().slice(0, 10));
+  // Filter transactions within the date range (inclusive)
+  const rangeTx = history.filter((tx) => {
+    if (tx.voided) return false;
+    const txDate = tx.created_at.slice(0, 10);
+    return txDate >= startDate && txDate <= endDate;
+  });
+  const totalRevenue = rangeTx.reduce((s, tx) => s + parseFloat(tx.total), 0);
+  const totalTransactions = rangeTx.length;
+  const byCash = rangeTx.filter((tx) => !tx.payment_method || tx.payment_method === "cash").reduce((s, tx) => s + parseFloat(tx.total), 0);
+  const byGcash = rangeTx.filter((tx) => tx.payment_method === "gcash").reduce((s, tx) => s + parseFloat(tx.total), 0);
+  const byCard = rangeTx.filter((tx) => tx.payment_method === "card").reduce((s, tx) => s + parseFloat(tx.total), 0);
+  const totalDiscount = rangeTx.reduce((s, tx) => s + parseFloat(tx.senior_discount || 0), 0);
   const itemMap = {};
-  dayTx.forEach((tx) => tx.items.forEach((item) => {
+  rangeTx.forEach((tx) => tx.items.forEach((item) => {
     if (!itemMap[item.item_name]) itemMap[item.item_name] = { qty: 0, revenue: 0 };
     itemMap[item.item_name].qty += item.quantity;
     itemMap[item.item_name].revenue += parseFloat(item.subtotal);
@@ -48,35 +54,49 @@ function DailySummary({ history, historyLoading }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
         <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">📊 Daily Summary</h1>
-        <input
-          type="date"
-          value={summaryDate}
-          onChange={(e) => setSummaryDate(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-600">From</label>
+          <input
+            type="date"
+            value={startDate}
+            max={endDate}
+            onChange={e => setStartDate(e.target.value)}
+            className="bg-gray-900 border-none rounded-xl px-4 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow"
+            style={{minWidth: '150px'}}
+          />
+          <label className="text-sm text-gray-600">to</label>
+          <input
+            type="date"
+            value={endDate}
+            min={startDate}
+            onChange={e => setEndDate(e.target.value)}
+            className="bg-gray-900 border-none rounded-xl px-4 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow"
+            style={{minWidth: '150px'}}
+          />
+        </div>
       </div>
       {historyLoading ? (
         <p className="text-gray-500">Loading...</p>
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-blue-600 text-white rounded-xl p-4">
-              <p className="text-xs opacity-80">Total Revenue</p>
-              <p className="text-2xl font-bold mt-1">₱{totalRevenue.toFixed(2)}</p>
+            <div className="bg-gray-900 text-white rounded-xl p-4">
+              <p className="text-xs opacity-80 text-white">Total Revenue</p>
+              <p className="text-2xl font-bold mt-1 text-white">₱{totalRevenue.toFixed(2)}</p>
             </div>
-            <div className="bg-gray-800 text-white rounded-xl p-4">
-              <p className="text-xs opacity-80">Transactions</p>
-              <p className="text-2xl font-bold mt-1">{totalTransactions}</p>
+            <div className="bg-gray-900 text-white rounded-xl p-4">
+              <p className="text-xs opacity-80 text-white">Transactions</p>
+              <p className="text-2xl font-bold mt-1 text-white">{totalTransactions}</p>
             </div>
-            <div className="bg-green-700 text-white rounded-xl p-4">
-              <p className="text-xs opacity-80">Cash</p>
-              <p className="text-2xl font-bold mt-1">₱{byCash.toFixed(2)}</p>
+            <div className="bg-gray-900 text-white rounded-xl p-4">
+              <p className="text-xs opacity-80 text-white">Cash</p>
+              <p className="text-2xl font-bold mt-1 text-white">₱{byCash.toFixed(2)}</p>
             </div>
-            <div className="bg-indigo-600 text-white rounded-xl p-4">
-              <p className="text-xs opacity-80">GCash / Card</p>
-              <p className="text-2xl font-bold mt-1">₱{(byGcash + byCard).toFixed(2)}</p>
+            <div className="bg-gray-900 text-white rounded-xl p-4">
+              <p className="text-xs opacity-80 text-white">GCash / Card</p>
+              <p className="text-2xl font-bold mt-1 text-white">₱{(byGcash + byCard).toFixed(2)}</p>
             </div>
           </div>
           <div className="bg-white rounded-xl shadow p-5 mb-6 max-w-md">
@@ -868,14 +888,15 @@ export default function POS() {
           <>
             <style>{`
               @media print {
+                @page { size: 58mm auto; margin: 0; }
                 body * { visibility: hidden; }
                 #receipt-print, #receipt-print * { visibility: visible; }
-                #receipt-print { position: fixed; top: 0; left: 0; width: 72mm; margin: 0; padding: 4mm; font-family: monospace; }
+                #receipt-print { position: fixed; top: 0; left: 0; width: 58mm; margin: 0; padding: 3mm; font-family: monospace; font-size: 11px; }
               }
             `}</style>
-            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-              <div className="bg-white rounded-xl shadow-2xl w-80 flex flex-col">
-                <div id="receipt-print" className="p-5 font-mono text-sm">
+            <div style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(0,0,0,0.6)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'16px'}}>
+              <div className="bg-white rounded-xl shadow-2xl w-80 flex flex-col" style={{maxHeight: 'calc(100vh - 32px)', overflow: 'hidden'}}>
+                <div id="receipt-print" className="p-5 font-mono text-sm overflow-y-auto flex-1">
                   <div className="text-center mb-3">
                     <p className="font-bold text-lg uppercase tracking-widest">Bevanda</p>
                     <p className="text-xs text-gray-500">Mobile Bar</p>

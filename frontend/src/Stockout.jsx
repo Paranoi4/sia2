@@ -142,7 +142,6 @@ const [endDate, setEndDate] = useState("");
                   <th className="border border-gray-300 px-4 py-3 text-center">Quantity</th>
                   
                   <th className="border border-gray-300 px-4 py-3 text-center">Timestamp</th>
-                  <th className="border border-gray-300 px-4 py-3 text-center">Event Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -168,14 +167,6 @@ const [endDate, setEndDate] = useState("");
     minute: "2-digit",
     hour12: true
   })}
-</td>
-
-<td className="border border-gray-300 px-4 py-2 text-center">
-  {transaction.transaction_date ? new Date(transaction.transaction_date).toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric"
-  }) : "N/A"}
 </td>
 
                   </tr>

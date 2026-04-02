@@ -104,12 +104,6 @@ const Table = ({ todos, setTodos, isLoading }) => {
   >
     Stock Out
   </button>
-  <button
-    className="bg-teal-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-teal-700 transition-all duration-200"
-    onClick={() => document.getElementById('stock-in-return-modal').showModal()}
-  >
-    Stock-In Return
-  </button>
 </div>
 
 
@@ -177,8 +171,8 @@ const Table = ({ todos, setTodos, isLoading }) => {
       <dialog id="stock-in-modal" className="modal">
         <form method="dialog" className="modal-box">
           <h3 className="font-bold text-lg mb-4">Stock In</h3>
-          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3" />
-          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3" />
+          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3 text-white" />
+          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3 text-white" />
           
           <div className="modal-action">
             <button type="button" className="btn btn-primary" onClick={() => handleStockAction("stock_in", stockInData, "stock-in-modal", "Stock added", "Failed to stock in")}>Submit</button>
@@ -190,8 +184,8 @@ const Table = ({ todos, setTodos, isLoading }) => {
       <dialog id="stock-out-modal" className="modal">
         <form method="dialog" className="modal-box">
           <h3 className="font-bold text-lg mb-4">Stock Out</h3>
-          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3" />
-          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3" />
+          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3 text-white" />
+          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3 text-white" />
          
           <div className="modal-action">
             <button type="button" className="btn btn-secondary" onClick={() => handleStockAction("stock_out", stockOutData, "stock-out-modal", "Stock updated", "Failed to stock out")}>Submit</button>
@@ -203,13 +197,13 @@ const Table = ({ todos, setTodos, isLoading }) => {
       <dialog id="stock-out-event-modal" className="modal">
         <form method="dialog" className="modal-box">
           <h3 className="font-bold text-lg mb-4">Stock Out (Event)</h3>
-          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockOutEventData)} className="input input-bordered w-full mb-3" />
-          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockOutEventData)} className="input input-bordered w-full mb-3" />
+          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockOutEventData)} className="input input-bordered w-full mb-3 text-white" />
+          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockOutEventData)} className="input input-bordered w-full mb-3 text-white" />
           <input
   name="reason"
   placeholder="Reason for stock-out"
   onChange={(e) => handleStockChange(e, setStockOutEventData)}
-  className="input input-bordered w-full mb-3"
+  className="input input-bordered w-full mb-3 text-white"
 />
           <div className="modal-action">
             <button type="button" className="btn btn-info" onClick={() => handleStockAction("stockoutevent", stockOutEventData, "stock-out-event-modal", "Event stock updated", "Failed to update")}>Submit</button>
@@ -252,17 +246,14 @@ const Table = ({ todos, setTodos, isLoading }) => {
       className="input input-bordered w-full mb-3"
     />
     <label className="block font-medium mb-2">Ingredients Type</label>
-    <select
+    <input
+      type="text"
       name="type"
-      className="select select-bordered w-full mb-3"
+      className="input input-bordered w-full mb-3"
       onChange={handleChange}
       value={editText.type || ''}
-    >
-      <option value="" disabled>Select ingredient type</option>
-      <option value="Beverage">Beverage</option>
-      <option value="Fruits">Fruits</option>
-      <option value="Non-Perishable Item">Non-Perishable Item</option>
-    </select>
+      placeholder="Enter ingredient type"
+    />
     <div className="modal-action">
       <button
         type="button"

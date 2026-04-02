@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Login from "./Login";
+import Expenses from "./Expenses";
 import Transaction from "./Transaction";
 import Edit from "./Edit";
 import Stockin from "./Stockin";
@@ -166,12 +167,19 @@ function App() {
         </button>
         {openPOS && (
           <ul className="pl-4 pt-1 space-y-0.5 text-sm">
-            <li>
+          
+               <li>
               <NavLink to="/pos?view=cashier" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
                 <FaCashRegister className="text-gray-400" />
                 Cashier
               </NavLink>
             </li>
+              <li>
+              <NavLink to="/expenses" className={({ isActive }) => `flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition ${isActive ? 'bg-indigo-600 text-white' : ''}`}>
+                <FaHistory className="text-gray-400" />
+                Expenses
+              </NavLink>
+               </li>
             <li>
               <NavLink to="/pos?view=history" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
                 <FaHistory className="text-gray-400" />
@@ -234,7 +242,13 @@ function App() {
         <NavLink to="/stock-out-event" className={({ isActive }) =>
             `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>
         <FaBox className="text-white" />
-        Stock-Out</NavLink>
+        Stock-Out Event</NavLink>
+      </li>
+      <li>
+        <NavLink to="/stock-out" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>
+          <FaBox className="text-white" />
+          Inventory Stock Out
+        </NavLink>
       </li>
       <li>
         <NavLink to="/edit" className={({ isActive }) =>  `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaHistory className="text-white" />
@@ -243,34 +257,6 @@ function App() {
     </ul>
   )}
 </li>
-
-      {/* 🎉 Preparation Inventory */}
-      <li>
-      <button
-  onClick={() => setOpenPreparation(!openPreparation)}
-  className={`flex items-center justify-between w-full gap-3 ${
-    openPreparation
-      ? "bg-indigo-600 text-white"
-      : "bg-blue-600 text-white hover:bg-blue-700"
-  } p-2 rounded-md`}
->
-  <span className="flex items-center gap-3"><FaGift className="text-white" />
-  Preparation Inventory</span>
-  <span className="text-white">›</span>
-</button>
-
-        {openPreparation && (
-          <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300">
-            <li>
-              <NavLink to="/stock-out" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaBox className="text-white" />
-              Stock-Out Event</NavLink>
-            </li>
-            <li>
-
-            </li>
-          </ul>
-        )}
-      </li>
     </>
   )}
 
@@ -336,7 +322,7 @@ function App() {
                       <PrivateRoute>
                         <>
                           <nav className="pt-8">
-                            <h1 className="text-5xl text-center pb-8">Bevanda Inventory</h1>
+                            <h1 className="text-5xl text-center pb-8 text-gray-800 font-bold">Bevanda Inventory</h1>
                           </nav>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                           <div className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
@@ -356,31 +342,19 @@ function App() {
       </p>
     </div>
   </div>
-      <div className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
-  <FaCocktail className="text-white text-3xl" />
-  <div>
-    <h3 className="text-white text-sm">Beverages</h3>
-    <p className="text-2xl font-semibold text-white">{todos.filter(item => item.type === "Beverage").length}</p>
-  </div>
-</div>
-
-<div className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
-  <FaAppleAlt className="text-white text-3xl" />
-  <div>
-    <h3 className="text-white text-sm">Fruits</h3>
-    <p className="text-2xl font-semibold text-white">{todos.filter(item => item.type === "Fruits").length}</p>
-  </div>
-</div>
-
-<div className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
-    <FaArchive className="text-white text-3xl" />
-    <div>
-      <h3 className="text-white text-sm">Non-Perishable Items</h3>
-      <p className="text-white text-2xl font-semibold">
-        {todos.filter(item => item.type === "Non-Perishable Item").length}
-      </p>
-    </div>
-  </div>
+      {/* Dynamically render a card for each unique type */}
+      {Array.from(new Set(todos.map(item => item.type)))
+        .filter(type => type && type.trim() !== "")
+        .map((type, idx) => (
+          <div key={type} className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
+            {/* Optionally, you can use different icons based on type, or use a default icon */}
+            <FaBox className="text-white text-3xl" />
+            <div>
+              <h3 className="text-white text-sm">{type}</h3>
+              <p className="text-2xl font-semibold text-white">{todos.filter(item => item.type === type).length}</p>
+            </div>
+          </div>
+        ))}
     </div>
                           <TodoForm setTodos={setTodos} todos={todos} />
                           <Table todos={todos} setTodos={setTodos} isLoading={isLoading} />
@@ -395,6 +369,7 @@ function App() {
                   <Route path="/stock-out-event" element={<PrivateRoute><StockOutEvent /></PrivateRoute>} />
 
                   <Route path="/pos" element={<PrivateRoute><POS /></PrivateRoute>} />
+                  <Route path="/expenses" element={<PrivateRoute><Expenses /></PrivateRoute>} />
                   <Route path="/admin/*" element={<PrivateRoute><BookPage /></PrivateRoute>} />
                   <Route path="/manage-packages" element={<PrivateRoute><ManagePackages /></PrivateRoute>} />
                   <Route path="/unavailable" element={<PrivateRoute><ManageUnavailableDates /></PrivateRoute>} />

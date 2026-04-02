@@ -93,19 +93,14 @@ const TodoForm = ({ todos, setTodos }) => {
               <label className="label">
                 <span className="label-text">Ingredients Type</span>
               </label>
-              <select
+              <input
+                type="text"
                 name="type"
                 onChange={handleChange}
                 value={newTodo.type}
-                className="select select-bordered w-full"
-              >
-                <option disabled value="">
-                  Select ingredient type
-                </option>
-                <option value="Beverage">Beverage</option>
-                <option value="Fruits">Fruits</option>
-                <option value="Non-Perishable Item">Non-Perishable Item</option>
-              </select>
+                placeholder="Enter ingredient type"
+                className="input input-bordered w-full"
+              />
             </div>
             <div className="modal-action">
               <button type="submit" className="btn btn-primary">

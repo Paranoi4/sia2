@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,10 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-gvv&(wdw76^8+3s*@hwc_h)a08c33zr-l7lxn#09j2vg8l*m-q'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.254.101']
 
@@ -33,9 +34,10 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.254.101']
 CORS_ALLOWED_ORIGINS = [
       "http://127.0.0.1:5173",
       "http://localhost:5173",
+      "http://192.168.254.101:5173"
   ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -109,8 +111,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / "db.sqlite3",  # SQLite file will be created in your project root
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='3306'),
     }
 }
 
@@ -159,12 +165,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # 📧 Email Configuration
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-DEFAULT_FROM_EMAIL = 'angelowjs@gmail.com'  # Replace with your Gmail address
+DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
 EMAIL_HOST = 'smtp.gmail.com'  # Gmail's SMTP server
 EMAIL_PORT = 587  # Standard port for TLS
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'angelowjs@gmail.com'  # Replace with your Gmail address
-EMAIL_HOST_PASSWORD = 'rguv xjkz igfu hmwi'  # Replace with your Gmail App Password
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 MEDIA_URL = "/media/"  
 MEDIA_ROOT = BASE_DIR / "media"

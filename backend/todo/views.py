@@ -1,3 +1,14 @@
+
+# ...existing code...
+
+# Expense API: List and Create
+from .models import Expense
+from .serializers import ExpenseSerializer
+from rest_framework import generics, permissions
+class ExpenseListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Expense.objects.all().order_by('-date', '-created_at')
+    serializer_class = ExpenseSerializer
+    permission_classes = [permissions.IsAuthenticated]
 from django.shortcuts import render, get_object_or_404
 from django.utils.timezone import now
 from rest_framework import viewsets, status, generics

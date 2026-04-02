@@ -1,4 +1,13 @@
+
 from django.contrib import admin
+from .models import Expense
+
+class ExpenseAdmin(admin.ModelAdmin):
+    list_display = ("date", "description", "amount", "created_at")
+    list_filter = ("date",)
+    search_fields = ("description",)
+
+admin.site.register(Expense, ExpenseAdmin)
 #from . import models
 #from .models import Booking, UnavailableDate, Payment
 from .models import Booking, UnavailableDate, Payment, Todo, DrinkCategory, ProductAllocation

@@ -1,4 +1,8 @@
 
+# ...existing code...
+
+from .views import ExpenseListCreateAPIView
+
 from django.urls import path, include
 from rest_framework import routers
 from .views import TodoViewSet, TransactionHistoryViewSet, CustomTokenObtainPairView, protected_view, BookingView, UnavailableDatesView,AdminUnavailableDateView, UnavailableDateDeleteView, UnavailableDateUpdateView, PaymentCreateView, CleanupExpiredBookings, AdminApprovePaymentView, PaymentStatusView, DeleteUnpaidBookingView,PaymentListView,PaymentDetailView, PackageViewSet, DrinkCategoryViewSet, PaymentDeleteView, POSItemViewSet, POSTransactionViewSet
@@ -32,6 +36,7 @@ urlpatterns = [
     path("payment-status/<int:booking_id>/", PaymentStatusView.as_view(), name="payment_status"),
     path("delete-unpaid-booking/<int:booking_id>/", DeleteUnpaidBookingView.as_view(), name="delete-unpaid-booking"),
     path("payments/delete/<int:payment_id>/", PaymentDeleteView.as_view(), name="payment-delete"),  # ✅ Add this
+    path('expenses/', ExpenseListCreateAPIView.as_view(), name='expense-list-create'),
     
     
     

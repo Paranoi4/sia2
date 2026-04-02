@@ -1,5 +1,12 @@
 from rest_framework import serializers
 from . import models
+
+# Expense Serializer
+class ExpenseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Expense
+        fields = ['id', 'description', 'amount', 'date', 'category', 'created_at', 'updated_at']
+
 from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment, Package, DrinkCategory, POSItem, POSTransaction, POSTransactionItem
 
 class TodoSerializer(serializers.ModelSerializer):
