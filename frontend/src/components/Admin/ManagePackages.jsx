@@ -9,11 +9,11 @@ const ManagePackages = () => {
   const [newCategory, setNewCategory] = useState({ name: "", items: "" });
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/packages/")
+    axios.get("http://192.168.254.154:8000/api/packages/")
       .then((res) => setPackages(res.data))
       .catch((err) => console.error("Failed to load packages", err));
 
-    axios.get("http://127.0.0.1:8000/api/drink-categories/")
+    axios.get("http://192.168.254.154:8000/api/drink-categories/")
       .then((res) => setDrinkCategories(res.data))
       .catch((err) => console.error("Failed to load drink categories", err));
   }, []);
@@ -33,7 +33,7 @@ const ManagePackages = () => {
   const handleSavePackages = async () => {
     try {
       for (const pkg of packages) {
-        await axios.put(`http://127.0.0.1:8000/api/packages/${pkg.id}/`, pkg);
+        await axios.put(`http://192.168.254.154:8000/api/packages/${pkg.id}/`, pkg);
       }
       alert("Packages updated!");
     } catch (error) {
@@ -47,7 +47,7 @@ const ManagePackages = () => {
       return;
     }
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/packages/", newPackage);
+      const res = await axios.post("http://192.168.254.154:8000/api/packages/", newPackage);
       setPackages([...packages, res.data]);
       setNewPackage({ pax: "", price: "", available: true });
     } catch (error) {
@@ -64,7 +64,7 @@ const ManagePackages = () => {
   const handleSaveDrinkCategories = async () => {
     try {
       for (const category of drinkCategories) {
-        await axios.put(`http://127.0.0.1:8000/api/drink-categories/${category.id}/`, category);
+        await axios.put(`http://192.168.254.154:8000/api/drink-categories/${category.id}/`, category);
       }
       alert("Drink categories updated!");
     } catch (error) {
@@ -78,7 +78,7 @@ const ManagePackages = () => {
       return;
     }
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/drink-categories/", newCategory);
+      const res = await axios.post("http://192.168.254.154:8000/api/drink-categories/", newCategory);
       setDrinkCategories([...drinkCategories, res.data]);
       setNewCategory({ name: "", items: "" });
     } catch (err) {
@@ -91,7 +91,7 @@ const ManagePackages = () => {
     if (!confirmDelete) return;
   
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/drink-categories/${id}/`);
+      await axios.delete(`http://192.168.254.154:8000/api/drink-categories/${id}/`);
       setDrinkCategories(drinkCategories.filter(category => category.id !== id));
       alert("Category deleted successfully.");
     } catch (error) {

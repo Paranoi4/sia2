@@ -24,7 +24,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
 
   const handleEdit = async (id, updatedTodo) => {
     try {
-      const response = await axios.patch(`http://192.168.254.101:8000/api/todo/${id}/`, updatedTodo);
+      const response = await axios.patch(`http://192.168.254.154:8000/api/todo/${id}/`, updatedTodo);
       const updatedTodos = todos.map(todo =>
         todo.id === id ? { ...todo, ...response.data } : todo
       );
@@ -43,7 +43,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this item?");
   if (!confirmDelete) return;
     try {
-      await axios.delete(`http://192.168.254.101:8000/api/todo/${id}/`);
+      await axios.delete(`http://192.168.254.154:8000/api/todo/${id}/`);
       setTodos(todos.filter(todo => todo.id !== id));
     } catch (error) {
       console.error(error);
@@ -59,7 +59,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
     if (!data.id || !data.quantity) return alert("Please enter both ID and quantity.");
     try {
       const response = await axios.patch(
-        `http://192.168.254.101:8000/api/todo/${data.id}/${endpoint}/`,
+        `http://192.168.254.154:8000/api/todo/${data.id}/${endpoint}/`,
         data
       );
       const updatedTodos = todos.map(todo =>
@@ -171,8 +171,8 @@ const Table = ({ todos, setTodos, isLoading }) => {
       <dialog id="stock-in-modal" className="modal">
         <form method="dialog" className="modal-box">
           <h3 className="font-bold text-lg mb-4">Stock In</h3>
-          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3 text-white" />
-          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3 text-white" />
+          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3 text-black" />
+          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3 text-black" />
           
           <div className="modal-action">
             <button type="button" className="btn btn-primary" onClick={() => handleStockAction("stock_in", stockInData, "stock-in-modal", "Stock added", "Failed to stock in")}>Submit</button>
@@ -184,8 +184,8 @@ const Table = ({ todos, setTodos, isLoading }) => {
       <dialog id="stock-out-modal" className="modal">
         <form method="dialog" className="modal-box">
           <h3 className="font-bold text-lg mb-4">Stock Out</h3>
-          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3 text-white" />
-          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3 text-white" />
+          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3 text-black" />
+          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3 text-black" />
          
           <div className="modal-action">
             <button type="button" className="btn btn-secondary" onClick={() => handleStockAction("stock_out", stockOutData, "stock-out-modal", "Stock updated", "Failed to stock out")}>Submit</button>
@@ -196,7 +196,7 @@ const Table = ({ todos, setTodos, isLoading }) => {
 
       <dialog id="stock-out-event-modal" className="modal">
         <form method="dialog" className="modal-box">
-          <h3 className="font-bold text-lg mb-4">Stock Out (Event)</h3>
+          <h3 className="font-bold text-lg mb-4">Stock Out</h3>
           <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockOutEventData)} className="input input-bordered w-full mb-3 text-white" />
           <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockOutEventData)} className="input input-bordered w-full mb-3 text-white" />
           <input

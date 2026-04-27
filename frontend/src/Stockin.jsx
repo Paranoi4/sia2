@@ -19,7 +19,7 @@ function StockIn() {
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/transactions/");
+      const response = await axios.get("http://192.168.254.154:8000/api/transactions/");
       const stockInTransactions = response.data.filter(
         (transaction) => transaction.action === "Stock-In"
       );
@@ -55,7 +55,7 @@ function StockIn() {
             <label className="block text-gray-700 mb-1 font-semibold">Select Date:</label>
             <input
               type="date"
-              className="border border-gray-300 rounded px-3 py-2 w-full"
+              className="border border-gray-300 rounded px-3 py-2 w-full text-black"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
             />

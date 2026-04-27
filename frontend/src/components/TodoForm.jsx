@@ -24,14 +24,14 @@ const TodoForm = ({ todos, setTodos }) => {
         
         if (existingItem) {
             const updatedQuantity = parseInt(existingItem.quantity) + parseInt(newTodo.quantity);
-            const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${existingItem.id}/`, {
+            const response = await axios.patch(`http://192.168.254.154:8000/api/todo/${existingItem.id}/`, {
                 quantity: updatedQuantity,
                 volume: newTodo.volume
             });
 
             setTodos(todos.map(todo => todo.id === existingItem.id ? { ...todo, quantity: updatedQuantity, volume: newTodo.volume } : todo));
         } else {
-            const response = await axios.post('http://127.0.0.1:8000/api/todo/', newTodo);
+            const response = await axios.post('http://192.168.254.154:8000/api/todo/', newTodo);
             setTodos([...todos, response.data]);
         }
 

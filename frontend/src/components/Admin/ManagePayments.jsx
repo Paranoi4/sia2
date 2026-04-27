@@ -17,7 +17,7 @@ const ManagePayments = () => {
 
 const fetchAllPayments = async () => {
   try {
-      const response = await axios.get("http://127.0.0.1:8000/api/payments/");
+      const response = await axios.get("http://192.168.254.154:8000/api/payments/");
       const sorted = response.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       setPayments(sorted);
       
@@ -43,7 +43,7 @@ const fetchAllPayments = async () => {
 
 const fetchPaymentDetails = async (paymentId) => {
   try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/payments/${paymentId}/`);
+      const response = await axios.get(`http://192.168.254.154:8000/api/payments/${paymentId}/`);
       if (response.status === 200) {
           setSelectedPayment(response.data); // This ensures you can view denied payments too
       } else {
@@ -67,7 +67,7 @@ const handleApproval = async (paymentId, action) => {
     if (!confirmed) return;
 
     try {
-        const res = await fetch(`http://127.0.0.1:8000/api/admin/approve-payment/${paymentId}/`, {
+        const res = await fetch(`http://192.168.254.154:8000/api/admin/approve-payment/${paymentId}/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action, custom_message: customMessage }),  // ✅ Added custom message
@@ -95,7 +95,7 @@ const handleDelete = async (paymentId) => {
   if (!confirmed) return;
 
   try {
-      const response = await axios.delete(`http://127.0.0.1:8000/api/payments/delete/${paymentId}/`);
+      const response = await axios.delete(`http://192.168.254.154:8000/api/payments/delete/${paymentId}/`);
       if (response.status === 200) {
           alert("Payment record deleted successfully.");
           fetchAllPayments();  // Refresh the payments list after deletion
@@ -258,7 +258,7 @@ const getStatusClass = (status) => {
               <p className="receipt-link">
                 <strong>Receipt:</strong>{" "}
                 <a
-                  href={`http://127.0.0.1:8000${selectedPayment.receipt}`}
+                  href={`http://192.168.254.154:8000${selectedPayment.receipt}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

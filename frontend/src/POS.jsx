@@ -16,8 +16,9 @@ import {
   FaSearch
 } from "react-icons/fa";
 import { MdEditNote, MdOutlineDeleteOutline } from "react-icons/md";
+import html2canvas from "html2canvas";
 
-const BASE_URL = "http://192.168.254.101:8000/api";
+const BASE_URL = "http://192.168.254.154:8000/api";
 
 const TILE_COLORS = [
   "#4f46e5","#0891b2","#059669","#d97706",
@@ -241,7 +242,6 @@ export default function POS() {
       cash_tendered: paymentMethod === "cash" ? parseFloat(cashTendered).toFixed(2) : discountedTotal.toFixed(2),
       change: paymentMethod === "cash" ? change.toFixed(2) : "0.00",
       payment_method: paymentMethod,
-      served_by: localStorage.getItem("username") || "",
       senior_discount: seniorDiscount.toFixed(2),
       num_pax: pax,
       num_seniors: seniors,
@@ -346,6 +346,17 @@ export default function POS() {
     }
   };
 
+  const handleSaveAsImage = () => {
+    const receipt = document.getElementById("receipt-print");
+    if (!receipt) return;
+    html2canvas(receipt, { backgroundColor: '#fff', scale: 2 }).then((canvas) => {
+      const link = document.createElement("a");
+      link.download = `receipt_${Date.now()}.jpg`;
+      link.href = canvas.toDataURL("image/jpeg", 1.0);
+      link.click();
+    });
+  };
+
   return (
     <div className="flex-1">
         {/* ── SALES HISTORY ── */}
@@ -384,7 +395,6 @@ export default function POS() {
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-xs text-gray-400">#{tx.id}</span>
-                          {tx.served_by && <span className="text-xs text-gray-300">by {tx.served_by}</span>}
                           {tx.voided && <span className="text-xs font-bold text-red-400 border border-red-600 rounded px-1">VOIDED</span>}
                         </div>
                         <span className="font-semibold text-white text-sm">{new Date(tx.created_at).toLocaleString()}</span>
@@ -569,7 +579,7 @@ export default function POS() {
                     {cart.map((c) => (
                       <div key={c.id} className="flex justify-between text-xs text-gray-300">
                         <span className="truncate mr-2">{c.name} × {c.qty}</span>
-                        <span className="flex-shrink-0 text-white font-semibold">₱{(parseFloat(c.price) * c.qty).toFixed(2)}</span>
+                        <span className="flex-shrink-0 text-white font-semibold">₱{parseFloat(c.price) * c.qty}.00</span>
                       </div>
                     ))}
                     <div className="border-t border-gray-600 mt-1" />
@@ -888,10 +898,35 @@ export default function POS() {
           <>
             <style>{`
               @media print {
-                @page { size: 58mm auto; margin: 0; }
+                @page { size: 54mm auto; margin: 0; }
                 body * { visibility: hidden; }
                 #receipt-print, #receipt-print * { visibility: visible; }
-                #receipt-print { position: fixed; top: 0; left: 0; width: 58mm; margin: 0; padding: 3mm; font-family: monospace; font-size: 11px; }
+                #receipt-print {
+                  position: fixed;
+                  top: 0;
+                  left: 0;
+                  width: 52mm;
+                  margin: 0;
+                  padding: 0 0.5mm 0 0.5mm;
+                  font-family: monospace;
+                  font-size: 14px;
+                  font-weight: bold !important;
+                  color: #000 !important;
+                }
+                #receipt-print * {
+                  font-weight: bold !important;
+                  color: #000 !important;
+                }
+                #receipt-print table th, #receipt-print table td {
+                  font-weight: bold !important;
+                  color: #000 !important;
+                  text-align: left !important;
+                }
+                #receipt-print .text-right {
+                  text-align: left !important;
+                  font-weight: bold !important;
+                  color: #000 !important;
+                }
               }
             `}</style>
             <div style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(0,0,0,0.6)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'16px'}}>
@@ -899,11 +934,7 @@ export default function POS() {
                 <div id="receipt-print" className="p-5 font-mono text-sm overflow-y-auto flex-1">
                   <div className="text-center mb-3">
                     <p className="font-bold text-lg uppercase tracking-widest">Bevanda</p>
-                    <p className="text-xs text-gray-500">Mobile Bar</p>
                     <p className="text-xs text-gray-400 mt-1">{receiptData.date.toLocaleString()}</p>
-                    {receiptData.served_by && (
-                      <p className="text-xs text-gray-900 font-bold flex items-center gap-1"><FaCashRegister className="text-gray-900" /> Cashier: {receiptData.served_by}</p>
-                    )}
                   </div>
                   <div className="border-t-2 border-dashed border-gray-300 my-2" />
                   <table className="w-full text-xs mb-1">
@@ -930,7 +961,7 @@ export default function POS() {
                       <>
                         <div className="flex justify-between text-gray-500 text-xs">
                           <span>Subtotal</span>
-                          <span>₱{(parseFloat(receiptData.total) + receiptData.senior_discount).toFixed(2)}</span>
+                          <span>₱{parseFloat(receiptData.total) + receiptData.senior_discount}.00</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span>Senior Discount ({receiptData.num_seniors}/{receiptData.num_pax} pax × 20%)</span>
@@ -960,14 +991,23 @@ export default function POS() {
                     )}
                   </div>
                   <div className="border-t-2 border-dashed border-gray-300 my-3" />
-                  <p className="text-center text-xs text-gray-400">Thank you for your purchase!</p>
+                  <div className="text-xs text-center mt-2" style={{lineHeight: '1.3'}}>
+                    <div>FB: Bevanda Restobar</div>
+                    <div>IG: Bevanda Restaurant and Bar</div>
+                    <div>Tiktok: Bevanda Restaurant and Bar</div>
+                    <div>Email: bevandamobilebar@gmail.com</div>
+                    <div>Number: 09096300880</div>
+                  </div>
+                  <div className="text-xs text-center mt-2" style={{lineHeight: '1.3'}}>
+                    Thank you for your purchase!
+                  </div>
                 </div>
                 <div className="flex gap-2 p-4 border-t">
                   <button
-                    onClick={() => window.print()}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 rounded-lg transition"
+                    onClick={handleSaveAsImage}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 rounded-lg transition"
                   >
-                    🖨 Print Receipt
+                    💾 Save as Image
                   </button>
                   <button
                     onClick={() => setReceiptData(null)}

@@ -28,15 +28,26 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.254.101']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.254.101', '192.168.254.154', '192.168.1.26', '192.168.1.10']
 
 
 CORS_ALLOWED_ORIGINS = [
       "http://127.0.0.1:5173",
       "http://localhost:5173",
-      "http://192.168.254.101:5173"
+      "http://192.168.254.101:5173",
+      "http://192.168.254.154:5173",
+      "http://192.168.1.26:5173",
+      "http://192.168.1.10:5173"
   ]
 
+CSRF_TRUSTED_ORIGINS = [
+      "http://127.0.0.1:5173",
+      "http://localhost:5173",
+      "http://192.168.254.101:5173",
+      "http://192.168.254.154:5173",
+      "http://192.168.1.26:5173",
+      "http://192.168.1.10:5173"
+  ]
 
 # Application definition
 

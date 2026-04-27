@@ -1,6 +1,3 @@
-
-# ...existing code...
-
 # Expense API: List and Create
 from .models import Expense
 from .serializers import ExpenseSerializer
@@ -550,6 +547,34 @@ class POSTransactionViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        # --- STOCK VALIDATION ---
+        # Check all items before saving transaction
+        items_data = serializer.validated_data.get('items', [])
+        error_items = []
+        for tx_item_data in items_data:
+            item_key = tx_item_data.get('item_key')
+            quantity = tx_item_data.get('quantity', 0)
+            try:
+                pos_item = POSItem.objects.get(item_key=item_key)
+            except POSItem.DoesNotExist:
+                continue
+            if not pos_item.inventory_item:
+                continue
+            inventory = pos_item.inventory_item
+            deduct_amount = quantity * pos_item.deduct_per_sale
+            try:
+                current_qty = int(inventory.quantity or 0)
+            except ValueError:
+                current_qty = 0
+            if current_qty < deduct_amount or current_qty <= 0:
+                error_items.append(f"{pos_item.name} (stock: {current_qty})")
+        if error_items:
+            return Response({
+                "error": "Insufficient stock for: " + ", ".join(error_items)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        # --- END STOCK VALIDATION ---
+
         transaction = serializer.save()
 
         # Auto-deduct inventory for each sold item

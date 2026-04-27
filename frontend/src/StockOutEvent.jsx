@@ -19,7 +19,7 @@ function StockOutEvent() {
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get("http://192.168.254.101:8000/api/transactions/");
+      const response = await axios.get("http://192.168.254.154:8000/api/transactions/");
 
       const stockOutEventTransactions = response.data.filter(
         (transaction) => transaction.action === "Stock-Out-Event"
@@ -121,11 +121,11 @@ setEndDate("");
                   <th className="border border-gray-300 px-4 py-3 text-center">Volume</th>
                   <th className="border border-gray-300 px-4 py-3 text-center">Stock-Out</th>
                   
-                  <th className="border border-gray-300 px-4 py-3 text-center">Previous Quantity</th>
-                  <th className="border border-gray-300 px-4 py-3 text-center">Quantity</th>
-                  <th className="border border-gray-300 px-4 py-3 text-center">Reason</th>
+                  <th className="border border-gray-300 px-4 py-2 text-center">Previous Quantity</th>
+                  <th className="border border-gray-300 px-4 py-2 text-center">Quantity</th>
+                  <th className="border border-gray-300 px-4 py-2 text-center">Reason</th>
 
-                  <th className="border border-gray-300 px-4 py-3 text-center">Timestamp</th>
+                  <th className="border border-gray-300 px-4 py-2 text-center">Timestamp</th>
                 </tr>
               </thead>
               <tbody>

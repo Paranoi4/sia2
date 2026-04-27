@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const BASE_URL = "http://192.168.254.101:8000/api";
+const BASE_URL = "http://192.168.254.154:8000/api";
 
 export default function Expenses() {
   const [expenses, setExpenses] = useState([]);
@@ -9,6 +9,7 @@ export default function Expenses() {
   const [form, setForm] = useState({ description: "", amount: "", date: new Date().toISOString().slice(0, 10) });
   const [formError, setFormError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [filterDate, setFilterDate] = useState("");
 
   const fetchExpenses = async () => {
     setLoading(true);
@@ -100,6 +101,24 @@ export default function Expenses() {
         <div className="md:w-1/2 flex flex-col justify-between h-full">
           <div className="h-full flex flex-col">
             <h2 className="text-xl font-bold mb-4 text-gray-700">Expense History</h2>
+            <div className="mb-4 flex items-center gap-2">
+              <label className="text-gray-700 font-medium">Filter by Date:</label>
+              <input
+                type="date"
+                className="border border-gray-300 rounded px-2 py-1 text-black"
+                value={filterDate}
+                onChange={e => setFilterDate(e.target.value)}
+              />
+              {filterDate && (
+                <button
+                  className="ml-2 px-2 py-1 bg-gray-300 rounded text-gray-700 hover:bg-gray-400"
+                  onClick={() => setFilterDate("")}
+                  type="button"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
             <div className="flex-1 flex flex-col">
               {loading ? (
                 <p className="text-gray-400">Loading...</p>
@@ -116,13 +135,15 @@ export default function Expenses() {
                       </tr>
                     </thead>
                     <tbody>
-                      {expenses.map((exp, i) => (
-                        <tr key={exp.id} className={i % 2 === 1 ? "bg-gray-50" : "bg-white"}>
-                          <td className="px-4 py-2 text-gray-800 text-left border-b border-r border-gray-200">{exp.date}</td>
-                          <td className="px-4 py-2 text-gray-800 text-center border-b border-r border-gray-200">{exp.description || <span className='text-gray-400'>—</span>}</td>
-                          <td className="px-4 py-2 text-green-700 font-bold text-center border-b border-gray-200">₱{parseFloat(exp.amount).toFixed(2)}</td>
-                        </tr>
-                      ))}
+                      {expenses
+                        .filter(exp => !filterDate || exp.date === filterDate)
+                        .map((exp, i) => (
+                          <tr key={exp.id} className={i % 2 === 1 ? "bg-gray-50" : "bg-white"}>
+                            <td className="px-4 py-2 text-gray-800 text-left border-b border-r border-gray-200">{exp.date}</td>
+                            <td className="px-4 py-2 text-gray-800 text-center border-b border-r border-gray-200">{exp.description || <span className='text-gray-400'>—</span>}</td>
+                            <td className="px-4 py-2 text-green-700 font-bold text-center border-b border-gray-200">₱{parseFloat(exp.amount).toFixed(2)}</td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>

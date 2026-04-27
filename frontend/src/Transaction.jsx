@@ -19,7 +19,7 @@ const [endDate, setEndDate] = useState("");
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get("http://192.168.254.101:8000/api/transactions/");
+      const response = await axios.get("http://192.168.254.154:8000/api/transactions/");
       const stockInTransactions = response.data.filter(
         (transaction) => transaction.action === "Stock-In"
       );

@@ -11,7 +11,7 @@ function DeletedTransactions() {
 
   const fetchDeletedTransactions = async () => {
     try {
-      const response = await axios.get("http://192.168.254.101:8000/api/transactions/");
+      const response = await axios.get("http://192.168.254.154:8000/api/transactions/");
 
       // Only include "Deleted" transactions (volume is optional)
       const filtered = response.data.filter(transaction =>

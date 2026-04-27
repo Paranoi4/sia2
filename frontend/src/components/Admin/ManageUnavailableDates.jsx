@@ -28,7 +28,7 @@ const [previewDates, setPreviewDates] = useState({
   useEffect(() => {
     const fetchBookingPreviewDates = async () => {
       try {
-        const { data } = await axios.get("http://127.0.0.1:8000/api/unavailable-dates/");
+        const { data } = await axios.get("http://192.168.254.154:8000/api/unavailable-dates/");
         setPreviewDates({
           redDates: data.confirmed_dates.map(date => new Date(date + "T00:00:00")),
           greyDates: data.admin_unavailable_dates.map(date => new Date(date + "T00:00:00")),
@@ -45,7 +45,7 @@ const [previewDates, setPreviewDates] = useState({
 
   const fetchDates = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/admin/unavailable-dates/");
+      const res = await axios.get("http://192.168.254.154:8000/api/admin/unavailable-dates/");
       setDates(res.data);
     } catch (err) {
       console.error("Error loading unavailable dates", err);
@@ -60,9 +60,9 @@ const [previewDates, setPreviewDates] = useState({
     e.preventDefault();
     try {
       if (editId !== null) {
-        await axios.put(`http://127.0.0.1:8000/api/admin/unavailable-dates/update/${editId}/`, formData);
-      } else {
-        await axios.post("http://127.0.0.1:8000/api/admin/unavailable-dates/", formData);
+        await axios.put(`http://192.168.254.154:8000/api/admin/unavailable-dates/update/${editId}/`, formData);
+        } else {
+        await axios.post("http://192.168.254.154:8000/api/admin/unavailable-dates/", formData);
       }
       setFormData({ date: "", reason: "" });
       setEditId(null);
@@ -84,7 +84,7 @@ const [previewDates, setPreviewDates] = useState({
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/admin/unavailable-dates/${id}/`);
+      await axios.delete(`http://192.168.254.154:8000/api/admin/unavailable-dates/${id}/`);
       fetchDates();
     } catch (err) {
       console.error("Error deleting unavailable date", err);
@@ -101,7 +101,7 @@ const [previewDates, setPreviewDates] = useState({
     try {
       await Promise.all(
         selectedIds.map((id) =>
-          axios.delete(`http://127.0.0.1:8000/api/admin/unavailable-dates/${id}/`)
+          axios.delete(`http://192.168.254.154:8000/api/admin/unavailable-dates/${id}/`)
         )
       );
       setSelectedIds([]);
