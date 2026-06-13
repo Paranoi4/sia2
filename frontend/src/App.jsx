@@ -1,201 +1,385 @@
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import './App.css';
-import Transaction from './Transaction';
-import Edit from './Edit';
-import Table from './components/Table';
-import TodoForm from './components/TodoForm';
-import Preparation from './Preparation';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import Login from "./Login";
+import Expenses from "./Expenses";
+import Transaction from "./Transaction";
+import Edit from "./Edit";
+import Stockin from "./Stockin";
+import Stockout from "./Stockout";
+import StockOutEvent from "./StockOutEvent";
 
-// ✅ Move PreparationPage Above App()
-const PreparationPage = ({ date }) => {
-  return (
-    <div>
-      <h1 className="text-4xl font-bold mb-4">Preparation Inventory for {date}</h1>
-      <p>This is a new page for inventory management on {date}.</p>
-    </div>
-  );
-};
+import Table from "./components/Table";
+import TodoForm from "./components/TodoForm";
+import LandingPage from "./LandingPage";
+import BookPage from "./BookPage";
+import ManagePackages from "./components/Admin/ManagePackages";
+import logo from "./assets/logo.jpg";
+import ManageUnavailableDates from "./components/Admin/ManageUnavailableDates";
+import POS from "./POS";
+import { FaListUl, FaPlusCircle, FaChartBar } from "react-icons/fa";
+import {
+  FaHome,
+  FaBox,
+  FaHistory,
+  FaCalendarAlt,
+  FaGift,
+  FaPowerOff,
+  FaAppleAlt,
+  FaCocktail,
+  FaCubes,
+  FaArchive,
+  FaCreditCard,
+  FaRegCalendarMinus,
+  FaTruckLoading,
+  FaUndoAlt,
+  FaCashRegister,
+} from 'react-icons/fa';
+
+import { NavLink } from "react-router-dom";
+
+
+
 
 function App() {
   const [todos, setTodos] = useState([]);
-  const [selectedDate, setSelectedDate] = useState("");
-  const [createdDates, setCreatedDates] = useState([]);
-  const [isLoading, setisLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem("access"));
+  const [openTransaction, setOpenTransaction] = useState(false);
+  const [openPreparation, setOpenPreparation] = useState(false);
+  const [openBooking, setOpenBooking] = useState(false);
+  const [openPOS, setOpenPOS] = useState(false);
+  
 
-  // ✅ Load Created Dates from Local Storage
   useEffect(() => {
-    const savedDates = localStorage.getItem("createdDates");
-    if (savedDates) {
-      try {
-        setCreatedDates(JSON.parse(savedDates));
-      } catch (error) {
-        console.error("Error loading saved dates:", error);
-        setCreatedDates([]);
-      }
-    }
     fetchData();
   }, []);
-  
-  
-
-
-  // ✅ Save Created Dates to Local Storage when it changes
-  useEffect(() => {
-    if (createdDates.length > 0) {
-      localStorage.setItem("createdDates", JSON.stringify(createdDates));
-    }
-  }, [createdDates]);
-  
-
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/todo/");
+      const response = await axios.get("http://192.168.254.154:8000/api/todo/");
       setTodos(response.data);
-      setisLoading(false);
+      setIsLoading(false);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleDateChange = (e) => {
-    setSelectedDate(e.target.value);
+  const handleLogout = () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("username");
+    setIsAuthenticated(false);
+    window.location.href = "/login";
   };
 
-   // ✅ Save Created Date to State & Local Storage
-   const handleCreateDate = () => {
-    if (!selectedDate) {
-      alert("Please select a date!");
-      return;
-    }
-  
-    if (createdDates.includes(selectedDate)) {
-      alert("This date already exists!");
-      return;
-    }
-  
-    const formattedDate = selectedDate.replaceAll("/", "-"); // Ensure correct format
-    const updatedDates = [...createdDates, formattedDate];
-    setCreatedDates(updatedDates);
-    localStorage.setItem("createdDates", JSON.stringify(updatedDates));
-  };
-  
-  
+  const groups = JSON.parse(localStorage.getItem("groups") || "[]");
+  const isInventoryOnly = groups.includes("inventory_only");
+  const isSuperUser = groups.includes("admin") || groups.length === 0;
 
-  // ✅ Allow Users to Delete a Created Date
-  const handleDeleteDate = (dateToDelete) => {
-    const updatedDates = createdDates.filter(date => date !== dateToDelete);
-    setCreatedDates(updatedDates);
-    localStorage.setItem("createdDates", JSON.stringify(updatedDates)); // ✅ Update Local Storage
+
+  const PrivateRoute = ({ children }) => {
+    const token = localStorage.getItem("access");
+    return token ? children : <Navigate to="/login" />;
   };
 
   return (
     <Router>
-      <div className="flex min-h-screen bg-indigo-100">
-        {/* Sidebar */}
-        <aside className="w-1/4 bg-gray-900 text-white p-4">
-          <h2 className="text-2xl font-bold mb-6">Welcome, Admin!</h2>
-          <ul className="space-y-4">
-            <li className="font-semibold">
-              <Link to="/" className="hover:underline">Dashboard</Link>
-            </li>
-            <li className="font-semibold">
-              <Link to="/ingredient-list" className="hover:underline">Ingredient List</Link>
-            </li>
-            <li>
-              <details className="cursor-pointer">
-                <summary className="font-semibold">Inventory</summary>
-                <ul className="ml-4 mt-2 space-y-2">
-                  <li>
-                    <Link to="/main-inventory" className="hover:underline">Main Inventory</Link>
-                  </li>
-                  <li>
-                    <Link to="/transaction" className="hover:underline">Stock-in/Stock-out</Link>
-                  </li>
-                </ul>
-                <ul className="ml-4 mt-2 space-y-2">
-                  <li>
-                    <Link to="/edit" className="hover:underline">Product History</Link>
-                  </li>
-                </ul>
-              </details>
-            </li>
-            <li>
-            <details className="cursor-pointer">
-                <summary className="font-semibold">Preparation Inventory</summary>
-                <ul className="ml-4 mt-2 space-y-2">
-                  {/* ✅ Step 3: Allow Date Selection */}
-                  <li>
-                    <input
-                      type="date"
-                      className="input input-bordered text-black p-2 w-full"
-                      value={selectedDate}
-                      onChange={handleDateChange}
-                    />
-                  </li>
-                  {/* ✅ Step 4: Create a Page for the Selected Date */}
-                  <li>
-                    <button className="btn btn-primary mt-2" onClick={handleCreateDate}>
-                      Create New Date Page
-                    </button>
-                  </li>
-                  {/* ✅ Step 5: Show Created Dates as Links */}
-                  {createdDates.length > 0 && (
-  <ul className="ml-4 mt-2 space-y-2">
-    {createdDates.map((date, index) => (
-      <li key={index} className="flex justify-between items-center">
-        <Link to={`/preparation/${encodeURIComponent(date)}`} className="hover:underline">{date}</Link>
-        <button 
-          className="ml-2 text-red-500 hover:text-red-700"
-          onClick={() => handleDeleteDate(date)}
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/first/*" element={<BookPage />} />
+        <Route path="/landing-page" element={<LandingPage />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/main-inventory" /> : <Login />} />
+
+        {/* Authenticated Routes */}
+        <Route
+          path="/*"
+          element={
+            <div className="flex min-h-screen bg-indigo-100 font-sans">
+              {isAuthenticated && (
+                <aside className="w-64 min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6 shadow-lg">
+                 <div className="mb-10 flex flex-col items-center">
+  <img
+    src={logo}
+    alt="Bevanda Logo"
+    className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover mb-3"
+  />
+  <h2 className="text-2xl font-bold text-white">Bevanda</h2>
+
+  <p className="text-sm text-gray-400">Admin Panel</p>
+
+</div>
+<hr className="my-6 border-t border-gray-600 opacity-50" />
+
+<ul className="space-y-4 text-sm font-medium">
+  {/* 🏠 Dashboard */}
+  <li className="relative -top-1">
+  <NavLink
+  to="/landing-page"
+  className={({ isActive }) =>
+    `flex items-center justify-between w-full gap-3 ${
+      isActive ? "bg-indigo-600 text-white" : "bg-blue-600 text-white hover:bg-blue-700"
+    } p-2 rounded-md`
+  }
+>
+<span className="flex items-center gap-3">
+  <FaHome className="text-white text-xl" />
+  Dashboard
+</span>
+
+  
+
+</NavLink>
+
+  </li>
+
+  {/* ✅ Inventory-only and Admin Shared Section */}
+  {(isInventoryOnly || isSuperUser) && (
+    <>
+     
+
+      <li>
+        <NavLink
+  to="/main-inventory"
+  className={({ isActive }) =>
+    `flex items-center justify-between w-full gap-3 ${
+      isActive ? "bg-indigo-600 text-white" : "bg-blue-600 text-white hover:bg-blue-700"
+    } p-2 rounded-md`
+  }
+>
+  <span className="flex items-center gap-3"><FaBox className="text-white" />
+  Main Inventory</span>
+  
+</NavLink>
+
+      </li>
+
+      <li>
+        <button
+          onClick={() => setOpenPOS(!openPOS)}
+          className={`flex items-center justify-between w-full gap-3 ${
+            openPOS ? "bg-indigo-600 text-white" : "bg-blue-600 text-white hover:bg-blue-700"
+          } p-2 rounded-md`}
         >
-                            ❌
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </ul>
-              </details>
+          <span className="flex items-center gap-3"><FaCashRegister className="text-white" />
+          POS</span>
+          <span className="text-white">›</span>
+        </button>
+        {openPOS && (
+          <ul className="pl-4 pt-1 space-y-0.5 text-sm">
+          
+               <li>
+              <NavLink to="/pos?view=cashier" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                <FaCashRegister className="text-gray-400" />
+                Cashier
+              </NavLink>
+            </li>
+              <li>
+              <NavLink to="/expenses" className={({ isActive }) => `flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition ${isActive ? 'bg-indigo-600 text-white' : ''}`}>
+                <FaHistory className="text-gray-400" />
+                Expenses
+              </NavLink>
+               </li>
+            <li>
+              <NavLink to="/pos?view=history" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                <FaHistory className="text-gray-400" />
+                Sales History
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/pos?view=items" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                <FaListUl className="text-gray-400" />
+                All POS Items
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/pos?view=create" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                <FaPlusCircle className="text-gray-400" />
+                Create Item
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/pos?view=summary" className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                <FaChartBar className="text-gray-400" />
+                Daily Summary
+              </NavLink>
             </li>
           </ul>
-        </aside>
+        )}
+      </li>
 
-        {/* Main Content */}
-        <main className="w-3/4 p-8">
-          <Routes>
-            {/* Dashboard Route */}
-            <Route
-              path="/main-inventory"
-              element={
-                <>
-                  <nav className="pt-8">
-                    <h1 className="text-5xl text-center pb-8">Bevanda Inventory</h1>
-                  </nav>
-                  <TodoForm setTodos={setTodos} todos={todos} />
+      {/* 📂 Transaction History */}
+      <li>
+      <button
+  onClick={() => setOpenTransaction(!openTransaction)}
+  className={`flex items-center justify-between w-full gap-3 ${
+    openTransaction
+      ? "bg-indigo-600 text-white"
+      : "bg-blue-600 text-white hover:bg-blue-700"
+  } p-2 rounded-md`}
+>
+  <span className="flex items-center gap-3"><FaHistory className="text-white" />
+  Transaction History</span>
+  <span className="text-white">›</span>
+</button>
 
-                  {/* <TodoForm setTodos={setTodos} todos={todos} fetchData={fetchData} /> */}
-                  <Table todos={todos} setTodos={setTodos} isLoading={isLoading} createdDates={createdDates} />
 
-                </>
-              }
-            />
+  {openTransaction && (
+    <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300">
+      <li>
+      <NavLink
+  to="/transaction"
+  className={({ isActive }) =>
+    `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`
+  }
+>
+  <FaTruckLoading className="text-white" />
+  Stock-In
+</NavLink>
 
-{/* ✅ Dynamic Routes for Each Created Date (No Duplicate Mapping) */}
-{createdDates.map((date, index) => (
-  <Route 
-  key={index} 
-  path={`/preparation/${encodeURIComponent(date)}`}
-  element={<Preparation selectedDate={date} />} />
-))}
-            <Route path="/transaction" element={<Transaction />} />
-            <Route path="/edit" element={<Edit />} />
-            <Route path="/preparation" element={<Preparation />} />
-          </Routes>
-        </main>
-      </div>
+      </li>
+      <li>
+        <NavLink to="/stock-out-event" className={({ isActive }) =>
+            `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>
+        <FaBox className="text-white" />
+        Stock-Out Event</NavLink>
+      </li>
+      <li>
+        <NavLink to="/stock-out" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}>
+          <FaBox className="text-white" />
+          Inventory Stock Out
+        </NavLink>
+      </li>
+      <li>
+        <NavLink to="/edit" className={({ isActive }) =>  `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaHistory className="text-white" />
+        Product History</NavLink>
+      </li>
+    </ul>
+  )}
+</li>
+    </>
+  )}
+
+  {/* 📅 Booking Management */}
+  {isSuperUser && (
+    <>
+      
+
+      <li>
+      <button
+  onClick={() => setOpenBooking(!openBooking)}
+  className={`flex items-center justify-between w-full gap-3 ${
+    openBooking
+      ? "bg-indigo-600 text-white"
+      : "bg-blue-600 text-white hover:bg-blue-700"
+  } p-2 rounded-md`}
+>
+  <span className="flex items-center gap-3"><FaCalendarAlt className="text-white" />
+  Booking Management</span>
+  <span className="text-white">›</span>
+</button>
+
+        {openBooking && (
+          <ul className="pl-6 pt-2 space-y-2 text-sm text-gray-300">
+            <li>
+              <NavLink to="/admin/payments" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaCreditCard className="text-white" />
+              Payment Management</NavLink>
+            </li>
+            <li>
+              <NavLink to="/manage-packages" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaRegCalendarMinus className="text-white" />
+              Manage Packages</NavLink>
+            </li>
+            <li>
+              <NavLink to="/unavailable" className={({ isActive }) => `flex items-center gap-3 p-2 rounded-md ${isActive ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"}`}><FaPowerOff className="text-white" />
+              Manage Unavailable Dates</NavLink>
+            </li>
+          </ul>
+        )}
+      </li>
+    </>
+  )}
+
+  {/* 🚪 Logout button */}
+  <li>
+    <button
+      onClick={handleLogout}
+      className="w-full flex items-center gap-3 bg-red-600 hover:bg-red-700 p-2 rounded-md mt-6"
+    >
+      <FaPowerOff className="text-white" />
+      Logout
+    </button>
+  </li>
+</ul>
+
+                </aside>
+              )}
+
+              <main className="flex-1 p-8">
+                <Routes>
+                  <Route
+                    path="/main-inventory"
+                    element={
+                      <PrivateRoute>
+                        <>
+                          <nav className="pt-8">
+                            <h1 className="text-5xl text-center pb-8 text-gray-800 font-bold">Bevanda Inventory</h1>
+                          </nav>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                          <div className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
+  <FaCubes className="text-white text-3xl" />
+  <div>
+    <h3 className="text-white text-sm">Total Items</h3>
+    <p className="text-2xl font-semibold text-white">{todos.length}</p>
+  </div>
+</div>
+
+<div className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
+    <FaBox className="text-white text-3xl" />
+    <div>
+      <h3 className="text-white text-sm">Total Quantity</h3>
+      <p className="text-white text-2xl font-semibold">
+        {todos.reduce((acc, item) => acc + parseInt(item.quantity), 0)}
+      </p>
+    </div>
+  </div>
+      {/* Dynamically render a card for each unique type */}
+      {Array.from(new Set(todos.map(item => item.type)))
+        .filter(type => type && type.trim() !== "")
+        .map((type, idx) => (
+          <div key={type} className="bg-[#0F1626] p-4 rounded-lg flex items-center gap-4 w-full max-w-[280px]">
+            {/* Optionally, you can use different icons based on type, or use a default icon */}
+            <FaBox className="text-white text-3xl" />
+            <div>
+              <h3 className="text-white text-sm">{type}</h3>
+              <p className="text-2xl font-semibold text-white">{todos.filter(item => item.type === type).length}</p>
+            </div>
+          </div>
+        ))}
+    </div>
+                          <TodoForm setTodos={setTodos} todos={todos} />
+                          <Table todos={todos} setTodos={setTodos} isLoading={isLoading} />
+                        </>
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route path="/transaction" element={<PrivateRoute><Transaction /></PrivateRoute>} />
+                  <Route path="/edit" element={<PrivateRoute><Edit /></PrivateRoute>} />
+                  <Route path="/stock-in" element={<PrivateRoute><Stockin /></PrivateRoute>} />
+                  <Route path="/stock-out" element={<PrivateRoute><Stockout /></PrivateRoute>} />
+                  <Route path="/stock-out-event" element={<PrivateRoute><StockOutEvent /></PrivateRoute>} />
+
+                  <Route path="/pos" element={<PrivateRoute><POS /></PrivateRoute>} />
+                  <Route path="/expenses" element={<PrivateRoute><Expenses /></PrivateRoute>} />
+                  <Route path="/admin/*" element={<PrivateRoute><BookPage /></PrivateRoute>} />
+                  <Route path="/manage-packages" element={<PrivateRoute><ManagePackages /></PrivateRoute>} />
+                  <Route path="/unavailable" element={<PrivateRoute><ManageUnavailableDates /></PrivateRoute>} />
+                  
+                </Routes>
+              </main>
+            </div>
+          }
+        />
+      </Routes>
     </Router>
   );
 }

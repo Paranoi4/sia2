@@ -1,18 +1,26 @@
 from rest_framework import serializers
 from . import models
-from .models import Todo, TransactionHistory
+
+# Expense Serializer
+class ExpenseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Expense
+        fields = ['id', 'description', 'amount', 'date', 'category', 'created_at', 'updated_at']
+
+from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment, Package, DrinkCategory, POSItem, POSTransaction, POSTransactionItem
 
 class TodoSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = models.Todo
         fields = "__all__"
+  
     def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        # Format the created field to display only the date
-        representation['created'] = instance.created.strftime('%Y-%m-%d')
-        return representation
-    #new serializers
+        rep = super().to_representation(instance)
+        rep['created'] = instance.created.isoformat()  # Send full datetime to frontend
+        return rep
+
+
     
     def create(self, validated_data):
         """Log transaction when an item is added"""
@@ -31,7 +39,8 @@ class TodoSerializer(serializers.ModelSerializer):
             action="Updated",
             item_name=instance.body,
             quantity=validated_data.get("quantity", instance.quantity),
-            type=validated_data.get("type", instance.type)
+            type=validated_data.get("type", instance.type),
+            volume=validated_data.get("volume", instance.volume)
         )
         return super().update(instance, validated_data)
     
@@ -39,3 +48,100 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
       class Meta:
         model = TransactionHistory
         fields = "__all__"
+
+
+# ✅ Serializer for Customer Bookings
+class BookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = "__all__"
+
+# ✅ Serializer for Admin Unavailable Dates
+class UnavailableDateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UnavailableDate
+        fields = ["date", "reason"]
+
+# ✅ Serializer for Payments
+class PaymentSerializer(serializers.ModelSerializer):
+    booking_id = serializers.IntegerField(write_only=True)  # ✅ Used to send booking ID from frontend
+
+    class Meta:
+        model = Payment
+        fields = ["id", "booking_id", "booking", "payment_method", "receipt", "created_at"]  
+        extra_kwargs = {"booking": {"read_only": True}}  # ✅ Prevent booking from being modified manually
+
+    def create(self, validated_data):
+        booking_id = validated_data.pop("booking_id", None)
+
+        if not booking_id:
+            raise serializers.ValidationError({"booking": ["This field is required."]})
+
+        # ✅ Ensure booking exists
+        try:
+            booking = Booking.objects.get(id=booking_id)
+        except Booking.DoesNotExist:
+            raise serializers.ValidationError({"booking": ["Invalid Booking ID."]})
+
+        validated_data["booking"] = booking  # ✅ Attach booking to payment
+        return super().create(validated_data)
+
+    def validate_receipt(self, value):
+        """✅ Validate uploaded receipt file type."""
+        if not value.name.lower().endswith(('.jpg', '.jpeg', '.png', '.pdf')):
+            raise serializers.ValidationError("Only JPG, PNG, and PDF files are allowed.")
+        return value
+
+class PaymentSerializer(serializers.ModelSerializer):
+    booking = BookingSerializer(read_only=True)
+
+    class Meta:
+        model = Payment
+        fields = ["id", "booking", "payment_method", "status", "receipt", "created_at"]
+
+class PackageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Package
+        fields = '__all__'
+
+class DrinkCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DrinkCategory
+        fields = "__all__"
+
+# ✅ Serializer for Admin Unavailable Dates
+class UnavailableDateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UnavailableDate
+        fields = ['id', 'date', 'reason']
+
+class POSItemSerializer(serializers.ModelSerializer):
+    inventory_item_name = serializers.CharField(source='inventory_item.body', read_only=True)
+
+    class Meta:
+        model = POSItem
+        fields = ['id', 'item_key', 'name', 'price', 'category', 'description',
+                  'inventory_item', 'inventory_item_name', 'deduct_per_sale', 'created_at']
+        read_only_fields = ['item_key', 'created_at', 'inventory_item_name']
+
+
+class POSTransactionItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = POSTransactionItem
+        fields = ['id', 'item_name', 'item_key', 'price', 'quantity', 'subtotal']
+
+
+class POSTransactionSerializer(serializers.ModelSerializer):
+    items = POSTransactionItemSerializer(many=True)
+
+    class Meta:
+        model = POSTransaction
+        fields = ['id', 'created_at', 'total', 'cash_tendered', 'change', 'payment_method', 'served_by', 'senior_discount', 'num_pax', 'num_seniors', 'voided', 'voided_at', 'voided_by', 'items']
+        read_only_fields = ['id', 'created_at', 'voided', 'voided_at', 'voided_by']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        transaction = POSTransaction.objects.create(**validated_data)
+        for item in items_data:
+            POSTransactionItem.objects.create(transaction=transaction, **item)
+        return transaction

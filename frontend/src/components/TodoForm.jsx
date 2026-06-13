@@ -7,6 +7,7 @@ const TodoForm = ({ todos, setTodos }) => {
     body: '',
     quantity: '',
     type: '',
+    volume: '',
   });
 
   const handleChange = (e) => {
@@ -19,34 +20,28 @@ const TodoForm = ({ todos, setTodos }) => {
 
   const postTodo = async () => {
     try {
-      const existingItem = todos.find(todo => todo.body === newTodo.body);
-  
-      if (existingItem) {
-        // Update existing item quantity
-        const updatedQuantity = parseInt(existingItem.quantity) + parseInt(newTodo.quantity);
-  
-        const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${existingItem.id}/`, {
-          quantity: updatedQuantity
-        });
-  
-        setTodos(todos.map(todo => todo.id === existingItem.id ? { ...todo, quantity: updatedQuantity } : todo));
-      } else {
-        // Create new item
-        const response = await axios.post('http://127.0.0.1:8000/api/todo/', newTodo);
-        setTodos([...todos, response.data]);
-      }
-  
-      setNewTodo({
-        body: '',
-        quantity: '',
-        type: '',
-      });
-  
-      document.querySelector('.modal').close();
+        const existingItem = todos.find(todo => todo.body === newTodo.body);
+        
+        if (existingItem) {
+            const updatedQuantity = parseInt(existingItem.quantity) + parseInt(newTodo.quantity);
+            const response = await axios.patch(`http://192.168.254.154:8000/api/todo/${existingItem.id}/`, {
+                quantity: updatedQuantity,
+                volume: newTodo.volume
+            });
+
+            setTodos(todos.map(todo => todo.id === existingItem.id ? { ...todo, quantity: updatedQuantity, volume: newTodo.volume } : todo));
+        } else {
+            const response = await axios.post('http://192.168.254.154:8000/api/todo/', newTodo);
+            setTodos([...todos, response.data]);
+        }
+
+        setNewTodo({ body: '', quantity: '', type: '', volume: '' });
+        document.querySelector('.modal').close();
     } catch (error) {
-      console.error(error);
+        console.error(error);
     }
-  };
+};
+
   
 
   return (
@@ -88,23 +83,24 @@ const TodoForm = ({ todos, setTodos }) => {
                 className="input input-bordered w-full"
               />
             </div>
+                    <div>
+            <label className="label">
+              <span className="label-text">Volume</span>
+            </label>
+            <input type="text" name="volume" onChange={handleChange} value={newTodo.volume} className="input input-bordered w-full"/>
+          </div>
             <div>
               <label className="label">
                 <span className="label-text">Ingredients Type</span>
               </label>
-              <select
+              <input
+                type="text"
                 name="type"
                 onChange={handleChange}
                 value={newTodo.type}
-                className="select select-bordered w-full"
-              >
-                <option disabled value="">
-                  Select ingredient type
-                </option>
-                <option value="Beverage">Beverage</option>
-                <option value="Fruits">Fruits</option>
-                <option value="Non-Perishable Item">Non-Perishable Item</option>
-              </select>
+                placeholder="Enter ingredient type"
+                className="input input-bordered w-full"
+              />
             </div>
             <div className="modal-action">
               <button type="submit" className="btn btn-primary">

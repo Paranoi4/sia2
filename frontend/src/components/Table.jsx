@@ -1,165 +1,32 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { MdOutlineDeleteOutline, MdEditNote, MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from 'react-icons/md';
+import { MdOutlineDeleteOutline, MdEditNote } from 'react-icons/md';
 
-const Table = ({ todos, setTodos, isLoading, createdDates }) => {
-  const [transferData, setTransferData] = useState({ id: '', quantity: '', date: '' });
+const Table = ({ todos, setTodos, isLoading }) => {
   const [stockOutData, setStockOutData] = useState({ id: '', quantity: '' });
   const [stockInData, setStockInData] = useState({ id: '', quantity: '' });
+  const [stockOutEventData, setStockOutEventData] = useState({ id: '', quantity: '', reason: ''  });
+
+  const [editText, setEditText] = useState({ id: '', body: '', quantity: '', volume: '', type: '' });
   const [filterText, setFilterText] = useState('');
+
   const filteredTodos = todos.filter(todo =>
     todo.body.toLowerCase().includes(filterText.toLowerCase()) ||
     todo.type.toLowerCase().includes(filterText.toLowerCase()) ||
-    todo.quantity.toString().includes(filterText)
+    todo.quantity.toString().includes(filterText) ||
+    (todo.volume && todo.volume.toString().includes(filterText))
   );
-  const [editText, setEditText] = useState({
-    id: '',
-    body: '',
-    quantity: '',
-    type: '',
-  });
 
-  const handleTransferChange = (e) => {
-    const { name, value } = e.target;
-    setTransferData(prev => ({ ...prev, [name]: value }));
-};
-
-const handleTransfer = async () => {
-  const { id, quantity, date } = transferData;
-  
-  if (!id || !quantity || !date) {
-      alert("Please enter ID, quantity, and select a date.");
-      return;
-  }
-
-  try {
-      console.log("Sending Transfer Request:", { id, quantity, date });
-
-      const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${id}/transfer_stock/`, {
-          quantity,
-          date  // Ensure date is included
-      });
-
-      console.log("Transfer Response:", response.data);
-
-      // Update Main Inventory
-      const updatedTodos = todos.map(todo =>
-          todo.id.toString() === id ? { ...todo, quantity: response.data.updated_quantity } : todo
-      );
-
-      setTodos(updatedTodos);
-
-      // ✅ NEW: Fetch updated preparation inventory after transfer
-      fetchPreparationData(date);
-
-      setTransferData({ id: '', quantity: '', date: '' });
-      document.getElementById('transfer-modal').close();
-
-      alert("Stock transferred successfully.");
-  } catch (error) {
-      console.error("Transfer Error:", error.response?.data);
-      alert(error.response?.data?.error || "Failed to transfer stock.");
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-  const handleStockOutChange = (e) => {
-    const { name, value } = e.target;
-    setStockOutData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleStockInChange = (e) => {
-    const { name, value } = e.target;
-    setStockInData(prev => ({ ...prev, [name]: value }));
-  };
-  const handleStockOut = async () => {
-    const { id, quantity } = stockOutData;
-    
-    if (!id || !quantity) {
-      alert("Please enter both ID and quantity.");
-      return;
-    }
-    
-    try {
-      const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${id}/stock_out/`, { quantity });
-
-      // Update state to reflect new quantity
-      const updatedTodos = todos.map(todo =>
-        todo.id.toString() === id ? { ...todo, quantity: response.data.updated_quantity } : todo
-      );
-      
-      setTodos(updatedTodos);
-      setStockOutData({ id: '', quantity: '' });
-      document.getElementById('stock-out-modal').close();
-      
-      alert("Stock updated successfully.");
-    } catch (error) {
-      alert(error.response?.data?.error || "Failed to update stock.");
-    }
-  };
-
-  const handleStockIn = async () => {
-    const { id, quantity } = stockInData;
-    
-    if (!id || !quantity) {
-      alert("Please enter both ID and quantity.");
-      return;
-    }
-
-    try {
-      const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${id}/stock_in/`, { quantity });
-
-      const updatedTodos = todos.map(todo =>
-        todo.id.toString() === id ? { ...todo, quantity: response.data.updated_quantity } : todo
-      );
-      
-      setTodos(updatedTodos);
-      setStockInData({ id: '', quantity: '' });
-      document.getElementById('stock-in-modal').close();
-      
-      alert("Stock added successfully.");
-    } catch (error) {
-      alert(error.response?.data?.error || "Failed to add stock.");
-    }
-  };
-  
-  // Function to delete a todo
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`http://127.0.0.1:8000/api/todo/${id}/`);
-      const newList = todos.filter((todo) => todo.id !== id);
-      setTodos(newList);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // Function to handle text change in the modal input
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEditText((prev) => ({
-      ...prev,
-      [name]: value, // Dynamically updates the correct field
-    }));
+    setEditText(prev => ({ ...prev, [name]: value }));
   };
 
-  // Function to handle the edit action
   const handleEdit = async (id, updatedTodo) => {
     try {
-      const response = await axios.patch(`http://127.0.0.1:8000/api/todo/${id}/`, updatedTodo);
-      const updatedTodos = todos.map((todo) =>
-        todo.id === id
-          ? { ...todo, body: response.data.body, quantity: response.data.quantity, type: response.data.type }
-          : todo
+      const response = await axios.patch(`http://192.168.254.154:8000/api/todo/${id}/`, updatedTodo);
+      const updatedTodos = todos.map(todo =>
+        todo.id === id ? { ...todo, ...response.data } : todo
       );
       setTodos(updatedTodos);
     } catch (error) {
@@ -167,273 +34,243 @@ const handleTransfer = async () => {
     }
   };
 
-  // Function to handle the "Edit" button click in the modal
   const handleClick = () => {
-    handleEdit(editText.id, {
-      body: editText.body,
-      quantity: editText.quantity,
-      type: editText.type,
-    });
-
-    setEditText({
-      id: '',
-      body: '',
-      quantity: '',
-      type: '',
-    });
+    handleEdit(editText.id, editText);
+    setEditText({ id: '', body: '', quantity: '', volume: '', type: '' });
   };
 
-  
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+  if (!confirmDelete) return;
+    try {
+      await axios.delete(`http://192.168.254.154:8000/api/todo/${id}/`);
+      setTodos(todos.filter(todo => todo.id !== id));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
+  const handleStockChange = (e, setter) => {
+    const { name, value } = e.target;
+    setter(prev => ({ ...prev, [name]: value }));
+  };
 
-  
-  
+  const handleStockAction = async (endpoint, data, modalId, successMsg, errorMsg) => {
+    if (!data.id || !data.quantity) return alert("Please enter both ID and quantity.");
+    try {
+      const response = await axios.patch(
+        `http://192.168.254.154:8000/api/todo/${data.id}/${endpoint}/`,
+        data
+      );
+      const updatedTodos = todos.map(todo =>
+        todo.id.toString() === data.id ? { ...todo, quantity: response.data.updated_quantity } : todo
+      );
+      setTodos(updatedTodos);
+      document.getElementById(modalId).close();
+      alert(successMsg);
+    } catch (error) {
+      alert(error.response?.data?.error || errorMsg);
+    }
+  };
+
   return (
-    <div className="py-8">
-      <div className="flex justify-center items-center mb-4">
-        <input
-          type="text"
-          placeholder="Filter todos..."
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-          className="input input-bordered w-full max-w-md"/>
-        <button
-          className="btn ml-4"
-          onClick={() => document.querySelector('.modal').showModal()}>
-          Add Item
-        </button>    
-        <button
-          className="btn ml-4"
-          onClick={() => document.getElementById('stock-in-modal').showModal()}>
-          Stock - In 
-        </button> 
-        <button
-          className="btn ml-4"
-          onClick={() => document.getElementById('stock-out-modal').showModal()}>
-          Stock - Out 
-        </button>
-        <button className="btn ml-4" onClick={() => document.getElementById('transfer-modal').showModal()}>
-    Transfer
-</button>
+    <div className="py-8 px-4 font-sans text-gray-800">
+      {/* Search and Actions */}
+      {/* Search and Actions */}
+<div className="flex flex-wrap gap-3 justify-center items-center mb-6 mt-2">
+  <input
+    type="text"
+    placeholder="Search inventory..."
+    value={filterText}
+    onChange={(e) => setFilterText(e.target.value)}
+    className="input input-bordered w-full max-w-md mt-5 ml-1"
+  />
+  <button
+    className="bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-green-700 transition-all duration-200"
+    onClick={() => document.querySelector('.modal').showModal()}
+  >
+    Add Item
+  </button>
+  <button
+    className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all duration-200"
+    onClick={() => document.getElementById('stock-in-modal').showModal()}
+  >
+    Stock In
+  </button>
+  
+  <button
+    className="bg-cyan-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-cyan-700 transition-all duration-200"
+    onClick={() => document.getElementById('stock-out-event-modal').showModal()}
+  >
+    Stock Out
+  </button>
+</div>
 
 
-      </div>
-      
-
-      <table className="w-11/12 max-w-4x1">
-        <thead className="border-b-2 border-black">
-          <tr>
-            <th className="p-3 text-sm font-semibold tracking-wide text-left">Checkbox</th>
-            <th className="p-3 text-sm font-semibold tracking-wide text-left">No ID.</th>
-            <th className="p-3 text-sm font-semibold tracking-wide text-left">Product</th>
-            <th className="p-3 text-sm font-semibold tracking-wide text-left">Quantity</th>
-            <th className="p-3 text-sm font-semibold tracking-wide text-left">Ingredients Type</th>
-            <th className="p-3 text-sm font-semibold tracking-wide text-left">Date Added</th>
-            <th className="p-3 text-sm font-semibold tracking-wide text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {isLoading ? (
-            <tr>
-              <td colSpan="7" className="text-center">
-                Is Loading
-              </td>
-            </tr>
-          ) : (
-            filteredTodos.map((todoItem, index) => (
-              <tr key={todoItem.id || index} className="border-b border-black">
-                <td className="p-3 text-sm">
-                  <span className="inline-block cursor-pointer">
-                    {todoItem.completed ? <MdOutlineCheckBox /> : <MdOutlineCheckBoxOutlineBlank />}
-                  </span>
-                </td>
-                <td className="p-3 text-sm">{todoItem.id}</td>
-                <td className="p-3 text-sm">{todoItem.body}</td>
-                <td className="p-3 text-sm text-center">
-                  <span className="p-1.5 text-xs font-medium tracking-wider rounded-md bg-green-300">{todoItem.quantity}</span>
-                </td>
-                <td className="p-3 text-sm">{todoItem.type}</td>
-                <td className="p-3 text-sm">{todoItem.created}</td>
-                <td className="p-3 text-xs font-medium grid grid-flow-col items-center mt-5">
-                  <span>
-                    <label htmlFor="my-modal">
-                      <MdEditNote
-                        onClick={() => setEditText({
-                          id: todoItem.id,
-                          body: todoItem.body,
-                          quantity: todoItem.quantity,
-                          type: todoItem.type,
-                        })}
-                        className="text-xl cursor-pointer"
-                      />
-                    </label>
-                  </span>
-                  <span className="text-x1 cursor-pointer">
-                    <MdOutlineDeleteOutline onClick={() => handleDelete(todoItem.id)} />
-                  </span>
-                </td>
+      {/* Table */}
+      <div className="overflow-x-auto">
+          <table className="table-auto w-full border-separate border-spacing-0 bg-white shadow-md rounded border border-gray-300">
+            <thead>
+              <tr className="bg-gray-900 text-white">
+                <th className="border border-gray-300 px-4 py-3">No ID.</th>
+                <th className="border border-gray-300 px-4 py-3">Product</th>
+                <th className="border border-gray-300 px-4 py-3">Quantity</th>
+                <th className="border border-gray-300 px-4 py-3">Volume</th>
+                <th className="border border-gray-300 px-4 py-3">Type</th>
+                <th className="border border-gray-300 px-4 py-3">Date Added</th>
                 
+                <th className="border border-gray-300 px-4 py-3">Actions</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-
-
-
-      <dialog id="transfer-modal" className="modal">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg">Transfer Item</h3>
-
-                    <label className="block font-medium mb-2">Enter ID</label>
-                    <input
-                        type="text"
-                        name="id"
-                        value={transferData.id}
-                        onChange={handleTransferChange}
-                        placeholder="Item ID"
-                        className="input input-bordered w-full"
-                    />
-
-                    <label className="block font-medium mb-2">Enter Quantity</label>
-                    <input
-                        type="number"
-                        name="quantity"
-                        value={transferData.quantity}
-                        onChange={handleTransferChange}
-                        placeholder="Quantity"
-                        className="input input-bordered w-full"
-                    />
-
-                    {/* Dropdown for Created Dates */}
-                    <label className="block font-medium mb-2">Select Date</label>
-                    <select
-                        name="date"
-                        value={transferData.date}
-                        onChange={handleTransferChange}
-                        className="select select-bordered w-full"
-                    >
-                        <option value="" disabled>Select a date</option>
-                        {createdDates.map((date, index) => (
-                            <option key={index} value={date}>{date}</option>
-                        ))}
-                    </select>
-
-                    <div className="modal-action">
-                        <button className="btn btn-primary" onClick={handleTransfer}>Submit</button>
-                        <button className="btn" onClick={() => document.getElementById('transfer-modal').close()}>Close</button>
+            </thead>
+          <tbody className="divide-y">
+            {isLoading ? (
+              <tr><td colSpan="7" className="text-center py-4">Loading...</td></tr>
+            ) : (
+              [...filteredTodos].reverse().map((todo) => (
+                <tr key={todo.id} className="hover:bg-gray-100 transition">
+                  <td className="border border-gray-300 px-4 py-2 text-center">{todo.id}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{todo.body}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{todo.quantity}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{todo.volume}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{todo.type}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+                    {new Date(todo.created).toLocaleString("en-US", {
+                      timeZone: "Asia/Manila",
+                      month: "short",
+                      day: "2-digit",
+                      year: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true
+                    })}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-center w-1/6">
+                    <div className="flex justify-center items-center space-x-2 relative -translate-y-3">
+                      <button
+                        onClick={() => { setEditText(todo); document.getElementById("edit-modal").showModal(); }}
+                        className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
+                      >
+                        <MdEditNote className="text-xl text-indigo-600 hover:text-indigo-800" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(todo.id)}
+                        className="focus:outline-none bg-transparent hover:bg-gray-200 p-1 rounded"
+                      >
+                        <MdOutlineDeleteOutline className="text-xl text-red-600 hover:text-red-800" />
+                      </button>
                     </div>
-                </div>
-            </dialog>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-
-
-       {/* Stock-in */}
+      {/* Modals (Stock In, Out, etc.) */}
       <dialog id="stock-in-modal" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Stock In Item</h3>
-          <label className="block font-medium mb-2">Enter ID</label>
-          <input
-            type="text"
-            name="id"
-            value={stockInData.id}
-            onChange={handleStockInChange}
-            placeholder="Item ID"
-            className="input input-bordered w-full"
-          />
-          <label className="block font-medium mb-2">Enter Quantity</label>
-          <input
-            type="number"
-            name="quantity"
-            value={stockInData.quantity}
-            onChange={handleStockInChange}
-            placeholder="Quantity"
-            className="input input-bordered w-full"
-          />
+        <form method="dialog" className="modal-box">
+          <h3 className="font-bold text-lg mb-4">Stock In</h3>
+          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3 text-black" />
+          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockInData)} className="input input-bordered w-full mb-3 text-black" />
+          
           <div className="modal-action">
-            <button className="btn btn-primary" onClick={handleStockIn}>Submit</button>
-            <button className="btn" onClick={() => document.getElementById('stock-in-modal').close()}>Close</button>
+            <button type="button" className="btn btn-primary" onClick={() => handleStockAction("stock_in", stockInData, "stock-in-modal", "Stock added", "Failed to stock in")}>Submit</button>
+            <button className="btn">Cancel</button>
           </div>
-        </div>
+        </form>
       </dialog>
 
-       {/* stock out */}
       <dialog id="stock-out-modal" className="modal">
-    <div className="modal-box">
-    <h3 className="font-bold text-lg">Stock Out Item</h3>
-    <label className="block font-medium mb-2">Enter ID</label>
+        <form method="dialog" className="modal-box">
+          <h3 className="font-bold text-lg mb-4">Stock Out</h3>
+          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3 text-black" />
+          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockOutData)} className="input input-bordered w-full mb-3 text-black" />
+         
+          <div className="modal-action">
+            <button type="button" className="btn btn-secondary" onClick={() => handleStockAction("stock_out", stockOutData, "stock-out-modal", "Stock updated", "Failed to stock out")}>Submit</button>
+            <button className="btn">Cancel</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="stock-out-event-modal" className="modal">
+        <form method="dialog" className="modal-box">
+          <h3 className="font-bold text-lg mb-4">Stock Out</h3>
+          <input name="id" placeholder="Item ID" onChange={(e) => handleStockChange(e, setStockOutEventData)} className="input input-bordered w-full mb-3 text-white" />
+          <input name="quantity" placeholder="Quantity" type="number" onChange={(e) => handleStockChange(e, setStockOutEventData)} className="input input-bordered w-full mb-3 text-white" />
+          <input
+  name="reason"
+  placeholder="Reason for stock-out"
+  onChange={(e) => handleStockChange(e, setStockOutEventData)}
+  className="input input-bordered w-full mb-3 text-white"
+/>
+          <div className="modal-action">
+            <button type="button" className="btn btn-info" onClick={() => handleStockAction("stockoutevent", stockOutEventData, "stock-out-event-modal", "Event stock updated", "Failed to update")}>Submit</button>
+            <button className="btn">Cancel</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="stock-in-return-modal" className="modal">
+        <form method="dialog" className="modal-box">
+          <h3 className="font-bold text-lg mb-4">Stock-In Return</h3>
+          {/* StockInReturn inputs removed */}
+          <div className="modal-action">
+            {/* StockInReturn button removed */}
+            <button className="btn">Cancel</button>
+          </div>
+        </form>
+      </dialog>
+
+    <dialog id="edit-modal" className="modal">
+    <form method="dialog" className="modal-box">
+    <h3 className="font-bold text-lg mb-4">Edit Item</h3>
+    <label className="block font-medium mb-2">Product</label>
     <input
       type="text"
-      name="id"
-      value={stockOutData.id}
-      onChange={handleStockOutChange}
-      placeholder="Item ID"
-      className="input input-bordered w-full"
+      name="body"
+      value={editText.body}
+      onChange={handleChange}
+      placeholder="Type here"
+      className="input input-bordered w-full mb-3"
     />
-    <label className="block font-medium mb-2">Enter Quantity</label>
+
+    <label className="block font-medium mb-2">Volume</label>
     <input
-      type="number"
-      name="quantity"
-      value={stockOutData.quantity}
-      onChange={handleStockOutChange}
-      placeholder="Quantity"
-      className="input input-bordered w-full"
+      type="text"
+      name="volume"
+      value={editText.volume}
+      onChange={handleChange}
+      placeholder="Volume"
+      className="input input-bordered w-full mb-3"
+    />
+    <label className="block font-medium mb-2">Ingredients Type</label>
+    <input
+      type="text"
+      name="type"
+      className="input input-bordered w-full mb-3"
+      onChange={handleChange}
+      value={editText.type || ''}
+      placeholder="Enter ingredient type"
     />
     <div className="modal-action">
-      <button className="btn btn-primary" onClick={handleStockOut}>Submit</button>
-      <button className="btn" onClick={() => document.getElementById('stock-out-modal').close()}>Close</button>
+      <button
+        type="button"
+        className="btn btn-primary"
+        onClick={() => {
+          handleClick();
+          document.getElementById('edit-modal').close();
+        }}
+      >
+        Save Changes
+      </button>
+      <button className="btn">Cancel</button>
     </div>
-  </div>
+  </form>
 </dialog>
 
-      {/* Modal */}
-      <input type="checkbox" id="my-modal" className="modal-toggle" />
-      <div className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Edit Todo</h3>
-          <label className="block font-medium mb-2">Product</label>
-          <input
-            type="text"
-            name="body"
-            value={editText.body}
-            onChange={handleChange}
-            placeholder="Type here"
-            className="input input-bordered w-full "
-          />
-          <label className="block font-medium mb-2">Quantity</label>
-          <input
-            type="number"
-            name="quantity"
-            value={editText.quantity}
-            onChange={handleChange}
-            placeholder="Quantity"
-            className="input input-bordered w-full"
-          />
-          <label className="block font-medium mb-2">Ingredients Type</label>
-          <select
-            name="type"
-            className="select select-bordered w-full"
-            onChange={handleChange}
-            value={editText.type || ''}
-          >
-            <option value="" disabled>
-              Select ingredient type
-            </option>
-            <option value="Beverage">Beverage</option>
-            <option value="Fruits">Fruits</option>
-            <option value="Non-Perishable Item">Non-Perishable Item</option>
-          </select>
-          <div className="modal-action">
-            <label htmlFor="my-modal" onClick={handleClick} className="btn btn-primary">
-              Edit
-            </label>
-            <label htmlFor="my-modal" className="btn">
-              Close
-            </label>
-          </div>
-        </div>
-      </div>
-      
+
     </div>
   );
 };

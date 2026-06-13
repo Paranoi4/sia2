@@ -1,0 +1,57 @@
+import { useNavigate } from "react-router-dom";
+import React from "react";
+import MountainPng from "../../assets/moon-surface-hd.png";
+
+const Hero = () => {
+  const navigate = useNavigate();
+
+  const handleBookNow = () => {
+    navigate("/first/");
+  };
+
+  return (
+    <div className="relative bg-black/20 h-full font-[Poppins]">
+      <div className="h-full flex justify-center items-center p-4">
+        <div className="container grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="text-white space-y-4 lg:pr-36">
+            <h1
+              data-aos="fade-up"
+              className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight"
+            >
+              🍹 Welcome to 🍹 <br />
+              <span className="text-white">Bevanda Mobile Bar!</span>
+            </h1>
+            <p
+              data-aos="fade-up"
+              data-aos-delay="300"
+              className="text-base md:text-lg text-gray-300"
+            >
+              Your premier mobile bar experience, serving handcrafted cocktails,
+              premium beverages, and unforgettable moments at every event!
+            </p>
+
+            <button
+              onClick={handleBookNow}
+              data-aos="fade-up"
+              data-aos-delay="500"
+              className="book-now-button z-20 relative bg-blue-500 hover:bg-red-500 px-6 py-2 rounded-md text-white font-semibold shadow-md transition duration-300"
+            >
+              Book now
+            </button>
+          </div>
+          <div></div>
+        </div>
+      </div>
+
+      <img
+        src={MountainPng}
+        alt=""
+        className="absolute right-0 bottom-0 w-full brightness-50 z-10"
+      />
+
+      <div className="absolute bottom-0 z-30 right-0 w-full bg-gradient-to-b from-transparent from-10% to-black to-90% h-[20px] sm:h-[50px] md:[60px]" />
+    </div>
+  );
+};
+
+export default Hero;

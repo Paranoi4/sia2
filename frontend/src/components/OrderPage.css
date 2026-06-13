@@ -1,0 +1,133 @@
+/* 🌌 Background & Centering */
+.order-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(145deg, #1c1c1c, #2b2b2b);
+}
+
+/* 🧾 Card Box */
+.order-card {
+  width: 100%;
+  max-width: 900px;
+  background-color: #222;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* 🏷️ Title */
+.order-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 25px;
+  color: white;
+}
+
+/* 📦 Flex Layout */
+.order-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+
+/* 🥤 Menu (Left Side) */
+.menu-section {
+  flex: 1;
+  color: #ccc;
+}
+
+.menu-section h3 {
+  color: #ffc107;
+  margin-bottom: 5px;
+}
+
+/* 📋 Packages (Right Side) */
+.package-section {
+  flex: none; /* ⬅️ Important! Remove automatic flex growing */
+  width: 100%;
+  max-width: 300px;
+  background-color: #2e2e2e;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  height: 350px; /* ⬅️ Add a fixed height */
+  display: flex; /* ⬅️ Add flexbox */
+  flex-direction: column; /* ⬅️ Stack content vertically */
+  justify-content: space-between; /* ⬅️ Push Confirm button near bottom */
+}
+
+
+/* 🏷️ Labels */
+.order-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ffc107;
+}
+
+/* 🔽 Dropdown */
+.order-select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #333;
+  color: white;
+  border: 1px solid #ffc107;
+  margin-bottom: 20px;
+}
+
+/* 💰 Price Display */
+.order-price {
+  background-color: #333;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 20px;
+}
+
+/* ✅ Confirm Button */
+.order-button {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  background-color: #ffc107;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.order-button:hover {
+  background-color: #ffca2c;
+}
+
+/* 📆 Calendar Date Coloring (if used) */
+.unavailable-date {
+  background-color: red !important;
+  color: white !important;
+  border-radius: 50%;
+}
+
+.admin-unavailable-date {
+  background-color: grey !important;
+  color: white !important;
+  border-radius: 50%;
+}
+
+@media (max-width: 768px) {
+  .order-content {
+    flex-direction: column;
+  }
+}
+

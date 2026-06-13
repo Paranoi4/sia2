@@ -1,32 +1,41 @@
+# Expense API: List and Create
+from .models import Expense
+from .serializers import ExpenseSerializer
+from rest_framework import generics, permissions
+class ExpenseListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Expense.objects.all().order_by('-date', '-created_at')
+    serializer_class = ExpenseSerializer
+    permission_classes = [permissions.IsAuthenticated]
 from django.shortcuts import render, get_object_or_404
-from rest_framework import viewsets, status
+from django.utils.timezone import now
+from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
+from rest_framework.decorators import action, api_view, permission_classes
 from . import serializers
 from . import models
-from rest_framework.decorators import action, api_view
+from .models import Todo, TransactionHistory, Booking, UnavailableDate, Payment, ProductAllocation, POSItem, POSTransaction
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
-from rest_framework.authtoken.models import Token
-from django.utils.timezone import now
-import logging
+from rest_framework.views import APIView
+from .serializers import BookingSerializer, UnavailableDateSerializer, PaymentSerializer, PackageSerializer, DrinkCategorySerializer, POSItemSerializer, POSTransactionSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from datetime import timedelta
+from rest_framework.generics import ListCreateAPIView
+from django.core.mail import send_mail  #added 4:30 pm 
+from django.conf import settings #added 4:30 pm 
+from .models import Package, DrinkCategory
+from django.template.loader import render_to_string
 
 
-logger = logging.getLogger(__name__)
 
-
-@api_view(['POST'])
-def login_view(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
-
-    user = authenticate(username=username, password=password)
-    if user:
-        token, _ = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key, 'is_admin': user.is_admin})
-    return Response({'error': 'Invalid Credentials'}, status=400)
 
 class TodoViewSet(viewsets.ModelViewSet):
     queryset = models.Todo.objects.all()
     serializer_class = serializers.TodoSerializer
+
+
+    
 
     def create(self, request, *args, **kwargs):
         """Log transaction when a new Todo item is added."""
@@ -39,17 +48,21 @@ class TodoViewSet(viewsets.ModelViewSet):
                 action="Added",
                 item_name=instance.body,
                 quantity=instance.quantity,
-                type=instance.type
+                type=instance.type,
+                volume=instance.volume
+                
             ).exists():
                 models.TransactionHistory.objects.create(
                     action="Added",
                     item_name=instance.body,
                     quantity=instance.quantity,
-                    type=instance.type
+                    type=instance.type,
+                    volume=instance.volume
+                    
                 )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
@@ -58,24 +71,25 @@ class TodoViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
 
         if serializer.is_valid():
-            updated_instance = serializer.save()
-
+            updated_instance = serializer.save()            
             # Safeguard: Check if a similar log already exists
             if not models.TransactionHistory.objects.filter(
                 action="Updated",
                 item_name=updated_instance.body,
                 quantity=updated_instance.quantity,
-                type=updated_instance.type
+                type=updated_instance.type,
+                volume=updated_instance.volume
             ).exists():
                 models.TransactionHistory.objects.create(
                     action="Updated",
                     item_name=updated_instance.body,
                     quantity=updated_instance.quantity,
-                    type=updated_instance.type
+                    type=updated_instance.type,
+                    volume=updated_instance.volume
                 )
 
             return Response(serializer.data, status=status.HTTP_200_OK)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
@@ -87,12 +101,13 @@ class TodoViewSet(viewsets.ModelViewSet):
             action="Deleted",
             item_name=instance.body,
             quantity=instance.quantity,
-            type=instance.type
+            type=instance.type,
+            volume=instance.volume 
         )
 
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     @action(detail=True, methods=['patch'])
     def stock_out(self, request, pk=None):
         """Reduce stock quantity for a Todo item"""
@@ -114,15 +129,17 @@ class TodoViewSet(viewsets.ModelViewSet):
             item_name=todo_item.body,
             previous_quantity=previous_quantity,
             quantity=todo_item.quantity,
+            stock_out_quantity=stock_out_quantity,
             type=todo_item.type,
-            stock_out_quantity=stock_out_quantity
+            volume=todo_item.volume
         )
-
+        
         models.TransactionHistory.objects.create(
             action="Updated",
             item_name=todo_item.body,
             quantity=todo_item.quantity,
-            type=todo_item.type
+            type=todo_item.type,
+            volume=todo_item.volume
         )
 
         return Response({"message": "Stock updated successfully.",
@@ -154,48 +171,596 @@ class TodoViewSet(viewsets.ModelViewSet):
             previous_quantity=previous_quantity,
             quantity=todo_item.quantity,
             type=todo_item.type,
-            stock_in_quantity=stock_in_quantity
+            stock_in_quantity=stock_in_quantity,
+            volume=todo_item.volume
         )
-
+        '''
         models.TransactionHistory.objects.create(
+            action="Updated",
+            item_name=todo_item.body,
+            quantity=todo_item.quantity,
+            type=todo_item.type,
+            volume=todo_item.volume
+        )
+        '''
+        return Response({"message": "Stock updated successfully.",
+                         "previous_quantity": previous_quantity,
+                         "updated_quantity": todo_item.quantity}, status=status.HTTP_200_OK)
+    
+    
+    @action(detail=True, methods=['patch'])
+    def stockoutevent(self, request, pk=None):
+        """Reduce stock quantity for an event-specific stock-out"""
+        todo_item = get_object_or_404(Todo, pk=pk)
+        stock_out_quantity = int(request.data.get('quantity', 0))
+        reason = request.data.get('reason', '')  # ✅ New
+        previous_quantity = todo_item.quantity
+        current_quantity = int(todo_item.quantity)
+
+        if stock_out_quantity > current_quantity:
+            return Response({"error": "Insufficient stock for event."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Reduce stock for the event and save
+        todo_item.quantity = str(current_quantity - stock_out_quantity)
+        todo_item.save()
+
+        # Log stock-out for an event
+        TransactionHistory.objects.create(
+            action="Stock-Out-Event",
+            item_name=todo_item.body,
+            previous_quantity=previous_quantity,
+            quantity=todo_item.quantity,
+            type=todo_item.type,
+            stock_out_quantity=stock_out_quantity,
+            volume=todo_item.volume,
+            reason=reason 
+        )
+        '''
+        # Log update for tracking purposes
+        TransactionHistory.objects.create(
             action="Updated",
             item_name=todo_item.body,
             quantity=todo_item.quantity,
             type=todo_item.type
         )
-
-        return Response({"message": "Stock updated successfully.",
-                         "previous_quantity": previous_quantity,
-                         "updated_quantity": todo_item.quantity}, status=status.HTTP_200_OK)
+        '''
+        return Response({
+            "message": "Stock-out for event updated successfully.",
+            "previous_quantity": previous_quantity,
+            "updated_quantity": todo_item.quantity
+        }, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['patch'])
-    def transfer_stock(self, request, pk=None):
-        """Transfer stock from main inventory to preparation inventory for a selected date."""
-        todo_item = get_object_or_404(models.Todo, pk=pk)
-        transfer_quantity = int(request.data.get('quantity', 0))
-        preparation_date = request.data.get('date', None)
+    def stockinreturn(self, request, pk=None):
+        """Subtract stock quantity for returned products"""
+        todo_item = get_object_or_404(Todo, pk=pk)
+        stock_return_quantity = int(request.data.get('quantity', 0))
 
-        if not preparation_date:
-            return Response({"error": "Preparation date is required."}, status=status.HTTP_400_BAD_REQUEST)
+        previous_quantity = todo_item.quantity
+        current_quantity = int(todo_item.quantity)
 
-        if transfer_quantity <= 0 or transfer_quantity > int(todo_item.quantity):
-            return Response({"error": "Invalid transfer quantity."}, status=status.HTTP_400_BAD_REQUEST)
+        if stock_return_quantity <= 0:
+            return Response({"error": "Quantity must be greater than zero."}, status=status.HTTP_400_BAD_REQUEST)
 
-        previous_quantity = int(todo_item.quantity)
-        todo_item.quantity = str(previous_quantity - transfer_quantity)
+
+        # Subtract stock due to return and save
+        todo_item.quantity = str(current_quantity + stock_return_quantity)
         todo_item.save()
 
-        preparation_item, created = models.Preparation.objects.get_or_create(
+        # Log "Stock-In-Return" transaction
+        TransactionHistory.objects.create(
+            action="Stock-In-Return",
             item_name=todo_item.body,
-            preparation_date=preparation_date,
-            defaults={"quantity": 0}
+            previous_quantity=previous_quantity,
+            quantity=todo_item.quantity,
+            type=todo_item.type,
+            stock_in_quantity=stock_return_quantity,
+            volume=todo_item.volume
         )
-        preparation_item.quantity += transfer_quantity
-        preparation_item.save()
+        '''
+        # Log update
+        TransactionHistory.objects.create(
+            action="Updated",
+            item_name=todo_item.body,
+            quantity=todo_item.quantity,
+            type=todo_item.type
+        )
+        '''
+        return Response({
+            "message": "Stock-in return updated successfully.",
+            "previous_quantity": previous_quantity,
+            "updated_quantity": todo_item.quantity
+        }, status=status.HTTP_200_OK)
+    
 
-        return Response({"message": "Stock transferred successfully."}, status=status.HTTP_200_OK)
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """JWT Login API for existing superusers"""
+    def post(self, request, *args, **kwargs):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        user = authenticate(username=username, password=password)
+
+        if user is None:
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        response = super().post(request, *args, **kwargs)
+
+        return Response({
+            "access": response.data["access"],
+            "refresh": response.data["refresh"],
+            "username": username,
+            "is_superuser": user.is_superuser,
+            "groups": list(user.groups.values_list("name", flat=True)),
+        })
+
+# Protected Route Example
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def protected_view(request):
+    return Response({"message": f"Hello, {request.user.username}! You are authenticated."})
 
 
 class TransactionHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.TransactionHistory.objects.all().order_by('-timestamp')
     serializer_class = serializers.TransactionHistorySerializer
+
+
+class BookingView(generics.ListCreateAPIView):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        
+        if serializer.is_valid():
+            # Save booking as unconfirmed (pending)
+            booking = serializer.save(confirmed=False)  # Mark as pending
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# ✅ View to Fetch Unavailable Dates (Red = Customers, Grey = Admin)
+class UnavailableDatesView(APIView):
+    def get(self, request, format=None):
+        # Fetch all confirmed bookings (fully booked)
+        confirmed_bookings = Booking.objects.filter(confirmed=True).values_list("event_date", flat=True).distinct()
+        
+        # Fetch all pending bookings (booked but not confirmed yet AND not denied)
+        pending_bookings = Booking.objects.filter(confirmed=False, payment__status="pending").values_list("event_date", flat=True).distinct()
+        
+        # Fetch all admin-marked unavailable dates
+        admin_unavailable = UnavailableDate.objects.values_list("date", flat=True).distinct()
+        
+        return Response({
+            "confirmed_dates": list(confirmed_bookings),
+            "pending_dates": list(pending_bookings),  # No denied dates should appear here
+            "admin_unavailable_dates": list(admin_unavailable)
+        })
+
+
+# ✅ View for Admin to Manually Set Unavailable Dates (Grey Dates)
+class AdminUnavailableDateView(APIView):
+    def get(self, request):
+        dates = UnavailableDate.objects.all()
+        serializer = UnavailableDateSerializer(dates, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = UnavailableDateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({"error": "Invalid data", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class UnavailableDateDeleteView(APIView):
+    def delete(self, request, date_id):
+        date = get_object_or_404(UnavailableDate, id=date_id)
+        date.delete()
+        return Response({"message": "Unavailable date deleted."}, status=status.HTTP_200_OK)
+
+class UnavailableDateUpdateView(APIView):
+    def put(self, request, date_id):
+        date = get_object_or_404(UnavailableDate, id=date_id)
+        serializer = UnavailableDateSerializer(date, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ✅ Payment Processing API View (Fixes Booking Reference Issue)
+class PaymentView(ListCreateAPIView):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+    parser_classes = (MultiPartParser, FormParser)
+
+    def create(self, request, *args, **kwargs):
+        print("📥 Incoming Payment Data:", request.data)
+        booking_id = request.data.get("booking")
+
+        if not booking_id:
+            return Response({"error": "Booking ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            booking = Booking.objects.get(id=booking_id)
+        except Booking.DoesNotExist:
+            return Response({"error": "Invalid Booking ID."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(booking=booking)
+            return Response({"message": "Payment submitted successfully!"}, status=status.HTTP_201_CREATED)
+        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class CleanupExpiredBookings(APIView):
+    def delete(self, request):
+        expiration_time = now() - timedelta(minutes=20)
+        expired_bookings = Booking.objects.filter(confirmed=False, created_at__lt=expiration_time)
+
+        if expired_bookings.exists():
+            count = expired_bookings.count()
+            expired_bookings.delete()
+            return Response({"message": f"{count} expired bookings removed."}, status=status.HTTP_200_OK)
+        
+        return Response({"message": "No expired bookings found."}, status=status.HTTP_200_OK)
+    
+
+
+class AdminApprovePaymentView(APIView):
+    def post(self, request, payment_id):
+        payment = get_object_or_404(Payment, id=payment_id)
+        action = request.data.get("action")
+        custom_message = request.data.get("custom_message", "")  # Optional message
+
+        if action == "approve":
+            payment.status = "approved"
+            payment.booking.confirmed = True
+            payment.booking.save()
+            payment.save(update_fields=["status"])
+
+            package_pax = payment.booking.pax
+            product_allocations = ProductAllocation.objects.filter(package_pax=package_pax)
+
+            if not product_allocations.exists():
+                return Response({"error": f"No product allocations found for {package_pax} pax."}, status=400)
+
+            deducted_items = []  # for response summary
+
+            for allocation in product_allocations:
+                product_name = allocation.product_name.lower()
+                required_quantity = allocation.quantity_per_pax
+
+
+                try:
+                    todo_item = Todo.objects.get(body__iexact=product_name)
+                    current_quantity = int(todo_item.quantity)
+
+                    if required_quantity > current_quantity:
+                        return Response({"error": f"Insufficient stock for '{product_name}'."}, status=400)
+
+                    previous_quantity = current_quantity
+                    todo_item.quantity = str(current_quantity - required_quantity)
+                    todo_item.save()
+
+                    # Log the deduction
+                    TransactionHistory.objects.create(
+                        action="Stock-Out",
+                        item_name=todo_item.body,
+                        previous_quantity=previous_quantity,
+                        quantity=todo_item.quantity,
+                        stock_out_quantity=required_quantity,
+                        type=todo_item.type,
+                        volume=todo_item.volume,
+                        transaction_date=payment.booking.event_date
+                    )
+
+                    deducted_items.append({
+                        "product": todo_item.body,
+                        "deducted": required_quantity,
+                        "remaining": todo_item.quantity
+                    })
+
+                except Todo.DoesNotExist:
+                    return Response({"error": f"Product '{product_name}' not found in inventory."}, status=404)
+
+            # Send email confirmation
+            send_mail(
+                subject="Booking Approved ✅",
+                message=f"Your booking has been approved! {custom_message}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[payment.booking.email],
+                fail_silently=False,
+            )
+
+            return Response({
+                "message": "Payment approved, inventory updated, and email sent.",
+                "deductions": deducted_items
+            }, status=200)
+
+        elif action == "deny":
+            payment.status = "denied"
+            payment.save(update_fields=["status"])
+            return Response({"message": "Payment denied."}, status=200)
+
+        return Response({"error": "Invalid action."}, status=400)
+
+
+
+
+
+
+class PaymentStatusView(APIView):
+    def get(self, request, booking_id):
+        payment = get_object_or_404(Payment, booking__id=booking_id)
+        return Response({"status": payment.status}) 
+            
+class DeleteUnpaidBookingView(APIView):
+    def delete(self, request, booking_id):
+        try:
+            booking = get_object_or_404(Booking, id=booking_id, confirmed=False)  # Only delete if NOT confirmed
+            booking.delete()
+            return Response({"message": "Booking deleted successfully."}, status=200)
+        except Booking.DoesNotExist:
+            return Response({"error": "Booking not found or already confirmed."}, status=404)
+
+# ✅ Fetch all Payments (For Viewing in Admin Panel)
+class PaymentListView(APIView):
+    def get(self, request):
+        payments = Payment.objects.select_related("booking").all().order_by("-created_at")
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data)
+
+class PaymentDetailView(APIView):
+    def get(self, request, payment_id):
+        payment = get_object_or_404(Payment, id=payment_id)
+        serializer = PaymentSerializer(payment)
+        return Response(serializer.data)
+    
+
+
+    
+
+class PackageViewSet(viewsets.ModelViewSet):
+    queryset = Package.objects.all()
+    serializer_class = PackageSerializer
+
+class DrinkCategoryViewSet(viewsets.ModelViewSet):
+    queryset = DrinkCategory.objects.all()
+    serializer_class = DrinkCategorySerializer
+
+class POSItemViewSet(viewsets.ModelViewSet):
+    queryset = POSItem.objects.all().order_by('-created_at')
+    serializer_class = POSItemSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class POSTransactionViewSet(viewsets.ModelViewSet):
+    queryset = POSTransaction.objects.all().order_by('-created_at')
+    serializer_class = POSTransactionSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'post', 'head', 'options']
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # --- STOCK VALIDATION ---
+        # Check all items before saving transaction
+        items_data = serializer.validated_data.get('items', [])
+        error_items = []
+        for tx_item_data in items_data:
+            item_key = tx_item_data.get('item_key')
+            quantity = tx_item_data.get('quantity', 0)
+            try:
+                pos_item = POSItem.objects.get(item_key=item_key)
+            except POSItem.DoesNotExist:
+                continue
+            if not pos_item.inventory_item:
+                continue
+            inventory = pos_item.inventory_item
+            deduct_amount = quantity * pos_item.deduct_per_sale
+            try:
+                current_qty = int(inventory.quantity or 0)
+            except ValueError:
+                current_qty = 0
+            if current_qty < deduct_amount or current_qty <= 0:
+                error_items.append(f"{pos_item.name} (stock: {current_qty})")
+        if error_items:
+            return Response({
+                "error": "Insufficient stock for: " + ", ".join(error_items)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        # --- END STOCK VALIDATION ---
+
+        transaction = serializer.save()
+
+        # Auto-deduct inventory for each sold item
+        for tx_item in transaction.items.all():
+            # Find the matching POSItem by item_key
+            try:
+                pos_item = POSItem.objects.get(item_key=tx_item.item_key)
+            except POSItem.DoesNotExist:
+                continue
+
+            if not pos_item.inventory_item:
+                continue
+
+            inventory = pos_item.inventory_item
+            deduct_amount = tx_item.quantity * pos_item.deduct_per_sale
+
+            try:
+                current_qty = int(inventory.quantity or 0)
+            except ValueError:
+                continue
+
+            previous_qty = str(current_qty)
+            new_qty = max(0, current_qty - deduct_amount)
+            inventory.quantity = str(new_qty)
+            inventory.save()
+
+            TransactionHistory.objects.create(
+                action="Stock-Out",
+                item_name=inventory.body,
+                previous_quantity=previous_qty,
+                quantity=str(new_qty),
+                stock_out_quantity=deduct_amount,
+                type=inventory.type,
+                volume=inventory.volume,
+                reason=f"POS Sale: {tx_item.quantity}x {tx_item.item_name}",
+            )
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @action(detail=True, methods=['post'], url_path='void')
+    def void(self, request, pk=None):
+        transaction = self.get_object()
+        if transaction.voided:
+            return Response({"error": "Transaction is already voided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Restore inventory for each sold item
+        for tx_item in transaction.items.all():
+            try:
+                pos_item = POSItem.objects.get(item_key=tx_item.item_key)
+            except POSItem.DoesNotExist:
+                continue
+            if not pos_item.inventory_item:
+                continue
+            inventory = pos_item.inventory_item
+            restore_amount = tx_item.quantity * pos_item.deduct_per_sale
+            try:
+                current_qty = int(inventory.quantity or 0)
+            except ValueError:
+                continue
+            new_qty = current_qty + restore_amount
+            inventory.quantity = str(new_qty)
+            inventory.save()
+            TransactionHistory.objects.create(
+                action="Stock-In",
+                item_name=inventory.body,
+                previous_quantity=str(current_qty),
+                quantity=str(new_qty),
+                stock_in_quantity=restore_amount,
+                type=inventory.type,
+                volume=inventory.volume,
+                reason=f"Void of POS Transaction #{transaction.id}",
+            )
+
+        transaction.voided = True
+        transaction.voided_at = now()
+        transaction.voided_by = request.user.username
+        transaction.save()
+        return Response({"message": f"Transaction #{transaction.id} voided successfully."}, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+def approve_payment(request, payment_id):
+    try:
+        payment = Payment.objects.get(id=payment_id)
+        payment.booking.confirmed = True
+        payment.booking.save()
+        return Response({"message": "Payment approved successfully!"}, status=status.HTTP_200_OK)
+    except Payment.DoesNotExist:
+        return Response({"error": "Payment not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+
+class PaymentDeleteView(APIView):
+    def delete(self, request, payment_id):
+        try:
+            payment = get_object_or_404(Payment, id=payment_id)
+            payment.delete()
+            return Response({"message": "Payment deleted successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class PaymentCreateView(ListCreateAPIView):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+    parser_classes = (MultiPartParser, FormParser)
+
+    def create(self, request, *args, **kwargs):
+        print("📥 Incoming Payment Data:", request.data)
+
+        booking_id = request.data.get("booking_id")
+
+        if not booking_id:
+            return Response({"error": "Booking ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            booking = Booking.objects.get(id=booking_id)
+        except Booking.DoesNotExist:
+            return Response({"error": "Invalid Booking ID."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            payment = serializer.save(booking=booking)
+
+            # ✅ Send email to customer after payment submission
+            subject = "Payment Received - Pending Confirmation"
+            message = f"""
+Hi {booking.first_name} {booking.last_name},
+
+Thank you for submitting your payment. We have received your proof of payment and your booking is now under review.
+
+📅 Event Details:
+- Event Type: {booking.event_type}
+- Event Date: {booking.event_date}
+- PAX: {booking.pax}
+- Price: ₱{booking.price}
+- Address: {booking.address}
+- Venue Contact: {booking.contact_number_venue}
+- Available Time: {booking.available_time}
+
+We will notify you once your payment is approved. If you have any questions, feel free to reach out.
+
+Best regards,  
+Bevanda Mobile Bar Team
+"""
+
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[booking.email],
+                fail_silently=False,
+            )
+
+            # ✅ Send email to admin after customer payment
+            admin_email = "joshnarcisoo@gmail.com"  # 🔁 Replace with actual admin email
+
+            admin_subject = f"New Payment Submitted by {booking.first_name} {booking.last_name}"
+            admin_message = f"""
+A new payment has been submitted and is awaiting approval.
+
+📢 Customer Info:
+- Name: {booking.first_name} {booking.last_name}
+- Email: {booking.email}
+
+📅 Event Details:
+- Type: {booking.event_type}
+- Date: {booking.event_date}
+- PAX: {booking.pax}
+- Price: ₱{booking.price}
+- Venue Address: {booking.venue_address}
+- Venue Contact: {booking.contact_number_venue}
+- Time: {booking.available_time}
+
+Please log in to the admin panel to review and confirm the payment.
+
+— Bevanda Booking System
+"""
+
+            send_mail(
+                subject=admin_subject,
+                message=admin_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[admin_email],
+                fail_silently=False,
+            )
+
+            return Response({"message": "Payment submitted and email sent successfully!"}, status=status.HTTP_201_CREATED)
+
+        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

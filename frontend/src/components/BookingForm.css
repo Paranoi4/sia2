@@ -1,0 +1,138 @@
+/* 🔲 Booking Form Container */
+.booking-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(145deg, #1c1c1c, #2b2b2b);
+}
+
+/* 📦 Main Booking Box */
+.booking-form-wrapper {
+  width: 100%;
+  max-width: 900px;
+  background-color: #222;
+  border-radius: 12px;
+  padding: 30px;
+  color: white;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* 📝 Title */
+.booking-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 25px;
+  text-align: center;
+  color: #ffffff;
+}
+
+/* 🧭 Layout Grid */
+.booking-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+
+.booking-group {
+  flex: 1;
+}
+
+/* 🔖 Labels */
+.booking-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ccc;
+}
+
+/* ✏️ Inputs */
+.booking-input,
+.booking-select,
+.booking-date-picker {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  margin-bottom: 15px;
+}
+
+.booking-input:focus,
+.booking-select:focus,
+.booking-date-picker:focus {
+  outline: none;
+  border-color: #ffc107;
+}
+
+/* 📊 Summary Text */
+.booking-summary-text {
+  background-color: #2e2e2e;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  color: #ccc;
+  margin-bottom: 15px;
+}
+
+/* 🧾 Errors */
+.error-text {
+  color: #ff4d4d;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+/* ✅ Submit Button */
+.booking-submit-button {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  background-color: #ffc107;
+  border: none;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.booking-submit-button:hover {
+  background-color: #ffca2c;
+}
+
+/* ✅ reCAPTCHA alignment */
+.recaptcha-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+@media (max-width: 768px) {
+  .booking-section {
+    flex-direction: column;
+  }
+}
+/* 🔴 RED - Confirmed Dates */
+.react-datepicker__day.red-date {
+  background-color: #ff4d4d;
+  color: white;
+  border-radius: 50%;
+}
+
+/* ⚫ GREY - Admin Unavailable Dates */
+.react-datepicker__day.grey-date {
+  background-color: #808080;
+  color: white;
+  border-radius: 50%;
+}
+
+/* 🟢 GREEN - Pending Dates */
+.react-datepicker__day.green-date {
+  background-color: #a3df35;
+  color: white;
+  border-radius: 50%;
+}

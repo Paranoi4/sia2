@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,19 +23,31 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-gvv&(wdw76^8+3s*@hwc_h)a08c33zr-l7lxn#09j2vg8l*m-q'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.254.101', '192.168.254.154', '192.168.1.26', '192.168.1.10']
 
 
 CORS_ALLOWED_ORIGINS = [
       "http://127.0.0.1:5173",
       "http://localhost:5173",
+      "http://192.168.254.101:5173",
+      "http://192.168.254.154:5173",
+      "http://192.168.1.26:5173",
+      "http://192.168.1.10:5173"
   ]
 
+CSRF_TRUSTED_ORIGINS = [
+      "http://127.0.0.1:5173",
+      "http://localhost:5173",
+      "http://192.168.254.101:5173",
+      "http://192.168.254.154:5173",
+      "http://192.168.1.26:5173",
+      "http://192.168.1.10:5173"
+  ]
 
 # Application definition
 
@@ -45,10 +60,26 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #External Apps
     'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
       #Internal Apps
     'todo',
+    
   ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=8),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
+
+
+
 
 
 MIDDLEWARE = [
@@ -61,7 +92,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 
 
 
@@ -92,8 +122,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='3306'),
     }
 }
 
@@ -122,7 +156,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Manila'
 
 USE_I18N = True
 
@@ -138,3 +172,16 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 📧 Email Configuration
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
+EMAIL_HOST = 'smtp.gmail.com'  # Gmail's SMTP server
+EMAIL_PORT = 587  # Standard port for TLS
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+MEDIA_URL = "/media/"  
+MEDIA_ROOT = BASE_DIR / "media"
